@@ -15,6 +15,21 @@ local function intGetNextAgentID()
 	
 end
 
+local function intGetNextZoneID()
+-- find the highest ID and return the one after that
+
+	local highestID = 0
+	for k, v in ipairs(Zones) do
+		if v.ID ~= nil then
+			if v.ID >= highestID then
+				highestID = v.ID
+			end
+		end		
+	end
+	return highestID + 1
+	
+end
+
 function createobjects.CreateAgent()
 	-- initialises agents and bots
 	-- Agents (non-physics)
@@ -27,6 +42,7 @@ function createobjects.CreateAgent()
 	bot.fullness = 74
 	bot.stamina = 50
 	bot.woodstock = 0
+	bot.cottonstock = 0
 	bot.red = 1
 	bot.green = 1
 	bot.blue = 1
@@ -37,6 +53,8 @@ function createobjects.CreateAgent()
 	bot.currenttasklabel = nil
 	bot.nexttasktimer = 2
 	bot.workzone = nil			-- where to work
+	bot.workzonex = nil
+	bot.workzoney = nil
 	bot.housezone = nil		-- where to live
 	bot.occupation = nil		-- skillset
 	bot.isselected = false		-- skillset
@@ -60,16 +78,16 @@ function createobjects.CreateAgent()
 
 end
 
-function createobjects.CreateGenericZone(v,zonetype,stocktype)
+function createobjects.CreateGenericZone(v,zonetype)
 -- returns a generic zone
 	myzone = {}
-	myzone.ID = #zs + 1
+	myzone.ID = intGetNextZoneID()
 	myzone.x = v.targetx
 	myzone.y = v.targety
 	myzone.width = 50
 	myzone.height = 50
 	myzone.zonetype = zonetype
-	myzone.stocktype = stocktype
+	-- myzone.stocktype = stocktype
 	myzone.stocklevel = 0
 	myzone.worker = v.ID
 	

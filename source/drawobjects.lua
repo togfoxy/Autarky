@@ -1,5 +1,15 @@
 local drawobjects = {}
 
+local function DrawZone(zne,r,g,b,alpha,caption)
+
+	love.graphics.setColor(r,g,b,alpha)
+	love.graphics.rectangle("line", zne.x,zne.y,zne.width + 15,zne.height)
+	love.graphics.print("Stock: " .. cf.round(zne.stocklevel,0), zne.x + 2, zne.y + 7)
+	love.graphics.print(caption, zne.x+2, zne.y + 30)
+
+
+end
+
 function drawobjects.DrawWorld()
 
 	for k,v in ipairs(Zones) do
@@ -40,7 +50,15 @@ function drawobjects.DrawWorld()
 			love.graphics.rectangle("line", v.x,v.y,v.width + 15,v.height)
 			love.graphics.print("Stock: " .. cf.round(v.stocklevel,0), v.x + 2, v.y + 7)
 			love.graphics.print("Healer", v.x+2, v.y + 30)
+		end	
+		if v.zonetype == enum.zonetypeCotton then
+			DrawZone(v,223/255,233/255,233/255,1,"Cotton")
+		end
+		if v.zonetype == enum.zonetypeWeaverShop then
+			DrawZone(v,169/255,169/255,169/255,1,"Cloth")
 		end		
+		
+
 	end
 	
 	if gbolPaused then
@@ -83,10 +101,11 @@ function drawobjects.DrawAgents(agt)
 		tmpstr = tmpstr .. "Health: " .. cf.round(v.health,0) .. "\n"
 		tmpstr = tmpstr .. "Fullness: " .. cf.round(v.fullness,0) .. "\n"
 		tmpstr = tmpstr .. "Hydration: " .. cf.round(v.hydration,0) .. "\n"
-		tmpstr = tmpstr .. "Stamina: " .. cf.round(v.stamina,0) .. "\n"
-		tmpstr = tmpstr .. "Happiness: " .. cf.round(v.happiness,0) .. "\n"
+		-- tmpstr = tmpstr .. "Stamina: " .. cf.round(v.stamina,0) .. "\n"
+		-- tmpstr = tmpstr .. "Happiness: " .. cf.round(v.happiness,0) .. "\n"
 		tmpstr = tmpstr .. "Wealth: " .. cf.round(v.wealth,0) .. "\n"
-		tmpstr = tmpstr .. "Wood: " .. cf.round(v.woodstock,0) .. "\n"
+		-- tmpstr = tmpstr .. "Wood: " .. cf.round(v.woodstock,0) .. "\n"
+		tmpstr = tmpstr .. "Cotton: " .. cf.round(v.cottonstock,0) .. "\n"
 		
 		love.graphics.print(tmpstr, x+10,y+5 )
 
@@ -114,7 +133,7 @@ function drawobjects.DrawPriorities()
   
   	local tmpstr = ""
 	
-	tmpstr = "Eat food #1: " .. cf.round(tree.child[4].priority(Agents[1]),0) .. "\n"
+	tmpstr = "Agent 1 food priority : " .. cf.round(tree.child[4].priority(Agents[1]),0) .. "\n"
 	-- tmpstr = tmpstr .. "Eat water: " .. tree.child[1].child[2].priority .. "\n"
 	-- tmpstr = tmpstr .. "Rest: " .. tree.child[1].priority .. "\n"
 	-- tmpstr = tmpstr .. "Work: " .. tree.child[2].priority .. "\n"
@@ -132,6 +151,8 @@ function drawobjects.DrawPriorities()
 	tmpstr = tmpstr .. "'F' to make a farmer" .. "\n"
 	tmpstr = tmpstr .. "'H' to make a healer" .. "\n"
 	tmpstr = tmpstr .. "'J' to make a lumberjack" .. "\n"
+	tmpstr = tmpstr .. "'C' to make a cotton farmer" .. "\n"
+	tmpstr = tmpstr .. "'W' to make a weaver" .. "\n"
 	
 	tmpstr = tmpstr .. "<space> to pause" .. "\n"
 	

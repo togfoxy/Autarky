@@ -19,6 +19,8 @@ gintScreenHeight = 900-- 1080
 garrCurrentScreen = {}			-- screen stack
 
 gintAgentRadius = 10
+gintNextZoneID = 1
+gintNumAgents = 8
 
 
 Agents = {}						-- these are physics objects
@@ -100,7 +102,7 @@ local function StopIfAtTarget(v)
 -- returns a boolean AND stops the agent moving
 -- v = single agent
 
-	if cf.GetDistance(v.body:getX(), v.body:getY(),v.targetx,v.targety) < 25 then
+	if cf.GetDistance(v.body:getX(), v.body:getY(),v.targetx,v.targety) < 45 then
 		-- arrived. Remember we have arrived
 		v.nexttasktimer = enum.timerNextTask
 		local vx, vy = v.body:getLinearVelocity( )
@@ -138,6 +140,12 @@ local function CheckIdleAgents(agt,dt)
 			if nextaction == enum.goalEat then
 				v.currenttasklabel = "Eating"
 			end	
+			if nextaction == enum.goalBuyCotton then
+				v.currenttasklabel = "Buying cotton"
+			end				
+			if nextaction == enum.goalBuyCloth then
+				v.currenttasklabel = "Buying cloth"
+			end				
 			if nextaction == enum.goalDrinkWater then
 				v.currenttasklabel = "Drinking water"
 			end				
@@ -149,7 +157,13 @@ local function CheckIdleAgents(agt,dt)
 			end			
 			if nextaction == enum.goalBuildLumberyard then
 				v.currenttasklabel = "Building lumberyard"
-			end		
+			end
+			if nextaction == enum.goalBuildCotton then
+				v.currenttasklabel = "Building cotton farm"
+			end
+			if nextaction == enum.goalBuildWeaver then
+				v.currenttasklabel = "Building weaver shop"
+			end
 			if nextaction == enum.goalBuyWood then
 				v.currenttasklabel = "Buying wood"
 			end	
@@ -174,13 +188,13 @@ function DegradeStats(agt, dt)
 			-- moving
 			v.hydration = v.hydration - (dt / 2)
 			v.happiness = v.happiness - (dt / 6)
-			v.fullness = v.fullness - (dt / 2)
+			v.fullness = v.fullness - (dt / 4)
 			v.stamina = v.stamina - (dt / 2 )
 		else
 			-- not moving
 			v.hydration = v.hydration - (dt / 4)
 			-- v.happiness = v.happiness - (dt / 2)
-			v.fullness = v.fullness - (dt / 5)		
+			v.fullness = v.fullness - (dt / 10)		
 			v.stamina = v.stamina - (dt / 8)
 		end
         
@@ -303,8 +317,8 @@ local function PerformRestImmediately(v, dt)
 
 end
 
-local function PerformBuildFarm(zs, v, dt)
-	-- create farm
+local function PerformBuild(zs,zonetype,v,dt)
+-- generic build function
 	if v.nexttasktimer <= 0 then	-- a value > 0 means we not yet arrived	
 		if v.targetx == nil then
 			v.targetx = love.math.random(100, gintScreenWidth - 100)			-- this is top left corner
@@ -313,34 +327,26 @@ local function PerformBuildFarm(zs, v, dt)
 		end
 		MoveAgent(v)
 		if StopIfAtTarget(v) then
-			-- create food zones
 			myzone = {}
-			myzone.ID = #zs + 1
-			myzone.x = v.targetx
-			myzone.y = v.targety
-			myzone.width = 50
-			myzone.height = 50
-			myzone.zonetype = enum.zonetypeFood
-			myzone.stocklevel = 0
-			myzone.worker = v.ID
+			myzone = cobjs.CreateGenericZone(v,zonetype)
 			table.insert(zs, myzone)
-
 			v.workzone = myzone.ID	
+			v.workzonex = v.x
+			v.workzoney = v.y
 			v.stamina = v.stamina - 10
 			v.happiness = v.happiness - 10	
-			v.hydration = v.hydration - 10
-			
+			v.hydration = v.hydration - 10	
 			v.nexttasktimer = 0
 			v.targetx = nil
 			v.targety = nil
 			v.currenttask = nil
-			v.targetzone = nil	
+			v.targetzone = nil
 			
-			-- small chance of being injured at worker
+			-- small chance of being injured at work
 			if love.math.random(1,100) <= 5 then
 				-- ouch
 				v.health = v.health - (love.math.random(5,10))
-			end
+			end	
 		end
 	else
 		-- arrived some time previously
@@ -351,163 +357,96 @@ local function PerformBuildFarm(zs, v, dt)
 		v.currenttask = nil
 		v.targetzone = nil			
 		UpdateTaskTimer(v, dt)	
-	end
+	end			
 end
 
-local function PerformBuildHealer(zs, v, dt)
-	-- create healer
-	if v.nexttasktimer <= 0 then	-- a value > 0 means we not yet arrived	
-		if v.targetx == nil then
-			v.targetx = love.math.random(100, gintScreenWidth - 100)			-- this is top left corner
-			v.targety = love.math.random(100, gintScreenHeight - 100)			-- the 100 bit stops it spawning off the screen
-			v.targetzone = nil
-		end
--- print("hotel " .. v.targetx)
-		MoveAgent(v)
-		if StopIfAtTarget(v) then
-			-- create healer
-			myzone = {}
-			myzone.ID = #zs + 1
-			myzone.x = v.targetx
-			myzone.y = v.targety
-			myzone.width = 50
-			myzone.height = 50
-			myzone.zonetype = enum.zonetypeHeal
-			myzone.stocklevel = 0
-			myzone.worker = v.ID
-			table.insert(zs, myzone)
-			
-			v.workzone = myzone.ID	
-			v.stamina = v.stamina - 10
-			v.happiness = v.happiness - 10	
-			v.hydration = v.hydration - 10
-			
-			v.nexttasktimer = 0
-			v.targetx = nil
-			v.targety = nil
-			v.currenttask = nil
-			v.targetzone = nil	
+local function AdjustStock(zs,v, qty, wealth)
+-- zs = single zone
+-- v = single agent
+-- stock quantity to effect
+-- wealth to assign
 
-			-- small chance of being injured at worker
-			if love.math.random(1,100) <= 5 then
-				-- ouch
-				v.health = v.health - (love.math.random(5,10))
-			end
-		end
-	else
-		-- arrived some time previously
-		v.currenttask = nil
-		v.nexttasktimer = 0
-		v.targetx = nil
-		v.targety = nil
-		v.currenttask = nil
-		v.targetzone = nil			
-		UpdateTaskTimer(v, dt)	
-	end
-		
-			
-end
+	-- stock the shop
+	zs.stocklevel = zs.stocklevel + qty
+	v.wealth = v.wealth + wealth
+	v.stamina = v.stamina - 4
+	v.happiness = v.happiness - 4
+	
+	-- small chance of being injured at work
+	if love.math.random(1,100) <= 5 then
+		-- ouch
+		v.health = v.health - (love.math.random(5,10))
+	end	
 
-local function PerformBuildLumberyard(zs, v, dt)
-	if v.nexttasktimer <= 0 then	-- a value > 0 means we not yet arrived	
-		if v.targetx == nil then
-			v.targetx = love.math.random(100, gintScreenWidth - 100)			-- this is top left corner
-			v.targety = love.math.random(100, gintScreenHeight - 100)			-- the 100 bit stops it spawning off the screen
-			v.targetzone = nil
-		end
-		MoveAgent(v)
-		if StopIfAtTarget(v) then
-			-- create lumberyard
-			myzone = {}
-			myzone.ID = #zs + 1
-			myzone.x = v.targetx
-			myzone.y = v.targety
-			myzone.width = 50
-			myzone.height = 50
-			myzone.zonetype = enum.zonetypeLumberyard
-			myzone.stocklevel = 0
-			myzone.worker = v.ID
-			table.insert(zs, myzone)
-			
-			v.workzone = myzone.ID	
-			v.stamina = v.stamina - 10
-			v.happiness = v.happiness - 10	
-			v.hydration = v.hydration - 10
-			
-			v.nexttasktimer = 0
-			v.targetx = nil
-			v.targety = nil
-			v.currenttask = nil
-			v.targetzone = nil	
-
-			-- small chance of being injured at worker
-			if love.math.random(1,100) <= 5 then
-				-- ouch
-				v.health = v.health - (love.math.random(5,10))
-			end
-		end
-	else
-		-- arrived some time previously
-		UpdateTaskTimer(v, dt)	
-	end
 
 end
 
 local function PerformWork(zs, v, dt)
 
+	local thiszone
 	if v.nexttasktimer <= 0 then	-- a value > 0 means we not yet arrived
 		-- a workzone is already allocated
-		myzone = v.workzone
+		myzoneID = v.workzone
 		
--- print(v.targetx)
--- print(myzone)
--- print(zs[myzone].x)
--- print(zs[myzone].width)
--- print("~~~")
+		for k,z in pairs(zs) do
+			if z.ID == myzoneID then
+				thiszone = z
+			end
+		end
+	
+		assert(thiszone ~= nil)
+		
+		v.targetx = thiszone.x + (thiszone.width / 2)
+		v.targety = thiszone.y + (thiszone.height / 2)
+		v.targetzsone = myzone		
 
-		for k,b in pairs(zs) do
-			if b.ID == myzone then
-			
-				v.targetx = b.x + (b.width / 2)
-				v.targety = b.y + (b.height / 2)
-				v.targetzsone = myzone		
-
-				MoveAgent(v)	-- assumes targetx and targety are set
-				if StopIfAtTarget(v) then
-					if v.stamina > 0 then
-						if zs[myzone].zonetype == enum.zonetypeFood then		
-							-- stock the shop
-							zs[myzone].stocklevel = zs[myzone].stocklevel + 6
-							v.wealth = v.wealth + 6
-							v.stamina = v.stamina - 4
-							v.happiness = v.happiness - 4
-							
-							-- small chance of being injured at work
-							if love.math.random(1,100) <= 5 then
-								-- ouch
-								v.health = v.health - (love.math.random(5,10))
-							end	
-						end
-						if zs[myzone].zonetype == enum.zonetypeHeal then
-							-- stock the medkits
-							zs[myzone].stocklevel = zs[myzone].stocklevel + 1
-							v.wealth = v.wealth + 10
-							v.stamina = v.stamina - 6
-							v.happiness = v.happiness - 2
-						end	
-						if zs[myzone].zonetype == enum.zonetypeLumberyard then
-							-- stock the medkits
-							zs[myzone].stocklevel = zs[myzone].stocklevel + 6
-							v.wealth = v.wealth + 6
-							v.stamina = v.stamina - 4
-							v.happiness = v.happiness - 4
-						end					
+		MoveAgent(v)	-- assumes targetx and targety are set
+		
+		if StopIfAtTarget(v) then
+			if v.stamina > 0 then
+				if thiszone.zonetype == enum.zonetypeFood then		
+					-- stock the shop
+					thiszone.stocklevel = thiszone.stocklevel + 6
+					v.wealth = v.wealth + 6
+					v.stamina = v.stamina - 4
+					v.happiness = v.happiness - 4
+					
+					-- small chance of being injured at work
+					if love.math.random(1,100) <= 5 then
+						-- ouch
+						v.health = v.health - (love.math.random(5,10))
+					end	
+				end
+				if thiszone.zonetype == enum.zonetypeHeal then
+					-- stock the medkits
+					thiszone.stocklevel = thiszone.stocklevel + 1
+					v.wealth = v.wealth + 10
+					v.stamina = v.stamina - 6
+					v.happiness = v.happiness - 2
+				end	
+				if thiszone.zonetype == enum.zonetypeLumberyard then
+					-- stock the medkits
+					thiszone.stocklevel = thiszone.stocklevel + 6
+					v.wealth = v.wealth + 6
+					v.stamina = v.stamina - 4
+					v.happiness = v.happiness - 4
+					-- small chance of being injured at work
+					if love.math.random(1,100) <= 5 then
+						-- ouch
+						v.health = v.health - (love.math.random(5,10))
+					end	
+				end	
+				if thiszone.zonetype == enum.zonetypeCotton then
+					AdjustStock(thiszone,v,6,6)
+				end
+				if thiszone.zonetype == enum.zonetypeWeaverShop then
+					if v.cottonstock > 5 then
+						AdjustStock(thiszone,v,6,6)
+						v.cottonstock = v.cottonstock - 6
 					end
 				end
 			end
-		
-		end				
-				
+		end
 	else
 		-- arrived some time previously
 		UpdateTaskTimer(v, dt)	
@@ -562,7 +501,7 @@ local function PerformEat(zs, v, dt)
 				local maxfullness = 100 - v.fullness
 				local amt = math.min(maxstock, maxwealth, maxfullness)
 				
-				if amt > 10 then amt = 10 end
+				if amt > 25 then amt = 25 end
 				
 				v.fullness = v.fullness + amt
 				v.wealth = v.wealth - amt
@@ -600,12 +539,13 @@ local function PerformBuyWood(zs, v, dt)
 				v.targetx = nil
 				v.targety = nil
 				v.currenttask = nil
-				v.targetzone = nil			
+				v.targetzone = nil	
+				
 				return 
 			else
 				v.targetx = zs[intBestZone].x + (zs[intBestZone].width / 2)
 				v.targety = zs[intBestZone].y + (zs[intBestZone].height / 2)
-				v.targetzone = intBestZone		--** need to remember that zones don't use ID but are just a sequence
+				v.targetzone = intBestZone		--** need to remember that zones don't use ID but are just a sequence	--!not sure this is right
 				assert(v.targetzone ~= 0)	
 			end
 		end
@@ -832,6 +772,128 @@ local function PerformBuildHouse(zs, v, dt)
 
 end
 
+local function PerformBuyCotton(zs, v, dt)
+
+	if v.nexttasktimer <= 0 then	-- a value > 0 means journey is started but not yet arrived
+		
+		local intMostCotton
+		local intBestZone
+		if v.targetx == nil then
+			-- find a wood zone with the most wood
+			intMostCotton = 0
+			intBestZone = -1
+			for q,w in ipairs(zs) do
+				if w.zonetype == enum.zonetypeCotton then
+					if w.stocklevel > intMostCotton then
+						intMostCotton = w.stocklevel
+						intBestZone = q
+					end
+				end
+			end
+			if intBestZone == -1 then
+				v.nexttasktimer = 0
+				v.targetx = nil
+				v.targety = nil
+				v.currenttask = nil
+				v.targetzone = nil	
+				
+				return 
+			else
+				v.targetx = zs[intBestZone].x + (zs[intBestZone].width / 2)
+				v.targety = zs[intBestZone].y + (zs[intBestZone].height / 2)
+				v.targetzone = intBestZone		--** need to remember that zones don't use ID but are just a sequence	--!not sure this is right
+				assert(v.targetzone ~= 0)	
+			end
+		end
+
+		MoveAgent(v)
+		
+		assert(v.targetzone ~= nil)
+		assert(v.targetzone ~= 0)
+
+		if StopIfAtTarget(v) then
+			if zs[v.targetzone] ~= nil then
+				local maxstock = zs[v.targetzone].stocklevel
+				local maxwealth = v.wealth
+				local amt = math.min(maxstock, maxwealth)
+				
+				if amt > 10 then amt = 10 end
+				
+				v.cottonstock = v.cottonstock + amt
+				v.wealth = v.wealth - amt
+				zs[v.targetzone].stocklevel = zs[v.targetzone].stocklevel - amt
+				-- v.happiness = v.happiness + (5 * amt/10)
+				-- v.stamina = v.stamina + (5 * amt/10)	
+			end
+		end
+	else
+		-- arrived some time previously
+		UpdateTaskTimer(v, dt)	
+	end		
+
+
+end
+
+local function PerformBuyCloth(zs, v, dt)
+
+	if v.nexttasktimer <= 0 then	-- a value > 0 means journey is started but not yet arrived
+		
+		local intMostCloth
+		local intBestZone
+		if v.targetx == nil then
+			-- find a wood zone with the most wood
+			intMostCloth = 0
+			intBestZone = -1
+			for q,w in ipairs(zs) do
+				if w.zonetype == enum.zonetypeWeaverShop then
+					if w.stocklevel > intMostCloth then
+						intMostCloth = w.stocklevel
+						intBestZone = q
+					end
+				end
+			end
+			if intBestZone == -1 then
+				v.nexttasktimer = 0
+				v.targetx = nil
+				v.targety = nil
+				v.currenttask = nil
+				v.targetzone = nil	
+				
+				return 
+			else
+				v.targetx = zs[intBestZone].x + (zs[intBestZone].width / 2)
+				v.targety = zs[intBestZone].y + (zs[intBestZone].height / 2)
+				v.targetzone = intBestZone		--** need to remember that zones don't use ID but are just a sequence	--!not sure this is right
+				assert(v.targetzone ~= 0)	
+			end
+		end
+
+		MoveAgent(v)
+		
+		assert(v.targetzone ~= nil)
+		assert(v.targetzone ~= 0)
+
+		if StopIfAtTarget(v) then
+			if zs[v.targetzone] ~= nil then
+				local maxstock = zs[v.targetzone].stocklevel
+				local maxwealth = v.wealth
+				local amt = math.min(maxstock, maxwealth)
+				
+				if amt > 10 then amt = 10 end
+				
+				v.happiness = v.happiness + (amt * 2)
+				v.wealth = v.wealth - amt
+				zs[v.targetzone].stocklevel = zs[v.targetzone].stocklevel - amt
+			end
+		end
+	else
+		-- arrived some time previously
+		UpdateTaskTimer(v, dt)	
+	end		
+
+
+end
+
 local function PerformTasks(znes, agt, dt)
 -- do things
 -- zne = Zones
@@ -841,8 +903,12 @@ local function PerformTasks(znes, agt, dt)
 			PerformRestImmediately(v,dt)
 		end	
 		if v.currenttask == enum.goalBuildFarm then
-			PerformBuildFarm(znes, v,dt)
+			-- PerformBuildFarm(znes, v,dt)
+			PerformBuild(znes,enum.zonetypeFood,v,dt)
 		end	
+		if v.currenttask == enum.goalBuildCotton then
+			PerformBuild(znes,enum.zonetypeCotton,v,dt)
+		end			
 		if v.currenttask == enum.goalWork then
 			PerformWork(znes, v,dt)
 		end	
@@ -853,17 +919,29 @@ local function PerformTasks(znes, agt, dt)
 			PerformDrinkWater(znes, v,dt)
 		end			
 		if v.currenttask == enum.goalBuildHealer then
-			PerformBuildHealer(znes, v,dt)
+			-- PerformBuildHealer(znes, v,dt)
+			PerformBuild(znes,enum.zonetypeHeal,v,dt)
+		end	
+		if v.currenttask == enum.goalBuildWeaver then
+			-- PerformBuildHealer(znes, v,dt)
+			PerformBuild(znes,enum.zonetypeWeaverShop,v,dt)
 		end	
 		if v.currenttask == enum.goalHeal then
 			PerformHeal(znes, v,dt)
 		end	
 		if v.currenttask == enum.goalBuildLumberyard then
-			PerformBuildLumberyard(znes, v,dt)
+			-- PerformBuildLumberyard(znes, v,dt)
+			PerformBuild(znes,enum.zonetypeLumberyard,v,dt)
 		end	
 		if v.currenttask == enum.goalBuyWood then
 			PerformBuyWood(znes, v,dt)
 		end	
+		if v.currenttask == enum.goalBuyCotton then
+			PerformBuyCotton(znes, v,dt)
+		end			
+		if v.currenttask == enum.goalBuyCloth then
+			PerformBuyCloth(znes, v,dt)
+		end			
 		if v.currenttask == enum.goalBuildHouseFoundation then
 			PerformBuildHouseFoundation(znes, v,dt)
 		end			
@@ -975,6 +1053,30 @@ function love.keyreleased( key, scancode )
 				v.blue = 52/255
 			end
 		end
+	end	
+	if key == "c" then		-- cotton
+		for k,v in ipairs(Agents) do
+			if v.isselected and v.occupation == nil then
+				v.occupation = enum.jobCotton
+				v.isselected = false
+				v.red = 223/255
+				v.green = 223/255
+				v.blue = 223/255
+			end
+		end
+	end
+	if key == "w" then		-- weaver
+		for k,v in ipairs(Agents) do
+			if v.isselected and v.occupation == nil then
+				v.occupation = enum.jobWeaver
+				v.isselected = false
+				v.red = 169/255
+				v.green = 169/255
+				v.blue = 169/255
+				v.wealth = v.wealth - 50
+				v.cottonstock = v.cottonstock + 50
+			end
+		end
 	end		
 	
 end
@@ -995,7 +1097,7 @@ function love.load()
 	
 	cobjs.CreateWorld(Zones)
 	--cobjs.CreateWorld(Zones)
-	gintNumAgents = 5
+	
 	for i = 1,gintNumAgents do
 		cobjs.CreateAgent(i)
 	end
