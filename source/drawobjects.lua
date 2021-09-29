@@ -76,12 +76,20 @@ function drawobjects.DrawAgents(agt)
 		local y = v.body:getY()
 	
 		love.graphics.setColor(v.red,v.green,v.blue,1)
-		
-		love.graphics.circle("fill", x,y, gintAgentRadius )		
-		
+
+		-- draw agen
+		love.graphics.circle("fill", x,y, gintAgentRadius)		
+
+		-- draw 'selected' icon
 		if v.isselected then
 			love.graphics.setColor(1,0,0,0.5)
 			love.graphics.circle("fill", x,y, gintAgentRadius / 2 )			
+		end
+		
+		-- agressor
+		if v.friendly == false then
+			love.graphics.setColor(1,0,0,0.5)
+			love.graphics.circle("line",x,y, gintAgentRadius * 0.9)
 		end
 		
 		-- display their ID
@@ -117,11 +125,13 @@ function drawobjects.DrawStats()
 
 	local tmpstr = ""
 	
-	tmpstr = "Fullness: " .. cf.round(gstatFullness,0) .. "\n"
-	tmpstr = tmpstr .. "Hydration: " .. cf.round(gstatHydration,0) .. "\n"
-	tmpstr = tmpstr .. "Stamina: " .. cf.round(gstatStamina,0) .. "\n"
-	tmpstr = tmpstr .. "Happiness: " .. cf.round(gstatHappiness,0) .. "\n"
-	tmpstr = tmpstr .. "Avail. food: " .. cf.round(gstatFoodStock,0) .. "\n"
+	tmpstr = "Avg fullness: " .. cf.round(gstatFullness,0) .. "\n"
+	tmpstr = tmpstr .. "Avg hydration: " .. cf.round(gstatHydration,0) .. "\n"
+	tmpstr = tmpstr .. "Avg stamina: " .. cf.round(gstatStamina,0) .. "\n"
+	tmpstr = tmpstr .. "Avg happiness: " .. cf.round(gstatHappiness,0) .. "\n"
+	tmpstr = tmpstr .. "Total food: " .. cf.round(gstatFoodStock,0) .. "\n"
+	tmpstr = tmpstr .. "Coffers: " .. cf.round(garrGlobals.coffer,1) .. "\n"
+
 	
 	
 	love.graphics.setColor(1,1,1,1)
@@ -133,7 +143,7 @@ function drawobjects.DrawPriorities()
   
   	local tmpstr = ""
 	
-	tmpstr = "Agent 1 food priority : " .. cf.round(tree.child[4].priority(Agents[1]),0) .. "\n"
+	-- tmpstr = "Agent 1 food priority : " .. cf.round(tree.child[4].priority(Agents[1]),0) .. "\n"
 	-- tmpstr = tmpstr .. "Eat water: " .. tree.child[1].child[2].priority .. "\n"
 	-- tmpstr = tmpstr .. "Rest: " .. tree.child[1].priority .. "\n"
 	-- tmpstr = tmpstr .. "Work: " .. tree.child[2].priority .. "\n"
@@ -153,10 +163,11 @@ function drawobjects.DrawPriorities()
 	tmpstr = tmpstr .. "'J' to make a lumberjack" .. "\n"
 	tmpstr = tmpstr .. "'C' to make a cotton farmer" .. "\n"
 	tmpstr = tmpstr .. "'W' to make a weaver" .. "\n"
+	tmpstr = tmpstr .. "'S' to make a soldier" .. "\n"
 	
 	tmpstr = tmpstr .. "<space> to pause" .. "\n"
 	
-	love.graphics.print(tmpstr, 10,200)
+	love.graphics.print(tmpstr, 10,150)
  
  
  end

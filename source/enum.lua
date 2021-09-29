@@ -22,6 +22,9 @@ goalBuildHouse = 11
 goalBuildCotton = 12
 goalBuildWeaver = 16
 
+goalAttack = 18
+gaolDefend = 19
+
 
 
 
@@ -35,6 +38,7 @@ zonetypeLumberyard = 6
 zonetypeHouseFoundation = 7
 zonetypeCotton = 8
 zonetypeWeaverShop = 9
+zonetypeSoldier = 10
 
 -- stock types
 -- stocktypeFood = 1
@@ -48,13 +52,16 @@ jobHealer = 2
 jobLumberjack = 3
 jobCotton = 4
 jobWeaver = 5
+jobSoldier = 6
+jobEnemy = 7
 
 -- these are seconds
 timerNextTask = 5
 timerBalancePriorities = 300
 timerGetStats = 5
-timerSpawnAgents = 60
+timerSpawnAgents = 180
 timerKillThings = 30
+timerTaxTime = 300
 
 
 

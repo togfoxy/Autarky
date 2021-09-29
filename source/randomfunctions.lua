@@ -43,6 +43,19 @@ function randomfunctions.NormaliseVectors(xv, yv)
 	return cf.ScaleVector(xv,yv,newscale)
 end
 
+function randomfunctions.GetClearBuildingSite()
+-- return a 'tile' that can be used/built on
+
+	local rndrow, rndcol 
+	repeat
+		rndrow = love.math.random(1,#garrGrid)
+		rndcol = love.math.random(1,#garrGrid[rndrow])
+	until garrGrid[rndrow][rndcol].zonetype == 0
+	
+	return rndrow, rndcol
+
+
+end
 
 return randomfunctions
 

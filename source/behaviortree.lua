@@ -73,6 +73,7 @@ function behaviortree.EstablishTree()
 									return true
 								end
 							 end
+
 							 
 							 
 
@@ -188,7 +189,7 @@ function behaviortree.EstablishTree()
 								return 3
 							end
 	tree.child[5].child[2].activate = function(bot)
-								if bot.woodstock < ginthousewoodcost and bot.wealth > 0 and bot.housezone == nil then
+								if bot.woodstock < ginthousewoodcost and bot.wealth > 0 and bot.housezone == nil and bot.occupation ~= enum.jobSoldier then
 									return true
 								else
 									return false
@@ -215,10 +216,10 @@ function behaviortree.EstablishTree()
 	tree.child[5].child[4] = {}
 	tree.child[5].child[4].goal = enum.goalBuyCotton
 	tree.child[5].child[4].priority = function(bot)
-								return 5
+								return 7
 							end
 	tree.child[5].child[4].activate = function(bot)
-								if bot.occupation == enum.jobWeaver and bot.wealth > 0 then
+								if bot.occupation == enum.jobWeaver and bot.wealth > 0 and bot.cottonstock <= 50 then
 									return true
 								else
 									return false

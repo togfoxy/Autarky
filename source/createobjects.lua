@@ -30,11 +30,12 @@ local function intGetNextZoneID()
 	
 end
 
-function createobjects.CreateAgent()
+function createobjects.CreateAgent(bolFriendly)
 	-- initialises agents and bots
 	-- Agents (non-physics)
 	bot = {}
 	bot.ID = intGetNextAgentID()
+	bot.friendly = bolFriendly
 	bot.health = 100
 	bot.hydration = 50
 	bot.happiness = 50
@@ -84,8 +85,8 @@ function createobjects.CreateGenericZone(v,zonetype)
 	myzone.ID = intGetNextZoneID()
 	myzone.x = v.targetx
 	myzone.y = v.targety
-	myzone.width = 50
-	myzone.height = 50
+	myzone.width = gintZoneSize
+	myzone.height = gintZoneSize
 	myzone.zonetype = zonetype
 	-- myzone.stocktype = stocktype
 	myzone.stocklevel = 0
@@ -98,10 +99,18 @@ function createobjects.CreateWorld(Zne)
 	-- water zone
 	myzone = {}
 	myzone.ID = #Zne + 1	--**
-	myzone.x = love.math.random(300, gintScreenWidth - 300)			-- this is top left corner
-	myzone.y = love.math.random(300, gintScreenHeight - 300)			-- the 100 bit stops it spawning off the screen
-	myzone.width = 50
-	myzone.height = 50
+	
+	local rndrow, rndcol
+	
+	repeat
+		rndrow, rndcol = fun.GetClearBuildingSite()	
+	until (rndrow > 3) and (rndrow <= #garrGrid - 3) and (rndcol > 2) and (rndcol <= #garrGrid[1] - 2)		-- keeps the well off the screen edge
+	myzone.x = garrGrid[rndrow][rndcol].x
+	myzone.y = garrGrid[rndrow][rndcol].y
+	garrGrid[rndrow][rndcol].zonetype = enum.zonetypeWater
+	
+	myzone.width = gintZoneSize
+	myzone.height = gintZoneSize
 	myzone.zonetype = enum.zonetypeWater
 	myzone.stocklevel = nil
 	myzone.worker = nil			-- the allocated agent to work here (if a work zone.)

@@ -15,17 +15,22 @@ enum = require "enum"
 cf = require "commonfunctions"
 
 gintScreenWidth = 1440-- 1920
-gintScreenHeight = 900-- 1080
+gintScreenHeight = 800-- 1080
 garrCurrentScreen = {}			-- screen stack
 
 gintAgentRadius = 10
 gintNextZoneID = 1
-gintNumAgents = 8
+gintNumAgents = 9
+gintTaxRate = 5		-- this is 1%
+gintZoneSize = 50		-- pixels
 
 
 Agents = {}						-- these are physics objects
 Zones = {}				-- area's of interest to agents
 tree = {}
+garrGrid = {}			-- track which grid contains which zone
+garrGlobals = {}		-- making a table means we can save it
+garrGlobals.coffer = 0
 
 gstatFullness = 0
 gstatHydration = 0
@@ -39,6 +44,7 @@ gtmrBalancePriorities = enum.timerBalancePriorities
 gtmrGetStats = enum.timerGetStats
 gtmrSpawnAgents = enum.timerSpawnAgents
 gtmrKillThings = enum.timerKillThings
+gtmrTaxTime = enum.timerTaxTime
 
 ginthousewoodcost = 200 --!200
 
@@ -59,7 +65,7 @@ local function MoveAgent(v)
 		xvector, yvector = fun.NormaliseVectors(xvector, yvector)
 		
 		-- move at half speed if tired
-		if v.stamina <= 0 then
+		if v.stamina <= 0 and v.friendly == true then
 			xvector, yvector = cf.ScaleVector(xvector,yvector,0.4)
 		end
 		
@@ -80,23 +86,23 @@ local function UpdateTaskTimer(v, dt)
 	end	
 end
 
-local function EnsureTargetSet(z, v,targetzonetype)
--- v = single agent
--- targetzonetype = the type of zone to look for
+-- local function EnsureTargetSet(z, v,targetzonetype)
+-- -- v = single agent
+-- -- targetzonetype = the type of zone to look for
 
-	if v.targetx == nil then
-		-- find a zone
-		local rndnum
-		repeat
-			rndnum = love.math.random(1, #z)
-		until z.zonetype == targetzonetype
+	-- if v.targetx == nil then
+		-- -- find a zone
+		-- local rndnum
+		-- repeat
+			-- rndnum = love.math.random(1, #z)
+		-- until z.zonetype == targetzonetype
 
-		z[rndnum].
-		v.targetx = z[rndnum].x + (z[rndnum].width / 2)
-		v.targety = z[rndnum].y + (z[rndnum].height / 2)
-		v.targetzone = q		
-	end	
-end
+		-- z[rndnum].
+		-- v.targetx = z[rndnum].x + (z[rndnum].width / 2)
+		-- v.targety = z[rndnum].y + (z[rndnum].height / 2)
+		-- v.targetzone = q		
+	-- end	
+-- end
 
 local function StopIfAtTarget(v)
 -- returns a boolean AND stops the agent moving
@@ -113,6 +119,17 @@ local function StopIfAtTarget(v)
 
 end
 
+local function NumOfEnemy(agt)
+-- count the number of non-friendly and return an int
+	local numofenemy = 0
+	for k,v in pairs(agt) do
+		if v.friendly == false then
+			numofenemy = numofenemy + 1
+		end
+	end
+	return numofenemy
+end
+
 local function CheckIdleAgents(agt,dt)
 -- agt = Agents
 
@@ -123,56 +140,70 @@ local function CheckIdleAgents(agt,dt)
 		-- see who is idle
 		if v.currenttask == nil and v.nexttasktimer <= 0 then
 		
-			nextaction = ft.DetermineAction(tree, v)
-			
-			--print("next action = " .. nextaction)
-			v.currenttask = nextaction
-			
-			if nextaction == enum.goalRest then
-				v.currenttasklabel = "Resting"
+			if v.friendly == true then
+				if v.occupation == enum.jobSoldier and NumOfEnemy(agt) > 0 then
+					SeekEnemy(agt, v)
+					
+					v.currenttask = enum.goalDefend
+					v.currenttasklabel = "Defending village!"
+					v.nexttasktimer = 5					
+				else
+
+					nextaction = ft.DetermineAction(tree, v)
+					
+					v.currenttask = nextaction
+				
+					if nextaction == enum.goalRest then
+						v.currenttasklabel = "Resting"
+					end
+					if nextaction == enum.goalBuildFarm then
+						v.currenttasklabel = "Building farm"
+					end		
+					if nextaction == enum.goalWork then
+						v.currenttasklabel = "Working"
+					end				
+					if nextaction == enum.goalEat then
+						v.currenttasklabel = "Eating"
+					end	
+					if nextaction == enum.goalBuyCotton then
+						v.currenttasklabel = "Buying cotton"
+					end				
+					if nextaction == enum.goalBuyCloth then
+						v.currenttasklabel = "Buying cloth"
+					end				
+					if nextaction == enum.goalDrinkWater then
+						v.currenttasklabel = "Drinking water"
+					end				
+					if nextaction == enum.goalBuildHealer then
+						v.currenttasklabel = "Building healer"
+					end	
+					if nextaction == enum.goalHeal then
+						v.currenttasklabel = "Healing"
+					end			
+					if nextaction == enum.goalBuildLumberyard then
+						v.currenttasklabel = "Building lumberyard"
+					end
+					if nextaction == enum.goalBuildCotton then
+						v.currenttasklabel = "Building cotton farm"
+					end
+					if nextaction == enum.goalBuildWeaver then
+						v.currenttasklabel = "Building weaver shop"
+					end
+					if nextaction == enum.goalBuyWood then
+						v.currenttasklabel = "Buying wood"
+					end	
+					if nextaction == enum.goalBuildHouseFoundation then
+						v.currenttasklabel = "Starting house"
+					end			
+					if nextaction == enum.goalBuildHouse then
+						v.currenttasklabel = "Finishing house"
+					end				
+				end
+			else
+				v.currenttask = enum.goalAttack
+				v.currenttasklabel = "Attacking village!"
+				v.nexttasktimer = 5
 			end
-			if nextaction == enum.goalBuildFarm then
-				v.currenttasklabel = "Building farm"
-			end		
-			if nextaction == enum.goalWork then
-				v.currenttasklabel = "Working"
-			end				
-			if nextaction == enum.goalEat then
-				v.currenttasklabel = "Eating"
-			end	
-			if nextaction == enum.goalBuyCotton then
-				v.currenttasklabel = "Buying cotton"
-			end				
-			if nextaction == enum.goalBuyCloth then
-				v.currenttasklabel = "Buying cloth"
-			end				
-			if nextaction == enum.goalDrinkWater then
-				v.currenttasklabel = "Drinking water"
-			end				
-			if nextaction == enum.goalBuildHealer then
-				v.currenttasklabel = "Building healer"
-			end	
-			if nextaction == enum.goalHeal then
-				v.currenttasklabel = "Healing"
-			end			
-			if nextaction == enum.goalBuildLumberyard then
-				v.currenttasklabel = "Building lumberyard"
-			end
-			if nextaction == enum.goalBuildCotton then
-				v.currenttasklabel = "Building cotton farm"
-			end
-			if nextaction == enum.goalBuildWeaver then
-				v.currenttasklabel = "Building weaver shop"
-			end
-			if nextaction == enum.goalBuyWood then
-				v.currenttasklabel = "Buying wood"
-			end	
-			if nextaction == enum.goalBuildHouseFoundation then
-				v.currenttasklabel = "Starting house"
-			end			
-			if nextaction == enum.goalBuildHouse then
-				v.currenttasklabel = "Finishing house"
-			end				
 		end
 	end
 end
@@ -321,9 +352,14 @@ local function PerformBuild(zs,zonetype,v,dt)
 -- generic build function
 	if v.nexttasktimer <= 0 then	-- a value > 0 means we not yet arrived	
 		if v.targetx == nil then
-			v.targetx = love.math.random(100, gintScreenWidth - 100)			-- this is top left corner
-			v.targety = love.math.random(100, gintScreenHeight - 100)			-- the 100 bit stops it spawning off the screen
 			v.targetzone = nil
+
+			rndrow, rndcol = fun.GetClearBuildingSite()
+			
+			v.targetx = garrGrid[rndrow][rndcol].x
+			v.targety = garrGrid[rndrow][rndcol].y
+			garrGrid[rndrow][rndcol].zonetype = zonetype
+	
 		end
 		MoveAgent(v)
 		if StopIfAtTarget(v) then
@@ -364,7 +400,7 @@ local function AdjustStock(zs,v, qty, wealth)
 -- zs = single zone
 -- v = single agent
 -- stock quantity to effect
--- wealth to assign
+-- wealth to assign to shopkeeper
 
 	-- stock the shop
 	zs.stocklevel = zs.stocklevel + qty
@@ -441,7 +477,7 @@ local function PerformWork(zs, v, dt)
 				end
 				if thiszone.zonetype == enum.zonetypeWeaverShop then
 					if v.cottonstock > 5 then
-						AdjustStock(thiszone,v,6,6)
+						AdjustStock(thiszone,v,6,12)
 						v.cottonstock = v.cottonstock - 6
 					end
 				end
@@ -876,13 +912,13 @@ local function PerformBuyCloth(zs, v, dt)
 		if StopIfAtTarget(v) then
 			if zs[v.targetzone] ~= nil then
 				local maxstock = zs[v.targetzone].stocklevel
-				local maxwealth = v.wealth
+				local maxwealth = v.wealth / 2		-- cloth costs 2 coin and not 1
 				local amt = math.min(maxstock, maxwealth)
 				
 				if amt > 10 then amt = 10 end
 				
 				v.happiness = v.happiness + (amt * 2)
-				v.wealth = v.wealth - amt
+				v.wealth = v.wealth - (amt * 2)
 				zs[v.targetzone].stocklevel = zs[v.targetzone].stocklevel - amt
 			end
 		end
@@ -891,6 +927,177 @@ local function PerformBuyCloth(zs, v, dt)
 		UpdateTaskTimer(v, dt)	
 	end		
 
+
+end
+
+local function PerformAttack(Zns, agts,enemy,dt)
+
+	enemy.nexttasktimer = enemy.nexttasktimer - dt
+
+	local closestdistance = 9999
+	local closesttarget = nil		-- this is an actual agent
+	
+	-- determine closest target
+	for k,v in pairs(agts) do
+		if v.friendly == true and v.health > 0 then
+		
+			local x1 = enemy.body:getX()		-- x axis
+			local y1 = enemy.body:getY()		-- y axis
+			local x2 = v.body:getX()			-- x axis
+			local y2 = v.body:getY()			-- y axis
+
+			local dist = cf.GetDistance(x1, y1, x2, y2)
+			if dist < closestdistance then
+				closesttarget = v
+				closestdistance = dist
+			end
+		end
+	end
+	
+	
+	enemy.targetx = closesttarget.body:getX()
+	enemy.targety = closesttarget.body:getY()
+	enemy.targetzone = 1		-- irrelevant but needs to be non-zero
+	
+	MoveAgent(enemy)
+	
+	--print(enemy.body:getLinearVelocity( ))
+
+	if cf.GetDistance(enemy.body:getX(), enemy.body:getY(),closesttarget.body:getX(),closesttarget.body:getY()) < 35 then
+		-- arrived
+		local vx, vy = enemy.body:getLinearVelocity( )
+		enemy.body:setLinearVelocity(vx / 2, vy / 2)
+		
+		if enemy.nexttasktimer <= 0 then
+			enemy.nexttasktimer = 1	-- seconds
+		
+			enemy.health = enemy.health - 5
+			
+			if closesttarget.occupation == enum.jobSoldier then
+				closesttarget.health = closesttarget.health - 5
+			else
+				closesttarget.health = closesttarget.health - 10
+			end
+			
+			-- villager dead
+			if closesttarget.health <= 0 then
+			
+				enemy.targetx = nil
+				enemy.targety = nil
+				enemy.targetzone = nil		-- irrelevant but needs to be non-zero
+			
+				local deadID = closesttarget.ID
+				
+				-- remove house and workplace
+				for q,w in ipairs(Zns) do
+					if w.worker == deadID or w.homeowner == deadID then
+						table.remove(Zns, q)
+					end
+				end
+				-- remove villager from array
+				for k,v in pairs(agts) do
+					if v.ID == deadID then
+						table.remove(agts, k)
+						break
+					end
+				end
+			end
+			
+			-- enemy dead
+			if enemy.health <= 0 then
+				local deadID = enemy.ID
+				-- remove enemy from array
+				for k,v in pairs(agts) do
+					if v.ID == deadID then
+						table.remove(agts, k)
+						break
+					end
+				end				
+			end
+
+		else
+			-- can't attack till timer runs down
+		end
+	end
+
+end
+
+local function PerformDefend(Zns, agts,agt, dt)
+-- -- agts is the array
+-- -- agt is a single agent
+
+	-- local closestdistance = 9999
+	-- local closesttarget = nil		-- this is an actual agent
+	
+	-- -- determine closest target
+	-- for k,v in pairs(agts) do
+		-- if v.friendly == false and v.health > 0 then
+		
+			-- local x1 = agt.body:getX()		-- x axis
+			-- local y1 = agt.body:getY()		-- y axis
+			-- local x2 = v.body:getX()			-- x axis
+			-- local y2 = v.body:getY()			-- y axis
+
+			-- local dist = cf.GetDistance(x1, y1, x2, y2)
+			-- if dist < closestdistance then
+				-- closesttarget = v		-- this is the enemy agent
+				-- closestdistance = dist
+			-- end
+		-- end
+	-- end
+	
+	-- agt.targetx = closesttarget.body:getX()
+	-- agt.targety = closesttarget.body:getY()
+	-- agt.targetzone = -1		-- irrelevant but needs to be non-zero
+
+	
+	-- MoveAgent(agt)
+
+	-- if cf.GetDistance(agt.body:getX(), agt.body:getY(),closesttarget.targetx,closesttarget.targety) < 35 then
+		-- -- arrived
+		-- local vx, vy = agt.body:getLinearVelocity( )
+		-- agt.body:setLinearVelocity(vx / 2, vy / 2)
+
+		-- if agt.nexttasktimer <= 0 then
+			-- agt.nexttasktimer = 1	-- seconds
+		
+			-- agt.health = agt.health - 5
+			
+			-- if closesttarget.friendly == false then
+				-- closesttarget.health = closesttarget.health - 5
+			-- end
+			
+			-- -- enemy dead
+			-- if closesttarget.health <= 0 then
+			
+				-- agt.targetx = nil
+				-- agt.targety = nil
+				-- agt.targetzone = nil		-- irrelevant but needs to be non-zero
+			
+				-- local deadID = closesttarget.ID
+				
+				-- -- remove villager from array
+				-- for k,v in pairs(agts) do
+					-- if v.ID == deadID then
+						-- table.remove(agts, k)
+						-- break
+					-- end
+				-- end
+			-- end
+			
+			-- -- agent dead
+			-- if agt.health <= 0 then
+				-- local deadID = agt.ID
+				-- -- remove agt from array
+				-- for k,v in pairs(agts) do
+					-- if v.ID == deadID then
+						-- table.remove(agts, k)
+						-- break
+					-- end
+				-- end				
+			-- end
+		-- end
+	-- end
 
 end
 
@@ -910,7 +1117,9 @@ local function PerformTasks(znes, agt, dt)
 			PerformBuild(znes,enum.zonetypeCotton,v,dt)
 		end			
 		if v.currenttask == enum.goalWork then
-			PerformWork(znes, v,dt)
+			if v.occupation ~= enum.jobSoldier then
+				PerformWork(znes, v,dt)
+			end
 		end	
 		if v.currenttask == enum.goalEat then
 			PerformEat(znes, v,dt)
@@ -948,6 +1157,14 @@ local function PerformTasks(znes, agt, dt)
 		if v.currenttask == enum.goalBuildHouse then
 			PerformBuildHouse(znes, v,dt)
 		end	
+		if v.currenttask == enum.goalAttack then
+			PerformAttack(znes, agt,v,dt)
+		end
+		if v.currenttask == enum.goalAttack then
+			PerformDefend(znes, agt,v,dt)
+		end		
+		
+		
 		
 	end
 end
@@ -993,6 +1210,65 @@ local function KillThings(Zns, Agts, dt)
 	end
 end
 
+local function TaxTime(Agts, dt)
+-- tax each citizen
+
+	gtmrTaxTime = gtmrTaxTime - dt
+	if gtmrTaxTime <= 0 then
+		gtmrTaxTime = enum.timerTaxTime
+
+		for k,v in pairs(Agts) do
+			local taxpayment = v.wealth * (gintTaxRate / 100)
+			v.wealth = v.wealth - taxpayment
+			garrGlobals.coffer = garrGlobals.coffer + taxpayment
+			
+			if v.occupation == enum.jobSoldier then
+				if garrGlobals.coffer >= 100 then
+					v.wealth = v.wealth + 100
+					garrGlobals.coffer = garrGlobals.coffer - 100
+				else
+					-- soldier not paid
+					table.remove(Agts, k)
+				end
+			end
+		end
+	end
+end
+
+local function InitialiseGrid()
+-- this is for simple tracking and fast lookup
+	local rows,cols
+	local maxrows,maxcols
+
+	maxrows = cf.round((gintScreenHeight - gintZoneSize) / gintZoneSize,0)
+	maxcols = cf.round((gintScreenWidth - gintZoneSize) / gintZoneSize,0)
+	
+	-- nice to keep things off the edge
+	maxrows = maxrows - 1
+	maxcols = maxcols - 1
+	
+-- print(gintScreenHeight,gintZoneSize)
+
+
+	-- establish a 2D array
+	for rows = 1,maxrows do
+		garrGrid[rows] = {}
+	end	
+	
+	for rows = 1, maxrows  do
+		for cols = 1, maxcols  do
+			garrGrid[rows][cols] = {}
+			garrGrid[rows][cols].x = cols * gintZoneSize
+			garrGrid[rows][cols].y = rows * gintZoneSize
+			garrGrid[rows][cols].zonetype = 0
+		end
+	end
+	
+--print(maxrows,maxcols)	
+--print(inspect(garrGrid))
+
+end
+
 function love.mousepressed( x, y, button, istouch, presses )
 
 	local mousex,mousey = TLfres.getMousePosition(gintScreenWidth, gintScreenHeight)    -- lets you pretend screen is 1920 * 1080
@@ -1003,7 +1279,7 @@ function love.mousepressed( x, y, button, istouch, presses )
 			local y2 = v.body:getY()		-- y axis
 			local dist = cf.GetDistance(mousex, mousey, x2, y2)
 
-			if dist <= gintAgentRadius and v.occupation == nil then
+			if dist <= gintAgentRadius and v.occupation == nil and v.friendly == true then
 				v.isselected = not v.isselected
 			end
 		end
@@ -1078,7 +1354,17 @@ function love.keyreleased( key, scancode )
 			end
 		end
 	end		
-	
+	if key == "s" then		-- soldier
+		for k,v in ipairs(Agents) do
+			if v.isselected and v.occupation == nil then
+				v.occupation = enum.jobSoldier
+				v.isselected = false
+				v.red = 134/255
+				v.green = 22/255
+				v.blue = 22/255
+			end
+		end
+	end
 end
 
 function love.load()
@@ -1095,12 +1381,15 @@ function love.load()
 	love.physics.setMeter(1)
 	world = love.physics.newWorld(0,0,false)	
 	
+	InitialiseGrid()		-- must be called before CreateWorld
+	
 	cobjs.CreateWorld(Zones)
-	--cobjs.CreateWorld(Zones)
 	
 	for i = 1,gintNumAgents do
-		cobjs.CreateAgent(i)
+		cobjs.CreateAgent(true)
 	end
+	
+	cobjs.CreateAgent(false)
 
 	fun.AddScreen("World")
 
@@ -1137,8 +1426,10 @@ function love.update(dt)
 		DegradeStats(Agents, dt)
 		-- GrowThings(Zones,dt)
 		KillThings(Zones, Agents, dt)
-		
+				
 		GetStats(Zones, Agents, dt)
+		
+		TaxTime(Agents, dt)
 		
 		SpawnAgents(dt)
 		
