@@ -12,6 +12,16 @@ end
 
 function drawobjects.DrawWorld()
 
+	-- background
+	local myscale = gintScreenWidth / 474
+	
+	love.graphics.setColor(0,1,0,0.25)
+	love.graphics.rectangle("fill", 0,0,gintScreenWidth,gintScreenHeight)
+	
+    love.graphics.setColor(1,1,1,0.5)
+    love.graphics.draw(garrImage[1],0,0,0, myscale,myscale,1,1)
+
+
 	for k,v in ipairs(Zones) do
 	
 		if v.zonetype == enum.zonetypeFood then

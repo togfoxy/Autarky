@@ -29,6 +29,7 @@ Agents = {}						-- these are physics objects
 Zones = {}				-- area's of interest to agents
 tree = {}
 garrGrid = {}			-- track which grid contains which zone
+garrImage = {}
 garrGlobals = {}		-- making a table means we can save it
 garrGlobals.coffer = 0
 
@@ -47,7 +48,6 @@ gtmrKillThings = enum.timerKillThings
 gtmrTaxTime = enum.timerTaxTime
 
 ginthousewoodcost = 200 --!200
-
 
 local function MoveAgent(v)
 -- moves a single bot towards tx,ty
@@ -86,24 +86,6 @@ local function UpdateTaskTimer(v, dt)
 	end	
 end
 
--- local function EnsureTargetSet(z, v,targetzonetype)
--- -- v = single agent
--- -- targetzonetype = the type of zone to look for
-
-	-- if v.targetx == nil then
-		-- -- find a zone
-		-- local rndnum
-		-- repeat
-			-- rndnum = love.math.random(1, #z)
-		-- until z.zonetype == targetzonetype
-
-		-- z[rndnum].
-		-- v.targetx = z[rndnum].x + (z[rndnum].width / 2)
-		-- v.targety = z[rndnum].y + (z[rndnum].height / 2)
-		-- v.targetzone = q		
-	-- end	
--- end
-
 local function StopIfAtTarget(v)
 -- returns a boolean AND stops the agent moving
 -- v = single agent
@@ -119,15 +101,34 @@ local function StopIfAtTarget(v)
 
 end
 
-local function NumOfEnemy(agt)
--- count the number of non-friendly and return an int
-	local numofenemy = 0
-	for k,v in pairs(agt) do
-		if v.friendly == false then
-			numofenemy = numofenemy + 1
+local function GetClosestAgent(agts, seeker, bolFriendly)
+-- return the closest enemy agent (object) or return nil
+-- agts is the whole array
+-- seeker is the single agent (obj) that is seeking an enemy
+-- bolFriendly = true or false for the sort of person you're looking for
+-- eg bolFriendly == true if you are seeking a friendly person (i.e seeker = enemy)
+
+	local closesttarget = nil
+	local closestdistance = 999
+	
+	for k,v in pairs(agts) do
+		if v.friendly == bolFriendly and v.health > 0 then
+		
+			local x1 = seeker.body:getX()		-- x axis
+			local y1 = seeker.body:getY()		-- y axis
+			local x2 = v.body:getX()			-- x axis
+			local y2 = v.body:getY()			-- y axis
+
+			local dist = cf.GetDistance(x1, y1, x2, y2)
+			if dist < closestdistance then
+				closesttarget = v
+				closestdistance = dist
+			end
 		end
 	end
-	return numofenemy
+	
+	return closesttarget
+
 end
 
 local function CheckIdleAgents(agt,dt)
@@ -139,14 +140,11 @@ local function CheckIdleAgents(agt,dt)
 
 		-- see who is idle
 		if v.currenttask == nil and v.nexttasktimer <= 0 then
-		
 			if v.friendly == true then
-				if v.occupation == enum.jobSoldier and NumOfEnemy(agt) > 0 then
-					SeekEnemy(agt, v)
-					
-					v.currenttask = enum.goalDefend
-					v.currenttasklabel = "Defending village!"
-					v.nexttasktimer = 5					
+				if v.occupation == enum.jobSoldier and GetClosestAgent(agt, v, false) ~= nil then
+						v.currenttask = enum.goalDefend
+						v.currenttasklabel = "Defending village!"
+						v.nexttasktimer = 5	
 				else
 
 					nextaction = ft.DetermineAction(tree, v)
@@ -930,31 +928,14 @@ local function PerformBuyCloth(zs, v, dt)
 
 end
 
-local function PerformAttack(Zns, agts,enemy,dt)
+local function PerformAttack(Zns, agts, enemy,dt)
 
 	enemy.nexttasktimer = enemy.nexttasktimer - dt
 
-	local closestdistance = 9999
 	local closesttarget = nil		-- this is an actual agent
 	
-	-- determine closest target
-	for k,v in pairs(agts) do
-		if v.friendly == true and v.health > 0 then
+	closesttarget = GetClosestAgent(agts, enemy, true)
 		
-			local x1 = enemy.body:getX()		-- x axis
-			local y1 = enemy.body:getY()		-- y axis
-			local x2 = v.body:getX()			-- x axis
-			local y2 = v.body:getY()			-- y axis
-
-			local dist = cf.GetDistance(x1, y1, x2, y2)
-			if dist < closestdistance then
-				closesttarget = v
-				closestdistance = dist
-			end
-		end
-	end
-	
-	
 	enemy.targetx = closesttarget.body:getX()
 	enemy.targety = closesttarget.body:getY()
 	enemy.targetzone = 1		-- irrelevant but needs to be non-zero
@@ -1022,83 +1003,73 @@ local function PerformAttack(Zns, agts,enemy,dt)
 
 end
 
-local function PerformDefend(Zns, agts,agt, dt)
+local function PerformDefend(Zns, agts, agt, dt)
 -- -- agts is the array
 -- -- agt is a single agent
 
-	-- local closestdistance = 9999
-	-- local closesttarget = nil		-- this is an actual agent
+	agt.nexttasktimer = agt.nexttasktimer - dt
+	if agt.nexttasktimer <= 0 then
+		agt.currenttask = nil
+	end
 	
-	-- -- determine closest target
-	-- for k,v in pairs(agts) do
-		-- if v.friendly == false and v.health > 0 then
+
+	local closesttarget = nil		-- this is an actual agent
+	
+	closesttarget = GetClosestAgent(agts, agt, false)
+	
+	if closesttarget ~= nil then
+		agt.targetx = closesttarget.body:getX()
+		agt.targety = closesttarget.body:getY()
+		agt.targetzone = -1		-- irrelevant but needs to be non-zero
 		
-			-- local x1 = agt.body:getX()		-- x axis
-			-- local y1 = agt.body:getY()		-- y axis
-			-- local x2 = v.body:getX()			-- x axis
-			-- local y2 = v.body:getY()			-- y axis
+		MoveAgent(agt)
 
-			-- local dist = cf.GetDistance(x1, y1, x2, y2)
-			-- if dist < closestdistance then
-				-- closesttarget = v		-- this is the enemy agent
-				-- closestdistance = dist
-			-- end
-		-- end
-	-- end
-	
-	-- agt.targetx = closesttarget.body:getX()
-	-- agt.targety = closesttarget.body:getY()
-	-- agt.targetzone = -1		-- irrelevant but needs to be non-zero
+		if cf.GetDistance(agt.body:getX(), agt.body:getY(),closesttarget.targetx,closesttarget.targety) < 35 then
+			-- arrived
+			local vx, vy = agt.body:getLinearVelocity( )
+			agt.body:setLinearVelocity(vx / 2, vy / 2)
 
-	
-	-- MoveAgent(agt)
-
-	-- if cf.GetDistance(agt.body:getX(), agt.body:getY(),closesttarget.targetx,closesttarget.targety) < 35 then
-		-- -- arrived
-		-- local vx, vy = agt.body:getLinearVelocity( )
-		-- agt.body:setLinearVelocity(vx / 2, vy / 2)
-
-		-- if agt.nexttasktimer <= 0 then
-			-- agt.nexttasktimer = 1	-- seconds
-		
-			-- agt.health = agt.health - 5
+			if agt.nexttasktimer <= 0 then
+				agt.nexttasktimer = 1	-- seconds
 			
-			-- if closesttarget.friendly == false then
-				-- closesttarget.health = closesttarget.health - 5
-			-- end
-			
-			-- -- enemy dead
-			-- if closesttarget.health <= 0 then
-			
-				-- agt.targetx = nil
-				-- agt.targety = nil
-				-- agt.targetzone = nil		-- irrelevant but needs to be non-zero
-			
-				-- local deadID = closesttarget.ID
+				agt.health = agt.health - 5
 				
-				-- -- remove villager from array
-				-- for k,v in pairs(agts) do
-					-- if v.ID == deadID then
-						-- table.remove(agts, k)
-						-- break
-					-- end
-				-- end
-			-- end
-			
-			-- -- agent dead
-			-- if agt.health <= 0 then
-				-- local deadID = agt.ID
-				-- -- remove agt from array
-				-- for k,v in pairs(agts) do
-					-- if v.ID == deadID then
-						-- table.remove(agts, k)
-						-- break
-					-- end
-				-- end				
-			-- end
-		-- end
-	-- end
-
+				if closesttarget.friendly == false then
+					closesttarget.health = closesttarget.health - 5
+				end
+				
+				-- enemy dead
+				if closesttarget.health <= 0 then
+				
+					agt.targetx = nil
+					agt.targety = nil
+					agt.targetzone = nil		-- irrelevant but needs to be non-zero
+				
+					local deadID = closesttarget.ID
+					
+					-- remove villager from array
+					for k,v in pairs(agts) do
+						if v.ID == deadID then
+							table.remove(agts, k)
+							break
+						end
+					end
+				end
+				
+				-- agent dead
+				if agt.health <= 0 then
+					local deadID = agt.ID
+					-- remove agt from array
+					for k,v in pairs(agts) do
+						if v.ID == deadID then
+							table.remove(agts, k)
+							break
+						end
+					end				
+				end
+			end
+		end
+	end
 end
 
 local function PerformTasks(znes, agt, dt)
@@ -1160,12 +1131,12 @@ local function PerformTasks(znes, agt, dt)
 		if v.currenttask == enum.goalAttack then
 			PerformAttack(znes, agt,v,dt)
 		end
-		if v.currenttask == enum.goalAttack then
+		if v.currenttask == enum.goalDefend then
 			PerformDefend(znes, agt,v,dt)
-		end		
-		
-		
-		
+		end	
+		if v.currenttask == enum.goalPatrol then
+			PerformRestImmediately(v,dt)
+		end
 	end
 end
 
@@ -1380,6 +1351,8 @@ function love.load()
 	
 	love.physics.setMeter(1)
 	world = love.physics.newWorld(0,0,false)	
+	
+	garrImage[1] = love.graphics.newImage("assets/grass.jpg")
 	
 	InitialiseGrid()		-- must be called before CreateWorld
 	

@@ -23,7 +23,8 @@ goalBuildCotton = 12
 goalBuildWeaver = 16
 
 goalAttack = 18
-gaolDefend = 19
+goalDefend = 19
+goalPatrol = 20
 
 
 
