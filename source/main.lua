@@ -47,7 +47,7 @@ gtmrSpawnAgents = enum.timerSpawnAgents
 gtmrKillThings = enum.timerKillThings
 gtmrTaxTime = enum.timerTaxTime
 
-ginthousewoodcost = 200 --!200
+ginthousewoodcost = 20 --!200
 
 local function MoveAgent(v)
 -- moves a single bot towards tx,ty
@@ -1352,7 +1352,13 @@ function love.load()
 	love.physics.setMeter(1)
 	world = love.physics.newWorld(0,0,false)	
 	
-	garrImage[1] = love.graphics.newImage("assets/grass.jpg")
+	garrImage[1] = love.graphics.newImage("assets/grass1.png")
+	garrImage[2] = love.graphics.newImage("assets/house1.png")
+	garrImage[3] = love.graphics.newImage("assets/house2.png")
+	garrImage[4] = love.graphics.newImage("assets/house3.png")
+	garrImage[5] = love.graphics.newImage("assets/house4.png")
+	garrImage[6] = love.graphics.newImage("assets/house5.png")
+	garrImage[7] = love.graphics.newImage("assets/well.png")
 	
 	InitialiseGrid()		-- must be called before CreateWorld
 	
@@ -1362,7 +1368,7 @@ function love.load()
 		cobjs.CreateAgent(true)
 	end
 	
-	cobjs.CreateAgent(false)
+	-- cobjs.CreateAgent(false)
 
 	fun.AddScreen("World")
 
