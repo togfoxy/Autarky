@@ -20,7 +20,7 @@ garrCurrentScreen = {}			-- screen stack
 
 gintAgentRadius = 10
 gintNextZoneID = 1
-gintNumAgents = 9
+gintNumAgents = 3
 gintTaxRate = 5		-- this is 1%
 gintZoneSize = 50		-- pixels
 
@@ -32,6 +32,7 @@ garrGrid = {}			-- track which grid contains which zone
 garrImage = {}
 garrGlobals = {}		-- making a table means we can save it
 garrGlobals.coffer = 0
+garrSoundEffects = {}
 
 gstatFullness = 0
 gstatHydration = 0
@@ -47,7 +48,7 @@ gtmrSpawnAgents = enum.timerSpawnAgents
 gtmrKillThings = enum.timerKillThings
 gtmrTaxTime = enum.timerTaxTime
 
-ginthousewoodcost = 20 --!200
+ginthousewoodcost = 200 --!200
 
 local function MoveAgent(v)
 -- moves a single bot towards tx,ty
@@ -237,14 +238,14 @@ function DegradeStats(agt, dt)
         if v.hydration <= 0 then
 			v.happiness = v.happiness - (1 * dt)
 		end 	
-		if v.stamina > 75 then
+		if v.stamina > 50 then
 			v.happiness = v.happiness + (0.5 * dt)
 		end
-		if v.fullness > 75 then
+		if v.fullness > 50 then
 			v.happiness = v.happiness + (0.5 * dt)
 		end		
 		
-		if v.hydration > 75 then
+		if v.hydration > 50 then
 			v.happiness = v.happiness + (0.5 * dt)
 		end		
 	
@@ -334,9 +335,12 @@ local function PerformRestImmediately(v, dt)
 		if StopIfAtTarget(v) then
 			-- rest
 			v.health = v.health + 0.25
-			v.happiness = v.happiness + 2
+			v.happiness = v.happiness + 4
 			v.stamina = v.stamina + 8
 			
+			if love.math.random(1,20) == 1 then
+				garrSoundEffects[2]:play()
+			end
 		
 		end	
 	else
@@ -381,6 +385,8 @@ local function PerformBuild(zs,zonetype,v,dt)
 				-- ouch
 				v.health = v.health - (love.math.random(5,10))
 			end	
+			
+			garrSoundEffects[1]:play()
 		end
 	else
 		-- arrived some time previously
@@ -479,6 +485,9 @@ local function PerformWork(zs, v, dt)
 						v.cottonstock = v.cottonstock - 6
 					end
 				end
+				if love.math.random(1,10) == 1 then
+					garrSoundEffects[3]:play()
+				end
 			end
 		end
 	else
@@ -542,6 +551,10 @@ local function PerformEat(zs, v, dt)
 				zs[v.targetzone].stocklevel = zs[v.targetzone].stocklevel - amt
 				v.happiness = v.happiness + (5 * amt/10)
 				v.stamina = v.stamina + (5 * amt/10)
+				
+				if love.math.random(1,10) == 1 then
+					garrSoundEffects[4]:play()
+				end
 			end
 			
 		end
@@ -636,6 +649,10 @@ local function PerformDrinkWater(zs, v, dt)
 			-- drink water
 			v.hydration = v.hydration + 30
 			v.happiness = v.happiness + 6
+			
+			if love.math.random(1,10) == 1 then
+				garrSoundEffects[5]:play()
+			end
 		end
 	else
 		-- arrived some time previously
@@ -1152,7 +1169,8 @@ local function SpawnAgents(dt)
 		if gstatFoodStock > 75 and gstatHappiness > 66 then
 			
 			gintNumAgents = gintNumAgents + 1
-			cobjs.CreateAgent(gintNumAgents)
+			cobjs.CreateAgent(true)
+			garrSoundEffects[6]:play()
 		end
 	end
 end
@@ -1360,6 +1378,18 @@ function love.load()
 	garrImage[6] = love.graphics.newImage("assets/house5.png")
 	garrImage[7] = love.graphics.newImage("assets/well.png")
 	
+	
+	garrSoundEffects[1] = love.audio.newSource("sounds/buildhouse.wav", "static")
+	garrSoundEffects[2] = love.audio.newSource("sounds/272030__aldenroth2__male-yawn.wav", "static")
+	garrSoundEffects[3] = love.audio.newSource("sounds/working.wav", "static")
+	garrSoundEffects[4] = love.audio.newSource("sounds/543386__chomp.wav", "static")
+	garrSoundEffects[5] = love.audio.newSource("sounds/416710__inspectorj__splash-small-a.wav", "static")
+	garrSoundEffects[6] = love.audio.newSource("sounds/387232__steaq__badge-coin-win.wav", "static")
+
+	
+
+	garrSoundEffects[1]:setVolume(0.50)
+	
 	InitialiseGrid()		-- must be called before CreateWorld
 	
 	cobjs.CreateWorld(Zones)
@@ -1411,6 +1441,8 @@ function love.update(dt)
 		TaxTime(Agents, dt)
 		
 		SpawnAgents(dt)
+		
+		--! CheckForRaid(dt)
 		
 		--BalancePriorities(Agents, dt)
 		world:update(dt) --this puts the world into motion
