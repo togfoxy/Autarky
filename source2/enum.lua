@@ -9,6 +9,14 @@ return {
 
     personDrawWidth = 10,
 
+    jobFarmer = 1,
+
+    buildingFarm = 1,
+
+
+    actionBuildWorkplace = 1,
+    actionMovingToWorkplace = 2,
+
 
 
 

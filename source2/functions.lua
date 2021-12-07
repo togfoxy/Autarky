@@ -21,6 +21,7 @@ function functions.getXYfromRowCol(row, col)
 end
 
 function functions.getRowColfromXY(x, y)
+    -- returns row and col
     local r = Cf.round(y / TILE_SIZE)
     local c = Cf.round(x / TILE_SIZE)
     return r, c
@@ -34,8 +35,71 @@ function functions.loadImages()
     IMAGES[Enum.terrainWell] = love.graphics.newImage("assets/images/well_256.png")
 end
 
+function functions.AtWorkplace(e)
+    -- check if entity has a workplace and is at the at the workplace
+    local result = false
+    if e:has("hasWorkplace") then
+        local erow, col = Fun.getRowColfromXY(e.position.row, e.position.col)
+        if erow == e.hasWorkplace.row and ecol == e.hasWorkplace.col then
+            result  = true
+        end
+    end
+    return result
+end
 
+function functions.DoWork(e)
+    print("doing work")
+end
 
+function functions.getBlankTile()
+    -- return a tile row/col that has no buildings on it (or wells)
+    local r
+    local c
+    repeat
+        r = love.math.random(1, NUMBER_OF_ROWS)
+        c = love.math.random(1, NUMBER_OF_COLS)
+    until not MAP[r][c]:has("hasBuilding")
+    return r, c
+end
 
+function functions.applyMovement(e, velocity, dt)
+    -- assumes an entity has a position and a target.
+    -- return a new row/col that progresses towards that target
 
+    local distancemovedthisstep = velocity * dt
+    -- map row/col to x/y
+    local currentx = (e.position.x)
+    local currenty = (e.position.y)
+    local targetx, targety = Fun.getXYfromRowCol(e.hasTargetTile.row, e.hasTargetTile.col)
+
+    -- get the vector that moves the entity closer to the destination
+    local xvector = targetx - currentx  -- tiles
+    local yvector = targety - currenty  -- tiles
+
+  --print(distancemovedthisstep, currentx,currenty,targetx,targety,xvector,yvector)
+
+    local xscale = math.abs(xvector / distancemovedthisstep)
+    local yscale = math.abs(yvector / distancemovedthisstep)
+    local scale = math.max(xscale, yscale)
+
+    if scale > 1 then
+        xvector = xvector / scale
+        yvector = yvector / scale
+    end
+
+    currentx = Cf.round(currentx + xvector, 1)
+    currenty = Cf.round(currenty + yvector, 1)
+
+    e.position.x = currentx
+    e.position.y = currenty
+
+  -- print(currentx, currenty, xvector  , yvector  )
+
+    e.position.row = (currenty / TILE_SIZE)
+    e.position.col = (currentx / TILE_SIZE)
+    if e.position.row < 1 then e.position.row = 1 end
+    if e.position.col < 1 then e.position.col = 1 end
+    if e.position.row > NUMBER_OF_ROWS then e.position.row = NUMBER_OF_ROWS end
+    if e.position.col > NUMBER_OF_COLS then e.position.col = NUMBER_OF_COLS end
+end
 return functions

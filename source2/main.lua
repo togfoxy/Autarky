@@ -29,10 +29,22 @@ print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " colu
 NUMBER_OF_VILLAGERS = 3
 
 MAP = {}			-- a 2d table of tiles
+VILLAGERS = {}
 
-function love.keyreleased( key, scancode )
+function love.keyreleased(key, scancode)
 	if key == "escape" then
 		Cf.RemoveScreen(SCREEN_STACK)
+	end
+
+	-- turn selected bots into farmers
+	if key == "f" then
+
+		for k,v in pairs(VILLAGERS) do
+			if v:has("isSelected") and (not v:has("occupation")) then
+				v:ensure("occupation", Enum.jobFarmer)
+				v:remove("isSelected")
+			end
+		end
 	end
 end
 
@@ -41,18 +53,38 @@ function love.mousepressed( x, y, button, istouch, presses )
 	local mousex,mousey = TLfres.getMousePosition(SCREEN_WIDTH, SCREEN_HEIGHT)    -- lets you pretend screen is 1920 * 1080
 
 	if button == 1 then
-		local row, col = Fun.getRowColfromXY(mousex, mousey)
-		if row < 1 then row = 1 end
-		if col < 1 then col = 1 end
-
-		if row > NUMBER_OF_ROWS then row = NUMBER_OF_ROWS end
-		if col > NUMBER_OF_COLS then col = NUMBER_OF_COLS end
-
-		if not MAP[row][col].isSelected then
-			MAP[row][col]:ensure("isSelected")
-		else
-			MAP[row][col]:remove("isSelected")
+		-- select the villager if clicked, else select the tile (further down)
+		local villagerclicked = false
+		for k, v in pairs(VILLAGERS) do
+			x2 = v.position.x
+			y2 = v.position.y
+			local dist = Cf.GetDistance(mousex, mousey, x2, y2)
+			if dist <= Enum.personDrawWidth then
+				if v.isSelected then
+					v:remove("isSelected")
+				else
+					v:ensure("isSelected")
+				end
+				villagerclicked = true
+			end
 		end
+
+		-- if a villager was clicked then don't click the underlying tile
+		if not villagerclicked then
+			local row, col = Fun.getRowColfromXY(mousex, mousey)
+			if row < 1 then row = 1 end
+			if col < 1 then col = 1 end
+
+			if row > NUMBER_OF_ROWS then row = NUMBER_OF_ROWS end
+			if col > NUMBER_OF_COLS then col = NUMBER_OF_COLS end
+
+			if not MAP[row][col].isSelected then
+				MAP[row][col]:ensure("isSelected")
+			else
+				MAP[row][col]:remove("isSelected")
+			end
+		end
+
 	end
 end
 
@@ -89,6 +121,5 @@ end
 
 
 function love.update(dt)
-
-
+	WORLD:emit("update", dt)
 end
