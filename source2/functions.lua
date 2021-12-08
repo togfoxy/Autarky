@@ -54,7 +54,7 @@ function functions.AtWorkplace(e)
 end
 
 function functions.DoWork(e)
-    print("doing work")
+    --!print("doing work")
 	
 	--! make sound some of the time
 end

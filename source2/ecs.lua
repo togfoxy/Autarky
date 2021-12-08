@@ -28,7 +28,7 @@ function ecs.init()
         c.traveltime = 0
     end)
     Concord.component("maxSpeed", function(c, number)
-        c.value = 30
+        c.value = 90 -- 30
     end)
     Concord.component("age", function(c, number)
         c.value = number or love.math.random(20, 45)
@@ -152,10 +152,13 @@ function ecs.init()
                         e:ensure("currentAction", Enum.actionMovingToWorkplace)
                         e:ensure("hasTargetTile", e.hasWorkplace.row, e.hasWorkplace.col)
                     else
+print("beta ", e.occupation.value)
                         -- has an occupation but no workplace
 						if e.occupation.value == Enum.jobConstruction then
+print("charlie")
 							-- look for something to construct
 							local r,c = Fun.getUnbuiltBuilding()
+print("unbuilt building at " .. r, c)
 							if r > 0 then
 								e:ensure("hasWorkplace", r, c)
 								e:ensure("hasTargetTile", r, c)
@@ -185,12 +188,15 @@ function ecs.init()
             -- adjust x and y
             Fun.applyMovement(e, e.maxSpeed.value, dt)
             -- remove hasTargetTile if at destination
-            
-			-- if (Cf.round(e.position.row,1) == Cf.round(e.hasTargetTile.row,1)) and Cf.round(e.position.col,1) == Cf.round(e.hasTargetTile.col,1) then
 			local targetx, targety = Fun.getXYfromRowCol(e.hasTargetTile.row, e.hasTargetTile.col)
 			if (Cf.round(e.position.y,2) == Cf.round(targety,2)) and Cf.round(e.position.x,2) == Cf.round(targetx,2) then 
                 e:remove("hasTargetTile")
-                -- print("Target tile removed " ..  dt)
+				if e.occupation.value == Enum.jobConstruction then
+					-- also remove workplace
+print("alpha")
+					e:remove("hasWorkplace")
+					e:remove("currentAction")
+				end
             end
         end
     end
