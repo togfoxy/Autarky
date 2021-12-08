@@ -118,9 +118,25 @@ function ecs.init()
     })
     function systemDecideAction:update(dt)
         for _, e in ipairs(self.pool) do
+            -- process current action
             if not e:has("currentAction") then
                 -- doing nothing. Decide action
-                if e:has("occupation") then
+
+                -- check if hungry
+
+                if e.fullness.value <= 33 and e.wealth.value > 10 then
+                    -- get some food
+
+                    -- find closest farm
+                    local r, c = Fun.getClosestBuilding(e, Enum.buildingFarm)
+                    if r > 0 then
+                        -- set target to farm
+                        e:ensure("hasTargetTile", r, c)
+                        -- set action to 'eat'
+                        e:ensure("currentAction", Enum.actionMovingToEat)
+                    end
+
+                elseif e:has("occupation") then
                     -- has a job
                     if e:has("hasWorkplace") then
                         -- lets go to work
@@ -149,6 +165,9 @@ function ecs.init()
                     end
                 end
             end
+
+            -- process hunger
+            e.fullness.value = e.fullness.value  - (1 * dt)
         end
     end
 
@@ -163,11 +182,6 @@ function ecs.init()
 			local targetx, targety = Fun.getXYfromRowCol(e.hasTargetTile.row, e.hasTargetTile.col)
 			if (Cf.round(e.position.y,2) == Cf.round(targety,2)) and Cf.round(e.position.x,2) == Cf.round(targetx,2) then
                 e:remove("hasTargetTile")
-				-- if e.occupation.value == Enum.jobConstruction then
-				-- 	-- also remove workplace
-				-- 	e:remove("hasWorkplace")
-				-- 	e:remove("currentAction")
-				-- end
             end
         end
     end
@@ -221,6 +235,7 @@ function ecs.init()
         :give("uid")
         :give("isPerson")
         :give("wealth")
+        :give("fullness")
         table.insert(VILLAGERS, VILLAGER)
     end
 end

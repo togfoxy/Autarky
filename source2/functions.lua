@@ -133,6 +133,21 @@ function functions.getUnbuiltBuilding()
 	return 0,0
 end
 
+function functions.getClosestBuilding(e, buildingtype)
+    for col = 1, NUMBER_OF_COLS do
+		for row = 1, NUMBER_OF_ROWS do
+			if MAP[row][col]:has("hasBuilding") then
+				if MAP[row][col].hasBuilding.isConstructed == true then
+                    if MAP[row][col].hasBuilding.buildingNumber == buildingtype then
+					    return row, col
+                    end
+				end
+			end
+		end
+	end
+	return 0,0
+end
+
 function functions.getLabel(e)
     -- construct a label and pass it back to the drawing loop
     local text = ""
@@ -140,7 +155,7 @@ function functions.getLabel(e)
         text = text .. e.currentAction.value .. "\n"
     end
     text = text .. Cf.round(e.wealth.value) .. "\n"
-
+    text = text .. Cf.round(e.fullness.value) .. "\n"
 
     return text
 end

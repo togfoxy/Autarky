@@ -39,7 +39,9 @@ function comp.init()
     Concord.component("wealth", function(c, number)
         c.value = number or 0
     end)
-
+    Concord.component("fullness", function(c, number)
+        c.value = number or 100
+    end)
     Concord.component("hasWorkplace", function(c, row, col)
         if row == nil or col == nil then error("hasWorkplace needs a row and a col") end
         c.row = row

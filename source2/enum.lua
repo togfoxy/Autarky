@@ -16,10 +16,11 @@ return {
 
     actionBuildingWorkplace = 1,
     actionMovingToWorkplace = 2,
+    actionMovingToEat = 3,
 
     -- income per second
-    workIncomeFarmer = 1,
-    workIncomeConstruction = 10,
+    workIncomeFarmer = 2,
+    workIncomeConstruction = 20,
 
    timerWorkperiod = 5,
 
