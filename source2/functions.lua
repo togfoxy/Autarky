@@ -34,11 +34,11 @@ function functions.loadImages()
 	IMAGES[Enum.terrainGrassGreen] = love.graphics.newImage("assets/images/grass_green_block_256x.png")
 	IMAGES[Enum.terrainTeal] = love.graphics.newImage("assets/images/grass_teal_block_256x.png")
     IMAGES[Enum.terrainWell] = love.graphics.newImage("assets/images/well_256.png")
-	
+
 	-- buildings
 	IMAGES[Enum.buildingFarm] = love.graphics.newImage("assets/images/house1.png")
-	
-	
+
+
 end
 
 function functions.AtWorkplace(e)
@@ -53,10 +53,17 @@ function functions.AtWorkplace(e)
     return result
 end
 
-function functions.DoWork(e)
-    --!print("doing work")
-	
-	--! make sound some of the time
+function functions.DoWork(e,dt)
+    e.occupation.timeWorking = e.occupation.timeWorking + dt
+
+    if e.occupation.value == Enum.jobFarmer then
+        e.wealth.value = e.wealth.value + (Enum.workIncomeFarmer * dt)
+    elseif e.occupation.value == Enum.jobConstruction then
+        e.wealth.value = e.wealth.value +  (Enum.workIncomeConstruction * dt)
+
+    end
+
+    --! make sound some of the time
 end
 
 function functions.getBlankTile()
@@ -113,7 +120,7 @@ end
 
 function functions.getUnbuiltBuilding()
 	-- scans the MAP table for a building that is not yet constructed and returns row/col
-	
+
 	for col = 1, NUMBER_OF_COLS do
 		for row = 1, NUMBER_OF_ROWS do
 			if MAP[row][col]:has("hasBuilding") then
@@ -125,4 +132,18 @@ function functions.getUnbuiltBuilding()
 	end
 	return 0,0
 end
+
+function functions.getLabel(e)
+    -- construct a label and pass it back to the drawing loop
+    local text = ""
+    if e:has("currentAction") then
+        text = text .. e.currentAction.value .. "\n"
+    end
+    text = text .. Cf.round(e.wealth.value) .. "\n"
+
+
+    return text
+end
+
+
 return functions

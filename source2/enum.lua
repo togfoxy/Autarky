@@ -6,7 +6,7 @@ return {
     terrainTeal = 3,
     terrainNumberOfTypes = 3,
     terrainWell = 4,
-	
+
 	buildingFarm = 5,
 
     personDrawWidth = 10,
@@ -16,6 +16,12 @@ return {
 
     actionBuildingWorkplace = 1,
     actionMovingToWorkplace = 2,
+
+    -- income per second
+    workIncomeFarmer = 1,
+    workIncomeConstruction = 10,
+
+   timerWorkperiod = 5,
 
 
 

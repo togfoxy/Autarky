@@ -34,12 +34,20 @@ function comp.init()
     end)
     Concord.component("occupation", function(c, number)
         c.value = number or 0
+        c.timeWorking = 0
     end)
+    Concord.component("wealth", function(c, number)
+        c.value = number or 0
+    end)
+
     Concord.component("hasWorkplace", function(c, row, col)
         if row == nil or col == nil then error("hasWorkplace needs a row and a col") end
         c.row = row
         c.col = col
     end)
+
+
+    -- ***********************************************
 
     Concord.component("isTile", function(c, imagenumber)
         c.imageNumber = imagenumber or love.math.random(1, Enum.terrainNumberOfTypes)

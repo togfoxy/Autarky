@@ -58,9 +58,9 @@ function ecs.init()
                     love.graphics.circle("fill", x, y, drawwidth / 2)
                     love.graphics.setColor(1,1,1,1)
                 end
-                if e:has("currentAction") then
-                    love.graphics.print(e.currentAction.value, x + 7, y)
-                end
+                local text = Fun.getLabel(e)
+                love.graphics.setColor(1,1,1,1)
+                love.graphics.print(text, x + 15, y - 7)
             end
         end
     end
@@ -83,11 +83,25 @@ function ecs.init()
 							MAP[r][c].hasBuilding.isConstructed = true
 						end
 					end
+                    -- process wages etc for a hard work
+                    Fun.DoWork(e, dt)
+                    if e.occupation.timeWorking > Enum.timerWorkperiod then
+                        e.occupation.timeWorking = 0
+                        e:remove("hasTargetTile")
+                        e:remove("currentAction")
+                        -- when the building is donw and timer is expired then find new workplace
+                        e:remove("hasWorkplace")
+                    end
 				else
 					-- not a construction worker
 					if MAP[r][c]:has("hasBuilding") then
 						if MAP[r][c].hasBuilding.isConstructed then
-							Fun.DoWork(e)
+							Fun.DoWork(e, dt)
+                            if e.occupation.timeWorking > Enum.timerWorkperiod then
+                                e.occupation.timeWorking = 0
+                                e:remove("hasTargetTile")
+                                e:remove("currentAction")
+                            end
 						else
 							-- has an occupation and a work place but the building is not yet constructed. Do nothing.
 						end
@@ -149,11 +163,11 @@ function ecs.init()
 			local targetx, targety = Fun.getXYfromRowCol(e.hasTargetTile.row, e.hasTargetTile.col)
 			if (Cf.round(e.position.y,2) == Cf.round(targety,2)) and Cf.round(e.position.x,2) == Cf.round(targetx,2) then
                 e:remove("hasTargetTile")
-				if e.occupation.value == Enum.jobConstruction then
-					-- also remove workplace
-					e:remove("hasWorkplace")
-					e:remove("currentAction")
-				end
+				-- if e.occupation.value == Enum.jobConstruction then
+				-- 	-- also remove workplace
+				-- 	e:remove("hasWorkplace")
+				-- 	e:remove("currentAction")
+				-- end
             end
         end
     end
@@ -206,6 +220,7 @@ function ecs.init()
         :give("maxSpeed")
         :give("uid")
         :give("isPerson")
+        :give("wealth")
         table.insert(VILLAGERS, VILLAGER)
     end
 end
