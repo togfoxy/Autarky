@@ -58,6 +58,9 @@ function ecs.init()
                     love.graphics.circle("fill", x, y, drawwidth / 2)
                     love.graphics.setColor(1,1,1,1)
                 end
+                if e:has("currentAction") then
+                    love.graphics.print(e.currentAction.value, x + 7, y)
+                end
             end
         end
     end
@@ -117,14 +120,14 @@ function ecs.init()
 							if r > 0 then
 								e:ensure("hasWorkplace", r, c)
 								e:ensure("hasTargetTile", r, c)
-								e:ensure("currentAction", actionBuildingWorkplace)
+								e:ensure("currentAction", Enum.actionBuildingWorkplace)
 							end
 						else
 							-- allocate a tile that will become the workplace
 							local r, c = Fun.getBlankTile()
 							if r > 0 then
 								e:ensure("hasWorkplace", r, c)
-								e:ensure("currentAction", actionMovingToWorkplace)
+								e:ensure("currentAction", Enum.actionMovingToWorkplace)
 								e:ensure("hasTargetTile", e.hasWorkplace.row, e.hasWorkplace.col)
 								MAP[r][c]:ensure("hasBuilding", Enum.buildingFarm)
 							end
@@ -205,9 +208,5 @@ function ecs.init()
         :give("isPerson")
         table.insert(VILLAGERS, VILLAGER)
     end
-
-
 end
-
-
 return ecs
