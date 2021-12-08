@@ -13,6 +13,7 @@ Cf = require 'lib.commonfunctions'
 Fun = require 'functions'
 Ecs = require 'ecs'
 Enum = require 'enum'
+Dobjs = require 'drawobjects'
 
 
 SCREEN_WIDTH = 1920
@@ -46,7 +47,7 @@ function love.keyreleased(key, scancode)
 		end
 	end
 	-- turn selected bots into construction workers
-	if key == "c" then
+	if key == "b" then
 		for k,v in pairs(VILLAGERS) do
 			if v:has("isSelected") and (not v:has("occupation")) then
 				v:ensure("occupation", Enum.jobConstruction)
@@ -122,7 +123,10 @@ function love.draw()
 	TLfres.beginRendering(SCREEN_WIDTH,SCREEN_HEIGHT)
 
 	WORLD:emit("draw")
-
+	
+	-- put this after 'draw'
+	Dobjs.DrawInstructions()
+	
 	TLfres.endRendering({0, 0, 0, 1})
 
 end
