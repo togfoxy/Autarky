@@ -38,10 +38,18 @@ function love.keyreleased(key, scancode)
 
 	-- turn selected bots into farmers
 	if key == "f" then
-
 		for k,v in pairs(VILLAGERS) do
 			if v:has("isSelected") and (not v:has("occupation")) then
 				v:ensure("occupation", Enum.jobFarmer)
+				v:remove("isSelected")
+			end
+		end
+	end
+	-- turn selected bots into construction workers
+	if key == "c" then
+		for k,v in pairs(VILLAGERS) do
+			if v:has("isSelected") and (not v:has("occupation")) then
+				v:ensure("occupation", Enum.jobConstruction)
 				v:remove("isSelected")
 			end
 		end
@@ -105,7 +113,7 @@ function love.load()
 	Fun.initialiseMap()
 	Ecs.init()	-- loads all the components etc
 	WORLD:emit("init")	-- triggers the init functions which load arrays and tables
-
+	
 end
 
 

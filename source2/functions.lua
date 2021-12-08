@@ -29,17 +29,23 @@ function functions.getRowColfromXY(x, y)
 end
 
 function functions.loadImages()
+	-- terrain tiles
 	IMAGES[Enum.terrainGrassDry] = love.graphics.newImage("assets/images/grass_dry_block_256x.png")
 	IMAGES[Enum.terrainGrassGreen] = love.graphics.newImage("assets/images/grass_green_block_256x.png")
 	IMAGES[Enum.terrainTeal] = love.graphics.newImage("assets/images/grass_teal_block_256x.png")
     IMAGES[Enum.terrainWell] = love.graphics.newImage("assets/images/well_256.png")
+	
+	-- buildings
+	IMAGES[Enum.buildingFarm] = love.graphics.newImage("assets/images/house1.png")
+	
+	
 end
 
 function functions.AtWorkplace(e)
     -- check if entity has a workplace and is at the at the workplace
     local result = false
     if e:has("hasWorkplace") then
-        local erow, col = Fun.getRowColfromXY(e.position.row, e.position.col)
+        local erow, ecol = Fun.getRowColfromXY(e.position.x, e.position.y)
         if erow == e.hasWorkplace.row and ecol == e.hasWorkplace.col then
             result  = true
         end
@@ -48,7 +54,9 @@ function functions.AtWorkplace(e)
 end
 
 function functions.DoWork(e)
-    print("doing work")
+    --!print("doing work")
+	
+	--! make sound some of the time
 end
 
 function functions.getBlankTile()
@@ -101,5 +109,20 @@ function functions.applyMovement(e, velocity, dt)
     if e.position.col < 1 then e.position.col = 1 end
     if e.position.row > NUMBER_OF_ROWS then e.position.row = NUMBER_OF_ROWS end
     if e.position.col > NUMBER_OF_COLS then e.position.col = NUMBER_OF_COLS end
+end
+
+function functions.getUnbuiltBuilding()
+	-- scans the MAP table for a building that is not yet constructed and returns row/col
+	
+	for col = 1, NUMBER_OF_COLS do
+		for row = 1, NUMBER_OF_ROWS do
+			if MAP[row][col]:has("hasBuilding") then
+				if MAP[row][col].hasBuilding.isConstructed == false then
+					return row, col
+				end
+			end
+		end
+	end
+	return 0,0
 end
 return functions
