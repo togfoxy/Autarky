@@ -113,7 +113,7 @@ function love.load()
 	Fun.initialiseMap()
 	Ecs.init()	-- loads all the components etc
 	WORLD:emit("init")	-- triggers the init functions which load arrays and tables
-
+	
 end
 
 

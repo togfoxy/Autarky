@@ -45,7 +45,7 @@ function functions.AtWorkplace(e)
     -- check if entity has a workplace and is at the at the workplace
     local result = false
     if e:has("hasWorkplace") then
-        local erow, col = Fun.getRowColfromXY(e.position.row, e.position.col)
+        local erow, ecol = Fun.getRowColfromXY(e.position.x, e.position.y)
         if erow == e.hasWorkplace.row and ecol == e.hasWorkplace.col then
             result  = true
         end
@@ -114,7 +114,15 @@ end
 function functions.getUnbuiltBuilding()
 	-- scans the MAP table for a building that is not yet constructed and returns row/col
 	
-print("getUnbuiltBuilding function not written")
-
+	for col = 1, NUMBER_OF_COLS do
+		for row = 1, NUMBER_OF_ROWS do
+			if MAP[row][col]:has("hasBuilding") then
+				if MAP[row][col].hasBuilding.isConstructed == false then
+					return row, col
+				end
+			end
+		end
+	end
+	return 0,0
 end
 return functions

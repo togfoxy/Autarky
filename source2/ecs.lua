@@ -49,7 +49,7 @@ function ecs.init()
         c.imageNumber = imagenumber or love.math.random(1, Enum.terrainNumberOfTypes)
     end)
     Concord.component("hasBuilding", function(c, buildingnumber)
-        c.imageNumber = buildingnumber	-- this determines the image
+        c.buildingNumber = buildingnumber	-- this determines the image
 		c.isConstructed = false		-- has the building been built
     end)
 
@@ -63,6 +63,7 @@ function ecs.init()
             if e.isTile then
                 local img = IMAGES[e.isTile.imageNumber]
                 local x, y = e.position.x - (TILE_SIZE / 2), e.position.y - (TILE_SIZE / 2)
+				love.graphics.setColor(1,1,1,1)
                 love.graphics.draw(img, x, y, 0, TILE_SIZE / 256)
                 if e.isSelected then
                     love.graphics.rectangle("line", x, y, TILE_SIZE, TILE_SIZE - 1)
@@ -75,8 +76,10 @@ function ecs.init()
 						-- ghost buildings not yet constructed
 						love.graphics.setColor(1,1,1,0.5)
 					end
-					love.graphics.draw(IMAGES[e.hasBuilding.imageNumber], x, y, 0, 1, 1)
+
+					love.graphics.draw(IMAGES[e.hasBuilding.buildingNumber], x + (TILE_SIZE / 4), y, 0, 1, 1)
 				end
+				love.graphics.setColor(1,1,1,1)
             end
 
             if e.isPerson then
@@ -110,17 +113,13 @@ function ecs.init()
         -- if at workplace then do work
         for _, e in ipairs(self.pool) do
             if Fun.AtWorkplace(e) then
-				local r, c = Fun.getRowColfromXY(e.position.row, e.position.col)
-				
+				local r, c = Fun.getRowColfromXY(e.position.x, e.position.y)		-- feed in col then row
 				-- constructors need to build
 				if e.occupation.value == Enum.jobConstruction then
 					if MAP[r][c]:has("hasBuilding") then
 						if not MAP[r][c].hasBuilding.isConstructed then
 							-- construct building
-							MAP[r][c].hasBuilding.isConstructed == true
-							e:remove("hasWorkplace")
-							e:remove("hasTargetTile")
-							e:remove("currentAction")
+							MAP[r][c].hasBuilding.isConstructed = true
 						end
 					end
 				else
@@ -157,16 +156,20 @@ function ecs.init()
 						if e.occupation.value == Enum.jobConstruction then
 							-- look for something to construct
 							local r,c = Fun.getUnbuiltBuilding()
-							e:ensure("hasWorkplace", r, c)
-							e:ensure("hasTargetTile", r, c)
-							e:ensure("currentAction", actionBuildingWorkplace)
+							if r > 0 then
+								e:ensure("hasWorkplace", r, c)
+								e:ensure("hasTargetTile", r, c)
+								e:ensure("currentAction", actionBuildingWorkplace)
+							end
 						else
 							-- allocate a tile that will become the workplace
 							local r, c = Fun.getBlankTile()
-							e:ensure("hasWorkplace", r, c)
-							e:ensure("currentAction", actionMovingToWorkplace)
-							e:ensure("hasTargetTile", e.hasWorkplace.row, e.hasWorkplace.col)
-							MAP[r][c]:ensure("hasBuilding", Enum.buildingFarm)
+							if r > 0 then
+								e:ensure("hasWorkplace", r, c)
+								e:ensure("currentAction", actionMovingToWorkplace)
+								e:ensure("hasTargetTile", e.hasWorkplace.row, e.hasWorkplace.col)
+								MAP[r][c]:ensure("hasBuilding", Enum.buildingFarm)
+							end
 						end
                     end
                 end
@@ -182,7 +185,10 @@ function ecs.init()
             -- adjust x and y
             Fun.applyMovement(e, e.maxSpeed.value, dt)
             -- remove hasTargetTile if at destination
-            if (Cf.round(e.position.row,1) == Cf.round(e.hasTargetTile.row,1)) and Cf.round(e.position.col,1) == Cf.round(e.hasTargetTile.col,1) then
+            
+			-- if (Cf.round(e.position.row,1) == Cf.round(e.hasTargetTile.row,1)) and Cf.round(e.position.col,1) == Cf.round(e.hasTargetTile.col,1) then
+			local targetx, targety = Fun.getXYfromRowCol(e.hasTargetTile.row, e.hasTargetTile.col)
+			if (Cf.round(e.position.y,2) == Cf.round(targety,2)) and Cf.round(e.position.x,2) == Cf.round(targetx,2) then 
                 e:remove("hasTargetTile")
                 -- print("Target tile removed " ..  dt)
             end
@@ -219,6 +225,7 @@ function ecs.init()
             :give("uid")
         end
     end
+
     -- add a well
     local wellrow = love.math.random(4,NUMBER_OF_ROWS - 3)
     local wellcol = love.math.random(4,NUMBER_OF_COLS - 3)
@@ -238,6 +245,8 @@ function ecs.init()
         :give("isPerson")
         table.insert(VILLAGERS, VILLAGER)
     end
+	
+
 end
 
 
