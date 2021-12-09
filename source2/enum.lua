@@ -18,6 +18,11 @@ return {
     actionMovingToWorkplace = 2,
     actionMovingToEat = 3,
 
+    actionMoveToTile = 4,
+    actionEat = 5,
+    actionWork = 6,
+    actionBuild = 7,
+
     -- income per second
     workIncomeFarmer = 2,
     workIncomeConstruction = 20,

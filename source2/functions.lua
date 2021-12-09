@@ -53,7 +53,7 @@ function functions.AtWorkplace(e)
     return result
 end
 
-function functions.DoWork(e,dt)
+function functions.getPaid(e,dt)
     e.occupation.timeWorking = e.occupation.timeWorking + dt
 
     if e.occupation.value == Enum.jobFarmer then
@@ -151,27 +151,41 @@ end
 function functions.getLabel(e)
     -- construct a label and pass it back to the drawing loop
     local text = ""
-    if e:has("currentAction") then
-        text = text .. "Action: " .. e.currentAction.value[1] .. "\n"
-    end
     text = text .. "Wealth: " .. Cf.round(e.wealth.value) .. "\n"
     text = text .. "Fullness: " .. Cf.round(e.fullness.value) .. "\n"
-
+    if #e.currentAction.value > 0 then
+        text = text .. "~~~" .. "\n"
+        for k, v in ipairs(e.currentAction.value) do
+            text = text .. v .. "\n"
+        end
+    end
     return text
 end
 
 function functions.updateRowCol(e)
     -- ensure the row/col correctly reflects the x/y
+    -- returns nothing (not a function)
     local r, c = Fun.getRowColfromXY(e.position.x, e.position.y)
     e.position.row = r
     e.position.col = c
+end
+
+function functions.addActionToQueue(e, action)
+    -- action = Enum
+    if not e:has("currentAction") then
+        e:ensure("currentAction")
+    end
+
+    if not Cf.bolTableHasValue (e.currentAction.value, action) then
+        table.insert(e.currentAction.value, action)
+    end
 end
 
 function functions.removeActionFromQueue(e)
    -- remove an action from the entities queue then remove the component if empty
    table.remove(e.currentAction.value, 1)
    if #e.currentAction.value < 1 then
-       e:remove("currentAction")
+       -- e:remove("currentAction")
    end
 end
 
