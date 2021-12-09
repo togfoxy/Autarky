@@ -22,10 +22,11 @@ return {
     actionEat = 5,
     actionWork = 6,
     actionBuild = 7,
+    actionIdle = 8,
 
     -- income per second
-    workIncomeFarmer = 2,
-    workIncomeConstruction = 20,
+    workIncomeFarmer = 1,
+    workIncomeConstruction = 10,
 
    timerWorkperiod = 5,
 

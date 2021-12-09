@@ -43,6 +43,7 @@ end
 
 function functions.atWorkplace(e)
     -- check if entity has a workplace and is at the at the workplace
+    -- returns a boolean value
     local result = false
     if e:has("hasWorkplace") then
         local erow, ecol = Fun.getRowColfromXY(e.position.x, e.position.y)
@@ -186,6 +187,24 @@ function functions.removeActionFromQueue(e)
    if #e.currentAction.value < 1 then
        -- e:remove("currentAction")
    end
+-- print("removed")
 end
+
+function functions.getRandomMovement(e)
+    -- get random directions to simulate idle movement
+    -- returns a row, col
+    Fun.updateRowCol(e)
+    local newrow = love.math.random(e.position.row - 1, e.position.row + 1)
+    local newcol = love.math.random(e.position.col - 1, e.position.col + 1)
+
+    if newrow < 1 then newrow = 1 end
+    if newcol < 1 then newcol = 1 end
+
+    if newrow > NUMBER_OF_ROWS then newrow = NUMBER_OF_ROWS end
+    if newcol > NUMBER_OF_COLS then newcol = NUMBER_OF_COLS end
+
+    return newrow, newcol
+end
+
 
 return functions

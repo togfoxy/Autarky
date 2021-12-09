@@ -90,7 +90,7 @@ function ecs.init()
                         e:remove("hasTargetTile")
                         -- e:remove("currentAction")
                         Fun.removeActionFromQueue(e)
-
+print("juliet")
                         -- when the building is donw and timer is expired then find new workplace
                         e:remove("hasWorkplace")
                     end
@@ -104,6 +104,7 @@ function ecs.init()
                                 e:remove("hasTargetTile")
                                 -- e:remove("currentAction")
                                 Fun.removeActionFromQueue(e)
+print("kilo")
                             end
 						else
 							-- has an occupation and a work place but the building is not yet constructed. Do nothing.
@@ -126,7 +127,7 @@ function ecs.init()
 
             if e:has("currentAction") then
                 if #e.currentAction.value > 0 then
-
+-- print("alpha")
                     local myaction = e.currentAction.value[1]
 
                     if myaction == Enum.actionMoveToTile and e:has("hasTargetTile") then
@@ -137,15 +138,17 @@ function ecs.init()
             			if (Cf.round(e.position.y,2) == Cf.round(targety,2)) and Cf.round(e.position.x,2) == Cf.round(targetx,2) then
                             e:remove("hasTargetTile")
                             Fun.removeActionFromQueue(e)
+print("lima")
                         end
                     end
-
+-- print("bravo")
                     if myaction == Enum.actionEat then
                         -- if at an eatery then eat
                         -- see if at an eating place
                         local r, c = Fun.getClosestBuilding(e, Enum.buildingFarm)
                         if r > 0 then
                             Fun.updateRowCol(e)
+print(e.position.row, e.position.col, r, c)
                             if e.position.row == r and e.position.col == c then
                                 -- at an eatery so eat
                                 local amt = 1 * dt * 4  -- fullness gain * delta * a magnifier to make this go faster
@@ -154,33 +157,42 @@ function ecs.init()
                                 -- keep eating till full or broke
                                 if e.wealth.value < 1 or e.fullness.value > 99 then
                                     Fun.removeActionFromQueue(e)
+print("Boo boo")
                                 end
                             else
                                 -- not an an eatery. Consider adding a "move" action later on
                                 -- "eat" is at the top of the queue but can't eat so remove it from the head of the queue
                                 Fun.removeActionFromQueue(e)
+print("Boo")
                             end
                         else
                             -- no eateries exist so do nothing
                         end
                     end
-
+-- print("foxtrot " .. myaction)
                     if myaction == Enum.actionBuild and e:has("occupation") then
+-- print("echo")
                         if e.occupation.value == Enum.jobConstruction then
                             Fun.updateRowCol(e)
                             local r, c = e.position.row, e.position.col
                             if MAP[r][c]:has("hasBuilding") then
                                 if MAP[r][c].hasBuilding.isConstructed == false then
                                     -- construct building
-
+-- print("charlie", e.occupation.timeWorking)
                                     Fun.getPaid(e,dt)
                                     if e.occupation.timeWorking > Enum.timerWorkperiod then
+-- print("delta")
                                         e.occupation.timeWorking = 0
                                         Fun.removeActionFromQueue(e)
+print("golf")
                                         e:remove("hasWorkplace")
                                         MAP[r][c].hasBuilding.isConstructed = true
                                     end
                                 end
+                            else
+                                -- have a build order but no building on this tile. Remove the build order
+                                Fun.removeActionFromQueue(e)
+print("hotel")
                             end
                         else
                             print("alpha: " .. myaction, e:has("occupation"), e.occupation.value)
@@ -197,6 +209,7 @@ function ecs.init()
                                     if e.occupation.timeWorking > Enum.timerWorkperiod then
                                         e.occupation.timeWorking = 0
                                         Fun.removeActionFromQueue(e)
+print("indigo")
                                     end
                                 end
                             end
@@ -227,10 +240,16 @@ function ecs.init()
                 -- work if possible
                 if e:has("occupation") then
                     if e:has("hasWorkplace") then
-                        if (e.occupation.value ~= Enum.jobConstruction) then
-                            -- lets go to work
+                        if not Fun.atWorkplace(e) then
                             Fun.addActionToQueue(e, Enum.actionMoveToTile)
                             e:ensure("hasTargetTile", e.hasWorkplace.row, e.hasWorkplace.col)
+                        end
+
+                        -- check if a builder
+                        if (e.occupation.value == Enum.jobConstruction) then
+                            Fun.addActionToQueue(e, Enum.actionBuild)
+                        else
+                            -- Not a builder - lets go to work
                             Fun.addActionToQueue(e, Enum.actionWork)
                         end
                     else
@@ -243,6 +262,11 @@ function ecs.init()
                                 e:ensure("hasTargetTile", r, c)
                                 Fun.addActionToQueue(e, Enum.actionMoveToTile)
                                 Fun.addActionToQueue(e, Enum.actionBuild)
+                            else
+                                -- nothing to do - use random movements
+                                local newrow, newcol = Fun.getRandomMovement(e)
+                                e:ensure("hasTargetTile", newrow, newcol)
+                                Fun.addActionToQueue(e, Enum.actionMoveToTile)
                             end
                         else
                             -- allocate a tile that will become the workplace
@@ -255,6 +279,15 @@ function ecs.init()
                                 MAP[r][c]:ensure("hasBuilding", Enum.buildingFarm)
                             end
                         end
+                    end
+                else
+                    -- no occupation
+                    -- move a random ammount
+                    if #e.currentAction.value == 0 then
+-- print("hi")
+                        local newrow, newcol = Fun.getRandomMovement(e)
+                        e:ensure("hasTargetTile", newrow, newcol)
+                        Fun.addActionToQueue(e, Enum.actionMoveToTile)
                     end
                 end
             end
@@ -315,6 +348,8 @@ function ecs.init()
     :give("position", wellrow, wellcol)
     :give("isTile", Enum.terrainWell)
     :give("uid")
+    WELL_ROW = wellrow
+    WELL_COL = wellcol
 
     -- add starting villagers
     for i = 1, NUMBER_OF_VILLAGERS do

@@ -24,6 +24,8 @@ IMAGES = {}
 TILE_SIZE = 50
 NUMBER_OF_ROWS = (Cf.round(SCREEN_HEIGHT / TILE_SIZE)) - 2
 NUMBER_OF_COLS = (Cf.round(SCREEN_WIDTH / TILE_SIZE)) - 2
+WELL_ROW = 0			-- capture the tile that has the well
+WELL_COL = 0
 
 print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
 
