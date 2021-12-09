@@ -166,22 +166,40 @@ function ecs.init()
                     end
 
                     if myaction == Enum.actionBuild and e:has("occupation") then
-                        if e.occupation.value == jobConstruction then
+                        if e.occupation.value == Enum.jobConstruction then
                             Fun.updateRowCol(e)
                             local r, c = e.position.row, e.position.col
                             if MAP[r][c]:has("hasBuilding") then
                                 if MAP[r][c].hasBuilding.isConstructed == false then
                                     -- construct building
-                                    MAP[r][c].hasBuilding.isConstructed = true
+
                                     Fun.getPaid(e,dt)
+                                    if e.occupation.timeWorking > Enum.timerWorkperiod then
+                                        e.occupation.timeWorking = 0
+                                        Fun.removeActionFromQueue(e)
+                                        e:remove("hasWorkplace")
+                                        MAP[r][c].hasBuilding.isConstructed = true
+                                    end
+                                end
+                            end
+                        else
+                            print("alpha: " .. myaction, e:has("occupation"), e.occupation.value)
+                            error("a non-builder has 'build' in their action queue'")
+                        end
+                    end
+
+                    if myaction == Enum.actionWork and e:has("occupation") then
+                        if Fun.atWorkplace(e) then
+                            local r, c = Fun.getRowColfromXY(e.position.x, e.position.y)
+                            if MAP[r][c]:has("hasBuilding") then
+                                if MAP[r][c].hasBuilding.isConstructed then
+                            		Fun.getPaid(e,dt)
                                     if e.occupation.timeWorking > Enum.timerWorkperiod then
                                         e.occupation.timeWorking = 0
                                         Fun.removeActionFromQueue(e)
                                     end
                                 end
                             end
-                        else
-                            error("a non-builder has 'build' in their action queue'")
                         end
                     end
                 end
@@ -195,24 +213,26 @@ function ecs.init()
     function systemDecideAction:update(dt)
         for _, e in ipairs(self.pool) do
             -- person is hungry and can afford food?
-            if e.fullness.value <= 33 and e.wealth.value > 10 and not Cf.bolTableHasValue(e.currentAction.value, Enum.actionEat) then
+            if e.fullness.value <= 33 and e.wealth.value > 10 then
                 -- try to move to food and eat
                  -- find closest farm
                 local r, c = Fun.getClosestBuilding(e, Enum.buildingFarm)
                 if r > 0 then
                     -- set target to farm
-                    table.insert(e.currentAction.value, Enum.actionMoveToTile)
+                    Fun.addActionToQueue(e, Enum.actionMoveToTile)
                     e:ensure("hasTargetTile", r, c)
                     functions.addActionToQueue(e, Enum.actionEat)
                 end
             else
                 -- work if possible
                 if e:has("occupation") then
-                    if e:has("hasWorkplace") and not Cf.bolTableHasValue(e.currentAction.value, Enum.actionWork) then
-                        -- lets go to work
-                        table.insert(e.currentAction.value, Enum.actionMoveToTile)
-                        e:ensure("hasTargetTile", e.hasWorkplace.row, e.hasWorkplace.col)
-                        functions.addActionToQueue(e, Enum.actionWork)
+                    if e:has("hasWorkplace") then
+                        if (e.occupation.value ~= Enum.jobConstruction) then
+                            -- lets go to work
+                            Fun.addActionToQueue(e, Enum.actionMoveToTile)
+                            e:ensure("hasTargetTile", e.hasWorkplace.row, e.hasWorkplace.col)
+                            Fun.addActionToQueue(e, Enum.actionWork)
+                        end
                     else
                         -- has no workplace but is allowed to have one so create one
                         if e.occupation.value == Enum.jobConstruction then
@@ -221,18 +241,17 @@ function ecs.init()
                             if r > 0 then
                                 e:ensure("hasWorkplace", r, c)
                                 e:ensure("hasTargetTile", r, c)
-                                table.insert(e.currentAction.value, Enum.actionMoveToTile)
-                                table.insert(e.currentAction.value, Enum.actionBuild)
+                                Fun.addActionToQueue(e, Enum.actionMoveToTile)
+                                Fun.addActionToQueue(e, Enum.actionBuild)
                             end
                         else
                             -- allocate a tile that will become the workplace
                             local r, c = Fun.getBlankTile()
                             if r > 0 then
                                 e:ensure("hasWorkplace", r, c)
-                                table.insert(e.currentAction.value, Enum.actionMoveToTile)
                                 e:ensure("hasTargetTile", e.hasWorkplace.row, e.hasWorkplace.col)
-                                table.insert(e.currentAction.value, Enum.actionWork)
-
+                                Fun.addActionToQueue(e, Enum.actionMoveToTile)
+                                Fun.addActionToQueue(e, Enum.actionWork)
                                 MAP[r][c]:ensure("hasBuilding", Enum.buildingFarm)
                             end
                         end

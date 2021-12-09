@@ -41,7 +41,7 @@ function functions.loadImages()
 
 end
 
-function functions.AtWorkplace(e)
+function functions.atWorkplace(e)
     -- check if entity has a workplace and is at the at the workplace
     local result = false
     if e:has("hasWorkplace") then
@@ -60,7 +60,6 @@ function functions.getPaid(e,dt)
         e.wealth.value = e.wealth.value + (Enum.workIncomeFarmer * dt)
     elseif e.occupation.value == Enum.jobConstruction then
         e.wealth.value = e.wealth.value +  (Enum.workIncomeConstruction * dt)
-
     end
 
     --! make sound some of the time
