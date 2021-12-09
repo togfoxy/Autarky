@@ -29,7 +29,7 @@ WELL_COL = 0
 
 print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
 
-NUMBER_OF_VILLAGERS = 1
+NUMBER_OF_VILLAGERS = 3
 
 MAP = {}			-- a 2d table of tiles
 VILLAGERS = {}
@@ -117,8 +117,8 @@ function love.load()
 	Ecs.init()	-- loads all the components etc
 	WORLD:emit("init")	-- triggers the init functions which load arrays and tables
 
-	MAP[10][15]:ensure("hasBuilding", Enum.buildingFarm)
-	MAP[10][15].hasBuilding.isConstructed = false
+	-- MAP[10][15]:ensure("hasBuilding", Enum.buildingFarm)
+	-- MAP[10][15].hasBuilding.isConstructed = false
 end
 
 

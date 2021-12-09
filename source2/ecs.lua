@@ -154,6 +154,7 @@ print("kilo")
                                 local amt = 1 * dt * 4  -- fullness gain * delta * a magnifier to make this go faster
                                 e.fullness.value = e.fullness.value + amt
                                 e.wealth.value = e.wealth.value - amt
+                                MAP[r][c].stock.value = MAP[r][c].stock.value - amt
                                 -- keep eating till full or broke
                                 if e.wealth.value < 1 or e.fullness.value > 99 then
                                     Fun.removeActionFromQueue(e)
@@ -205,11 +206,12 @@ print("kilo")
                             local r, c = Fun.getRowColfromXY(e.position.x, e.position.y)
                             if MAP[r][c]:has("hasBuilding") then
                                 if MAP[r][c].hasBuilding.isConstructed then
+                                    MAP[r][c]:ensure("stock")
+                                    MAP[r][c].stock.value = MAP[r][c].stock.value + (1 * dt)
                             		Fun.getPaid(e,dt)
                                     if e.occupation.timeWorking > Enum.timerWorkperiod then
                                         e.occupation.timeWorking = 0
                                         Fun.removeActionFromQueue(e)
--- print("indigo")
                                     end
                                 end
                             end

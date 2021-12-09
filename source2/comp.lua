@@ -61,6 +61,9 @@ function comp.init()
         c.buildingNumber = buildingnumber	-- this determines the image
 		c.isConstructed = false		-- has the building been built
     end)
+    Concord.component("stock", function(c, number)
+        c.value = number or 0
+    end)
 end
 
 return comp

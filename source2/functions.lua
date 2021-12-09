@@ -153,6 +153,12 @@ function functions.getLabel(e)
     local text = ""
     text = text .. "Wealth: " .. Cf.round(e.wealth.value) .. "\n"
     text = text .. "Fullness: " .. Cf.round(e.fullness.value) .. "\n"
+
+    local r, c = Fun.getRowColfromXY(e.position.x, e.position.y)
+    if MAP[r][c]:has("stock") then
+        text = text .. "Stock: " .. Cf.round(MAP[r][c].stock.value) .. "\n"
+    end
+
     if #e.currentAction.value > 0 then
         text = text .. "~~~" .. "\n"
         for k, v in ipairs(e.currentAction.value) do
