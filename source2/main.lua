@@ -116,7 +116,7 @@ function love.load()
 	WORLD:emit("init")	-- triggers the init functions which load arrays and tables
 
 	MAP[10][15]:ensure("hasBuilding", Enum.buildingFarm)
-	MAP[10][15].hasBuilding.isConstructed = true
+	MAP[10][15].hasBuilding.isConstructed = false
 end
 
 

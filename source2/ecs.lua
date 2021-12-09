@@ -88,7 +88,9 @@ function ecs.init()
                     if e.occupation.timeWorking > Enum.timerWorkperiod then
                         e.occupation.timeWorking = 0
                         e:remove("hasTargetTile")
-                        e:remove("currentAction")
+                        -- e:remove("currentAction")
+                        Fun.removeActionFromQueue(e)
+
                         -- when the building is donw and timer is expired then find new workplace
                         e:remove("hasWorkplace")
                     end
@@ -100,7 +102,8 @@ function ecs.init()
                             if e.occupation.timeWorking > Enum.timerWorkperiod then
                                 e.occupation.timeWorking = 0
                                 e:remove("hasTargetTile")
-                                e:remove("currentAction")
+                                -- e:remove("currentAction")
+                                Fun.removeActionFromQueue(e)
                             end
 						else
 							-- has an occupation and a work place but the building is not yet constructed. Do nothing.
@@ -113,81 +116,148 @@ function ecs.init()
         end
     end
 
+    systemPersonTick = Concord.system({
+        pool = {"isPerson"}
+    })
+    function systemPersonTick:update(dt)
+        for _, e in ipairs(self.pool) do
+            -- process hunger
+            e.fullness.value = e.fullness.value  - (1 * dt)
+
+            if e:has("currentAction") then
+                if #e.currentAction.value > 0 then
+
+                    local myaction = e.currentAction.value[1]
+
+                    if myaction == Enum.actionMoveToTile and e:has("hasTargetTile") then
+                        -- adjust x and y
+                        Fun.applyMovement(e, e.maxSpeed.value, dt)
+                        -- remove hasTargetTile if at destination
+            			local targetx, targety = Fun.getXYfromRowCol(e.hasTargetTile.row, e.hasTargetTile.col)
+            			if (Cf.round(e.position.y,2) == Cf.round(targety,2)) and Cf.round(e.position.x,2) == Cf.round(targetx,2) then
+                            e:remove("hasTargetTile")
+                            Fun.removeActionFromQueue(e)
+                        end
+                    end
+
+                    if myaction == Enum.actionEat then
+                        -- if at an eatery then eat
+                        -- see if at an eating place
+                        local r, c = Fun.getClosestBuilding(e, Enum.buildingFarm)
+                        if r > 0 then
+                            Fun.updateRowCol(e)
+                            if e.position.row == r and e.position.col == c then
+                                -- at an eatery so eat
+                                local amt = 1 * dt * 4  -- fullness gain * delta * a magnifier to make this go faster
+                                e.fullness.value = e.fullness.value + amt
+                                e.wealth.value = e.wealth.value - amt
+                                -- keep eating till full or broke
+                                if e.wealth.value < 1 or e.fullness.value > 99 then
+                                    Fun.removeActionFromQueue(e)
+                                end
+                            else
+                                -- not an an eatery. Consider adding a "move" action later on
+                                -- "eat" is at the top of the queue but can't eat so remove it from the head of the queue
+                                Fun.removeActionFromQueue(e)
+                            end
+                        else
+                            -- no eateries exist so do nothing
+                        end
+                    end
+
+                    if myaction == Enum.actionBuild and e:has("occupation") then
+                        if e.occupation.value == Enum.jobConstruction then
+                            Fun.updateRowCol(e)
+                            local r, c = e.position.row, e.position.col
+                            if MAP[r][c]:has("hasBuilding") then
+                                if MAP[r][c].hasBuilding.isConstructed == false then
+                                    -- construct building
+
+                                    Fun.getPaid(e,dt)
+                                    if e.occupation.timeWorking > Enum.timerWorkperiod then
+                                        e.occupation.timeWorking = 0
+                                        Fun.removeActionFromQueue(e)
+                                        e:remove("hasWorkplace")
+                                        MAP[r][c].hasBuilding.isConstructed = true
+                                    end
+                                end
+                            end
+                        else
+                            print("alpha: " .. myaction, e:has("occupation"), e.occupation.value)
+                            error("a non-builder has 'build' in their action queue'")
+                        end
+                    end
+
+                    if myaction == Enum.actionWork and e:has("occupation") then
+                        if Fun.atWorkplace(e) then
+                            local r, c = Fun.getRowColfromXY(e.position.x, e.position.y)
+                            if MAP[r][c]:has("hasBuilding") then
+                                if MAP[r][c].hasBuilding.isConstructed then
+                            		Fun.getPaid(e,dt)
+                                    if e.occupation.timeWorking > Enum.timerWorkperiod then
+                                        e.occupation.timeWorking = 0
+                                        Fun.removeActionFromQueue(e)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
     systemDecideAction = Concord.system({
         pool = {"isPerson"}
     })
     function systemDecideAction:update(dt)
         for _, e in ipairs(self.pool) do
-            -- process current action
-            if e:has("currentAction") then
-                -- process the action
-                if e.currentAction.value == Enum.actionMovingToEat then
-                    -- see if at an eating place
-                    local r, c = Fun.getClosestBuilding(e, Enum.buildingFarm)
-                    if r > 0 then
-                        Fun.updateRowCol(e)
-                        if e.position.row == r and e.position.col == c then
-                            -- at an eatery so eat
-                            local amt = 1 * dt * 4  -- fullness gain * delta * a magnifier to make this go faster
-                            e.fullness.value = e.fullness.value + amt
-                            e.wealth.value = e.wealth.value - amt
-
-                            if e.wealth.value < 1 or e.fullness.value > 99 then
-                                -- stop eating
-                                e:remove("currentAction")
-                            end
-                         end
-                    end
+            -- person is hungry and can afford food?
+            if e.fullness.value <= 33 and e.wealth.value > 10 then
+                -- try to move to food and eat
+                 -- find closest farm
+                local r, c = Fun.getClosestBuilding(e, Enum.buildingFarm)
+                if r > 0 then
+                    -- set target to farm
+                    Fun.addActionToQueue(e, Enum.actionMoveToTile)
+                    e:ensure("hasTargetTile", r, c)
+                    functions.addActionToQueue(e, Enum.actionEat)
                 end
             else
-                -- doing nothing. Decide action
-
-                -- check if hungry
-
-                if e.fullness.value <= 33 and e.wealth.value > 10 then
-                    -- get some food
-
-                    -- find closest farm
-                    local r, c = Fun.getClosestBuilding(e, Enum.buildingFarm)
-                    if r > 0 then
-                        -- set target to farm
-                        e:ensure("hasTargetTile", r, c)
-                        -- set action to 'eat'
-                        e:ensure("currentAction", Enum.actionMovingToEat)
-                    end
-
-                elseif e:has("occupation") then
-                    -- has a job
+                -- work if possible
+                if e:has("occupation") then
                     if e:has("hasWorkplace") then
-                        -- lets go to work
-                        e:ensure("currentAction", Enum.actionMovingToWorkplace)
-                        e:ensure("hasTargetTile", e.hasWorkplace.row, e.hasWorkplace.col)
+                        if (e.occupation.value ~= Enum.jobConstruction) then
+                            -- lets go to work
+                            Fun.addActionToQueue(e, Enum.actionMoveToTile)
+                            e:ensure("hasTargetTile", e.hasWorkplace.row, e.hasWorkplace.col)
+                            Fun.addActionToQueue(e, Enum.actionWork)
+                        end
                     else
-                        -- has an occupation but no workplace
-						if e.occupation.value == Enum.jobConstruction then
-							-- look for something to construct
-							local r,c = Fun.getUnbuiltBuilding()
-							if r > 0 then
-								e:ensure("hasWorkplace", r, c)
-								e:ensure("hasTargetTile", r, c)
-								e:ensure("currentAction", Enum.actionBuildingWorkplace)
-							end
-						else
-							-- allocate a tile that will become the workplace
-							local r, c = Fun.getBlankTile()
-							if r > 0 then
-								e:ensure("hasWorkplace", r, c)
-								e:ensure("currentAction", Enum.actionMovingToWorkplace)
-								e:ensure("hasTargetTile", e.hasWorkplace.row, e.hasWorkplace.col)
-								MAP[r][c]:ensure("hasBuilding", Enum.buildingFarm)
-							end
-						end
+                        -- has no workplace but is allowed to have one so create one
+                        if e.occupation.value == Enum.jobConstruction then
+                            -- look for something to construct
+                            local r,c = Fun.getUnbuiltBuilding()
+                            if r > 0 then
+                                e:ensure("hasWorkplace", r, c)
+                                e:ensure("hasTargetTile", r, c)
+                                Fun.addActionToQueue(e, Enum.actionMoveToTile)
+                                Fun.addActionToQueue(e, Enum.actionBuild)
+                            end
+                        else
+                            -- allocate a tile that will become the workplace
+                            local r, c = Fun.getBlankTile()
+                            if r > 0 then
+                                e:ensure("hasWorkplace", r, c)
+                                e:ensure("hasTargetTile", e.hasWorkplace.row, e.hasWorkplace.col)
+                                Fun.addActionToQueue(e, Enum.actionMoveToTile)
+                                Fun.addActionToQueue(e, Enum.actionWork)
+                                MAP[r][c]:ensure("hasBuilding", Enum.buildingFarm)
+                            end
+                        end
                     end
                 end
             end
-
-            -- process hunger
-            e.fullness.value = e.fullness.value  - (1 * dt)
         end
     end
 
@@ -222,7 +292,7 @@ function ecs.init()
     end
 
     -- Add the Systems
-    WORLD:addSystems(systemDraw, systemIsTile, systemDoWork, systemDecideAction, systemMove)
+    WORLD:addSystems(systemDraw, systemIsTile, systemDecideAction, systemPersonTick)
 
     -- Create entitites
 
@@ -256,6 +326,7 @@ function ecs.init()
         :give("isPerson")
         :give("wealth")
         :give("fullness")
+        :give("currentAction")
         table.insert(VILLAGERS, VILLAGER)
     end
 end
