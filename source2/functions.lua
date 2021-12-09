@@ -152,10 +152,10 @@ function functions.getLabel(e)
     -- construct a label and pass it back to the drawing loop
     local text = ""
     if e:has("currentAction") then
-        text = text .. e.currentAction.value .. "\n"
+        text = text .. "Action: " .. e.currentAction.value[1] .. "\n"
     end
-    text = text .. Cf.round(e.wealth.value) .. "\n"
-    text = text .. Cf.round(e.fullness.value) .. "\n"
+    text = text .. "Wealth: " .. Cf.round(e.wealth.value) .. "\n"
+    text = text .. "Fullness: " .. Cf.round(e.fullness.value) .. "\n"
 
     return text
 end
@@ -167,7 +167,12 @@ function functions.updateRowCol(e)
     e.position.col = c
 end
 
-
-
+function functions.removeActionFromQueue(e)
+   -- remove an action from the entities queue then remove the component if empty
+   table.remove(e.currentAction.value, 1)
+   if #e.currentAction.value < 1 then
+       e:remove("currentAction")
+   end
+end
 
 return functions

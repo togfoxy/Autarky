@@ -88,7 +88,9 @@ function ecs.init()
                     if e.occupation.timeWorking > Enum.timerWorkperiod then
                         e.occupation.timeWorking = 0
                         e:remove("hasTargetTile")
-                        e:remove("currentAction")
+                        -- e:remove("currentAction")
+                        Fun.removeActionFromQueue(e)
+
                         -- when the building is donw and timer is expired then find new workplace
                         e:remove("hasWorkplace")
                     end
@@ -100,7 +102,8 @@ function ecs.init()
                             if e.occupation.timeWorking > Enum.timerWorkperiod then
                                 e.occupation.timeWorking = 0
                                 e:remove("hasTargetTile")
-                                e:remove("currentAction")
+                                -- e:remove("currentAction")
+                                Fun.removeActionFromQueue(e)
                             end
 						else
 							-- has an occupation and a work place but the building is not yet constructed. Do nothing.
@@ -121,7 +124,7 @@ function ecs.init()
             -- process current action
             if e:has("currentAction") then
                 -- process the action
-                if e.currentAction.value == Enum.actionMovingToEat then
+                if e.currentAction.value[1] == Enum.actionMovingToEat then
                     -- see if at an eating place
                     local r, c = Fun.getClosestBuilding(e, Enum.buildingFarm)
                     if r > 0 then
@@ -134,7 +137,8 @@ function ecs.init()
 
                             if e.wealth.value < 1 or e.fullness.value > 99 then
                                 -- stop eating
-                                e:remove("currentAction")
+                                -- e:remove("currentAction")
+                                Fun.removeActionFromQueue(e)
                             end
                          end
                     end
@@ -153,14 +157,16 @@ function ecs.init()
                         -- set target to farm
                         e:ensure("hasTargetTile", r, c)
                         -- set action to 'eat'
-                        e:ensure("currentAction", Enum.actionMovingToEat)
+                        e:ensure("currentAction")
+                        table.insert(e.currentAction.value, Enum.actionMovingToEat)
                     end
 
                 elseif e:has("occupation") then
                     -- has a job
                     if e:has("hasWorkplace") then
                         -- lets go to work
-                        e:ensure("currentAction", Enum.actionMovingToWorkplace)
+                        -- e:ensure("currentAction", Enum.actionMovingToWorkplace)
+                        table.insert(e.currentAction.value, Enum.actionMovingToWorkplace)
                         e:ensure("hasTargetTile", e.hasWorkplace.row, e.hasWorkplace.col)
                     else
                         -- has an occupation but no workplace
@@ -170,14 +176,16 @@ function ecs.init()
 							if r > 0 then
 								e:ensure("hasWorkplace", r, c)
 								e:ensure("hasTargetTile", r, c)
-								e:ensure("currentAction", Enum.actionBuildingWorkplace)
+								-- e:ensure("currentAction", Enum.actionBuildingWorkplace)
+                                table.insert(e.currentAction.value, Enum.actionBuildingWorkplace)
 							end
 						else
 							-- allocate a tile that will become the workplace
 							local r, c = Fun.getBlankTile()
 							if r > 0 then
 								e:ensure("hasWorkplace", r, c)
-								e:ensure("currentAction", Enum.actionMovingToWorkplace)
+								-- e:ensure("currentAction", Enum.actionMovingToWorkplace)
+                                table.insert(e.currentAction.value, Enum.actionMovingToWorkplace)
 								e:ensure("hasTargetTile", e.hasWorkplace.row, e.hasWorkplace.col)
 								MAP[r][c]:ensure("hasBuilding", Enum.buildingFarm)
 							end

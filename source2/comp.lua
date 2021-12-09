@@ -14,9 +14,12 @@ function comp.init()
         c.x, c.y = Fun.getXYfromRowCol(c.row, c.col)
     end)
 
+    -- ***********************************************
+
     Concord.component("isPerson")
-    Concord.component("currentAction", function(c, number)
-        c.value = number or 0
+    Concord.component("currentAction", function(c)
+        -- c.value = number or 0
+        c.value = {}
     end)
     Concord.component("hasTargetTile", function(c, row, col)
         c.row = row
@@ -47,7 +50,6 @@ function comp.init()
         c.row = row
         c.col = col
     end)
-
 
     -- ***********************************************
 
