@@ -119,7 +119,27 @@ function ecs.init()
     function systemDecideAction:update(dt)
         for _, e in ipairs(self.pool) do
             -- process current action
-            if not e:has("currentAction") then
+            if e:has("currentAction") then
+                -- process the action
+                if e.currentAction.value == Enum.actionMovingToEat then
+                    -- see if at an eating place
+                    local r, c = Fun.getClosestBuilding(e, Enum.buildingFarm)
+                    if r > 0 then
+                        Fun.updateRowCol(e)
+                        if e.position.row == r and e.position.col == c then
+                            -- at an eatery so eat
+                            local amt = 1 * dt * 4  -- fullness gain * delta * a magnifier to make this go faster
+                            e.fullness.value = e.fullness.value + amt
+                            e.wealth.value = e.wealth.value - amt
+
+                            if e.wealth.value < 1 or e.fullness.value > 99 then
+                                -- stop eating
+                                e:remove("currentAction")
+                            end
+                         end
+                    end
+                end
+            else
                 -- doing nothing. Decide action
 
                 -- check if hungry

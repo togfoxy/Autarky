@@ -160,5 +160,14 @@ function functions.getLabel(e)
     return text
 end
 
+function functions.updateRowCol(e)
+    -- ensure the row/col correctly reflects the x/y
+    local r, c = Fun.getRowColfromXY(e.position.x, e.position.y)
+    e.position.row = r
+    e.position.col = c
+end
+
+
+
 
 return functions

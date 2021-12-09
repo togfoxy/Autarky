@@ -27,7 +27,7 @@ NUMBER_OF_COLS = (Cf.round(SCREEN_WIDTH / TILE_SIZE)) - 2
 
 print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
 
-NUMBER_OF_VILLAGERS = 3
+NUMBER_OF_VILLAGERS = 1
 
 MAP = {}			-- a 2d table of tiles
 VILLAGERS = {}
@@ -114,7 +114,9 @@ function love.load()
 	Fun.initialiseMap()
 	Ecs.init()	-- loads all the components etc
 	WORLD:emit("init")	-- triggers the init functions which load arrays and tables
-	
+
+	MAP[10][15]:ensure("hasBuilding", Enum.buildingFarm)
+	MAP[10][15].hasBuilding.isConstructed = true
 end
 
 
@@ -123,10 +125,10 @@ function love.draw()
 	TLfres.beginRendering(SCREEN_WIDTH,SCREEN_HEIGHT)
 
 	WORLD:emit("draw")
-	
+
 	-- put this after 'draw'
 	Dobjs.DrawInstructions()
-	
+
 	TLfres.endRendering({0, 0, 0, 1})
 
 end
