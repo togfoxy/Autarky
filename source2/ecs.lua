@@ -138,7 +138,7 @@ print("kilo")
             			if (Cf.round(e.position.y,2) == Cf.round(targety,2)) and Cf.round(e.position.x,2) == Cf.round(targetx,2) then
                             e:remove("hasTargetTile")
                             Fun.removeActionFromQueue(e)
-print("lima")
+-- print("lima")
                         end
                     end
 -- print("bravo")
@@ -148,7 +148,7 @@ print("lima")
                         local r, c = Fun.getClosestBuilding(e, Enum.buildingFarm)
                         if r > 0 then
                             Fun.updateRowCol(e)
-print(e.position.row, e.position.col, r, c)
+    -- print(e.position.row, e.position.col, r, c)
                             if e.position.row == r and e.position.col == c then
                                 -- at an eatery so eat
                                 local amt = 1 * dt * 4  -- fullness gain * delta * a magnifier to make this go faster
@@ -157,13 +157,13 @@ print(e.position.row, e.position.col, r, c)
                                 -- keep eating till full or broke
                                 if e.wealth.value < 1 or e.fullness.value > 99 then
                                     Fun.removeActionFromQueue(e)
-print("Boo boo")
+-- print("Boo boo")
                                 end
                             else
                                 -- not an an eatery. Consider adding a "move" action later on
                                 -- "eat" is at the top of the queue but can't eat so remove it from the head of the queue
                                 Fun.removeActionFromQueue(e)
-print("Boo")
+-- print("Boo")
                             end
                         else
                             -- no eateries exist so do nothing
@@ -184,7 +184,7 @@ print("Boo")
 -- print("delta")
                                         e.occupation.timeWorking = 0
                                         Fun.removeActionFromQueue(e)
-print("golf")
+-- print("golf")
                                         e:remove("hasWorkplace")
                                         MAP[r][c].hasBuilding.isConstructed = true
                                     end
@@ -192,7 +192,7 @@ print("golf")
                             else
                                 -- have a build order but no building on this tile. Remove the build order
                                 Fun.removeActionFromQueue(e)
-print("hotel")
+-- print("hotel")
                             end
                         else
                             print("alpha: " .. myaction, e:has("occupation"), e.occupation.value)
@@ -209,10 +209,18 @@ print("hotel")
                                     if e.occupation.timeWorking > Enum.timerWorkperiod then
                                         e.occupation.timeWorking = 0
                                         Fun.removeActionFromQueue(e)
-print("indigo")
+-- print("indigo")
                                     end
                                 end
                             end
+                        end
+                    end
+
+                    if myaction == Enum.actionWait then
+                        e.currentAction.timer = e.currentAction.timer + dt
+                        if e.currentAction.timer > 5 then
+                            e.currentAction.timer = 0
+                            Fun.removeActionFromQueue(e)
                         end
                     end
                 end
@@ -288,6 +296,7 @@ print("indigo")
                         local newrow, newcol = Fun.getRandomMovement(e)
                         e:ensure("hasTargetTile", newrow, newcol)
                         Fun.addActionToQueue(e, Enum.actionMoveToTile)
+                        Fun.addActionToQueue(e, Enum.actionWait)
                     end
                 end
             end

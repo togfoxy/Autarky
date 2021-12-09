@@ -23,6 +23,7 @@ return {
     actionWork = 6,
     actionBuild = 7,
     actionIdle = 8,
+    actionWait = 9,
 
     -- income per second
     workIncomeFarmer = 1,

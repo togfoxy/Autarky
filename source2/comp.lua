@@ -20,6 +20,7 @@ function comp.init()
     Concord.component("currentAction", function(c)
         -- c.value = number or 0
         c.value = {}
+        c.timer = 0     -- used for whatever
     end)
     Concord.component("hasTargetTile", function(c, row, col)
         c.row = row
