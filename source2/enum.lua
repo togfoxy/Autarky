@@ -26,7 +26,7 @@ return {
     actionWait = 9,
 
     -- income per second
-    workIncomeFarmer = 1,
+    workIncomeFarmer = 10,
     workIncomeConstruction = 10,
 
    timerWorkperiod = 5,

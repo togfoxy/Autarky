@@ -34,8 +34,11 @@ function ecs.init()
 						-- ghost buildings not yet constructed
 						love.graphics.setColor(1,1,1,0.5)
 					end
-
 					love.graphics.draw(IMAGES[e.hasBuilding.buildingNumber], x + (TILE_SIZE / 4), y, 0, 1, 1)
+                    -- draw Stock
+                    if e:has("stock") then
+                        love.graphics.print(e.stock.value, x + TILE_SIZE, y + (TILE_SIZE / 2))
+                    end
 				end
 				love.graphics.setColor(1,1,1,1)
             end
@@ -151,7 +154,7 @@ print("kilo")
     -- print(e.position.row, e.position.col, r, c)
                             if e.position.row == r and e.position.col == c then
                                 -- at an eatery so eat
-                                local amt = 1 * dt * 4  -- fullness gain * delta * a magnifier to make this go faster
+                                local amt = 5 * dt * 4  -- fullness gain * delta * a magnifier to make this go faster
                                 e.fullness.value = e.fullness.value + amt
                                 e.wealth.value = e.wealth.value - amt
                                 MAP[r][c].stock.value = MAP[r][c].stock.value - amt
@@ -164,10 +167,13 @@ print("kilo")
                                 -- not an an eatery. Consider adding a "move" action later on
                                 -- "eat" is at the top of the queue but can't eat so remove it from the head of the queue
                                 Fun.removeActionFromQueue(e)
+
 -- print("Boo")
                             end
                         else
                             -- no eateries exist so do nothing
+                            Fun.removeActionFromQueue(e)
+
                         end
                     end
 -- print("foxtrot " .. myaction)
@@ -207,9 +213,9 @@ print("kilo")
                             if MAP[r][c]:has("hasBuilding") then
                                 if MAP[r][c].hasBuilding.isConstructed then
                                     MAP[r][c]:ensure("stock")
-                                    MAP[r][c].stock.value = MAP[r][c].stock.value + (1 * dt)
+                                    MAP[r][c].stock.value = MAP[r][c].stock.value + (10 * dt)
                             		Fun.getPaid(e,dt)
-                                    if e.occupation.timeWorking > Enum.timerWorkperiod then
+                                    if e.occupation.timeWorking > Enum.timerWorkperiod or MAP[r][c].stock.value > 100 then
                                         e.occupation.timeWorking = 0
                                         Fun.removeActionFromQueue(e)
                                     end
@@ -277,6 +283,7 @@ print("kilo")
                                 local newrow, newcol = Fun.getRandomMovement(e)
                                 e:ensure("hasTargetTile", newrow, newcol)
                                 Fun.addActionToQueue(e, Enum.actionMoveToTile)
+                                Fun.addActionToQueue(e, Enum.actionWait)
                             end
                         else
                             -- allocate a tile that will become the workplace

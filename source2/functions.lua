@@ -139,7 +139,11 @@ function functions.getClosestBuilding(e, buildingtype)
 			if MAP[row][col]:has("hasBuilding") then
 				if MAP[row][col].hasBuilding.isConstructed == true then
                     if MAP[row][col].hasBuilding.buildingNumber == buildingtype then
-					    return row, col
+                        if MAP[row][col]:has("stock") then
+                            if MAP[row][col].stock.value > 10 then
+                               return row, col
+                            end
+                        end
                     end
 				end
 			end
