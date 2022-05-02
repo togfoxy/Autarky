@@ -47,3 +47,5 @@ function love.load()
     fun.initialiseMap()
 
 end
+
+print("Hello World")
