@@ -22,8 +22,9 @@ IMAGES = {}
 TILE_SIZE = 50
 NUMBER_OF_ROWS = (Cf.round(SCREEN_HEIGHT / TILE_SIZE)) - 2
 NUMBER_OF_COLS = (Cf.round(SCREEN_WIDTH / TILE_SIZE)) - 2
-WELL_ROW = 0			-- capture the tile that has the well
-WELL_COL = 0
+-- capture the tile that has the well
+WELL_ROW = love.math.random(3, NUMBER_OF_ROWS - 2)  -- The 3 and -2 keeps the well off the screen edge
+WELL_COL = love.math.random(3, NUMBER_OF_COLS - 2)
 
 NUMBER_OF_VILLAGERS = 3
 
