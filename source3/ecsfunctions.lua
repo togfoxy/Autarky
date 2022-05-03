@@ -12,7 +12,7 @@ function ecsfunctions.init()
 
     -- ## declare systems
     systemDraw = concord.system({
-        pool = {"drawable"}
+        pool = {"position", "drawable"}
     })
 
     -- define same systems
@@ -20,15 +20,14 @@ function ecsfunctions.init()
         love.graphics.setColor(1,1,1,1)
         for _, e in ipairs(self.pool) do
             if e.isTile then
-    print(e.isTile.tiletype)
                 local img = IMAGES[e.isTile.tileType]
-                local drawx, drawyy = e.position.x, e.position.y
+                local drawx, drawy = e.position.x, e.position.y
                 local imagewidth = img:getWidth()
                 local imageheight = img:getHeight()
                 local drawscalex = (TILE_SIZE / imagewidth)
                 local drawscaley = (TILE_SIZE / imageheight)
 				love.graphics.setColor(1,1,1,1)
-                love.graphics.draw(img, x, y, 0, drawscalex, drawscaley)
+                love.graphics.draw(img, drawx, drawy, 0, drawscalex, drawscaley)
             end
         end
     end

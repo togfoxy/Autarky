@@ -92,51 +92,53 @@ function love.draw()
     -- end
 
     -- draw contour lines (height)
-    for col = 1, NUMBER_OF_COLS do
-        for row = 1,NUMBER_OF_ROWS do
-            -- check if top neighbour is different to current cell
-            if row > 1 then
-                if MAP[row-1][col].height ~= MAP[row][col].height then
-                    -- draw line
-                    local x1, y1 = fun.getXYfromRowCol(row, col)
-                    local x2, y2 = x1 + TILE_SIZE, y1
-                    local alpha = MAP[row][col].height / UPPER_TERRAIN_HEIGHT
-                    love.graphics.setColor(1,1,1,alpha)
-                    love.graphics.line(x1, y1, x2, y2)
-                end
-            end
-            -- left side
-            if col > 1 then
-                if MAP[row][col-1].height ~= MAP[row][col].height then
-                    -- draw line
-                    local x1, y1 = fun.getXYfromRowCol(row, col)
-                    local x2 = x1
-                    local y2 = y1 + TILE_SIZE
-                    local alpha = MAP[row][col].height / UPPER_TERRAIN_HEIGHT
-                    love.graphics.setColor(1,1,1,alpha)
-                    love.graphics.line(x1, y1, x2, y2)
-                end
-            end
-        end
-    end
-
-    -- draw water wells
-    for k,well in pairs(WELLS) do
-        local drawx, drawy = fun.getXYfromRowCol(well.row, well.col)
-        local imagex = IMAGES[enum.terrainWell]:getWidth()
-        local imagey = IMAGES[enum.terrainWell]:getHeight()
-
-        local drawscalex = (TILE_SIZE / imagex)
-        local drawscaley = (TILE_SIZE / imagey)
-
-        love.graphics.setColor(1,1,1,1)
-        love.graphics.draw(IMAGES[enum.terrainWell], drawx, drawy, 0, drawscalex, drawscaley)
-    end
+    -- for col = 1, NUMBER_OF_COLS do
+    --     for row = 1,NUMBER_OF_ROWS do
+    --         -- check if top neighbour is different to current cell
+    --         if row > 1 then
+    --             if MAP[row-1][col].height ~= MAP[row][col].height then
+    --                 -- draw line
+    --                 local x1, y1 = fun.getXYfromRowCol(row, col)
+    --                 local x2, y2 = x1 + TILE_SIZE, y1
+    --                 local alpha = MAP[row][col].height / UPPER_TERRAIN_HEIGHT
+    --                 love.graphics.setColor(1,1,1,alpha)
+    --                 love.graphics.line(x1, y1, x2, y2)
+    --             end
+    --         end
+    --         -- left side
+    --         if col > 1 then
+    --             if MAP[row][col-1].height ~= MAP[row][col].height then
+    --                 -- draw line
+    --                 local x1, y1 = fun.getXYfromRowCol(row, col)
+    --                 local x2 = x1
+    --                 local y2 = y1 + TILE_SIZE
+    --                 local alpha = MAP[row][col].height / UPPER_TERRAIN_HEIGHT
+    --                 love.graphics.setColor(1,1,1,alpha)
+    --                 love.graphics.line(x1, y1, x2, y2)
+    --             end
+    --         end
+    --     end
+    -- end
+    --
+    -- -- draw water wells
+    -- for k,well in pairs(WELLS) do
+    --     local drawx, drawy = fun.getXYfromRowCol(well.row, well.col)
+    --     local imagex = IMAGES[enum.terrainWell]:getWidth()
+    --     local imagey = IMAGES[enum.terrainWell]:getHeight()
+    --
+    --     local drawscalex = (TILE_SIZE / imagex)
+    --     local drawscaley = (TILE_SIZE / imagey)
+    --
+    --     love.graphics.setColor(1,1,1,1)
+    --     love.graphics.draw(IMAGES[enum.terrainWell], drawx, drawy, 0, drawscalex, drawscaley)
+    -- end
 
 end
 
 
 function love.update(dt)
+
+    WORLD:emit("update", dt)
 
 	res.update()
 
