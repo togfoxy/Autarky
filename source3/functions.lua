@@ -1,12 +1,11 @@
 functions = {}
 
 function functions.initialiseMap()
-    local terrainheightperlinseed
-    local terraintypeperlinseed = love.math.random(0,20) / 20
-    repeat
-        terrainheightperlinseed = love.math.random(0,20) / 20
-    until terrainheightperlinseed ~= terraintypeperlinseed
-
+    -- local terrainheightperlinseed
+    -- local terraintypeperlinseed = love.math.random(0,20) / 20
+    -- repeat
+    --     terrainheightperlinseed = love.math.random(0,20) / 20
+    -- until terrainheightperlinseed ~= terraintypeperlinseed
 
     for row = 1, NUMBER_OF_ROWS do
 		MAP[row] = {}
@@ -16,13 +15,12 @@ function functions.initialiseMap()
 			MAP[row][col] = {}
             MAP[row][col].row = row
             MAP[row][col].col = col
-            local rowvalue = row / NUMBER_OF_ROWS
-            local colvalue = col / NUMBER_OF_COLS
 
-
-            -- the noise function only works with numbers between 0 and 1
-            MAP[row][col].height = cf.round(love.math.noise(rowvalue, colvalue, terrainheightperlinseed) * UPPER_TERRAIN_HEIGHT)
-            MAP[row][col].tiletype = cf.round(love.math.noise(rowvalue, colvalue, terraintypeperlinseed) * 4)
+            -- local rowvalue = row / NUMBER_OF_ROWS
+            -- local colvalue = col / NUMBER_OF_COLS
+            -- -- the noise function only works with numbers between 0 and 1
+            -- MAP[row][col].height = cf.round(love.math.noise(rowvalue, colvalue, terrainheightperlinseed) * UPPER_TERRAIN_HEIGHT)
+            -- MAP[row][col].tiletype = cf.round(love.math.noise(rowvalue, colvalue, terraintypeperlinseed) * 4)
 		end
 	end
 end

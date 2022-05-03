@@ -60,7 +60,9 @@ function love.load()
 	cf.AddScreen("World", SCREEN_STACK)
 
     fun.loadImages()
-    fun.initialiseMap()
+    fun.initialiseMap()     -- initialises 2d map with nils
+    ecsfunctions.init()	    -- loads all the components etc
+    WORLD:emit("init")      -- triggers the init functions which load arrays and tables
 
 end
 
@@ -69,23 +71,25 @@ function love.draw()
     res.start()
     res.stop()
 
-    -- draw tile types (grass etc)
-    for col = 1, NUMBER_OF_COLS do
-        for row = 1,NUMBER_OF_ROWS do
-            -- convert col/row into x/y
-            local drawx, drawy = fun.getXYfromRowCol(row, col)
-            local imagex = IMAGES[MAP[row][col].tiletype]:getWidth()
-            local imagey = IMAGES[MAP[row][col].tiletype]:getHeight()
+    WORLD:emit("draw")
 
-            local drawscalex = (TILE_SIZE / imagex)
-            local drawscaley = (TILE_SIZE / imagey)
-
-            love.graphics.setColor(1,1,1,1)
-            love.graphics.draw(IMAGES[MAP[row][col].tiletype], drawx, drawy, 0, drawscalex, drawscaley)
-            -- love.graphics.print(MAP[row][col].tiletype, drawx, drawy)
-            -- love.graphics.print(MAP[row][col].height, drawx, drawy)
-        end
-    end
+    -- -- draw tile types (grass etc)
+    -- for col = 1, NUMBER_OF_COLS do
+    --     for row = 1,NUMBER_OF_ROWS do
+    --         -- convert col/row into x/y
+    --         local drawx, drawy = fun.getXYfromRowCol(row, col)
+    --         local imagex = IMAGES[MAP[row][col].tiletype]:getWidth()
+    --         local imagey = IMAGES[MAP[row][col].tiletype]:getHeight()
+    --
+    --         local drawscalex = (TILE_SIZE / imagex)
+    --         local drawscaley = (TILE_SIZE / imagey)
+    --
+    --         love.graphics.setColor(1,1,1,1)
+    --         love.graphics.draw(IMAGES[MAP[row][col].tiletype], drawx, drawy, 0, drawscalex, drawscaley)
+    --         -- love.graphics.print(MAP[row][col].tiletype, drawx, drawy)
+    --         -- love.graphics.print(MAP[row][col].height, drawx, drawy)
+    --     end
+    -- end
 
     -- draw contour lines (height)
     for col = 1, NUMBER_OF_COLS do
