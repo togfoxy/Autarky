@@ -30,7 +30,11 @@ function ecsfunctions.init()
                 love.graphics.draw(img, drawx, drawy, 0, drawscalex, drawscaley)
             end
             if e.isPerson then
-                love.graphics.setColor(1,1,1,1)
+                if e.isSelected then
+                    love.graphics.setColor(0,1,0,1)
+                else
+                    love.graphics.setColor(1,1,1,1)
+                end
                 local drawwidth = PERSON_DRAW_WIDTH
                 local drawx, drawy = e.position.x, e.position.y
                 local offsetx, offsety = TILE_SIZE / 2, TILE_SIZE / 2

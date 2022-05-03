@@ -45,9 +45,33 @@ function love.keyreleased( key, scancode )
 	end
 end
 
+
+function love.mousepressed( x, y, button, istouch, presses )
+
+	--! local mousex,mousey = res.toScreen(x, y)
+    local mousex = x - TILE_SIZE / 2    -- the villagers are drawn in the centre of the tile so need to fake mouse adjustment
+    local mousey = y - TILE_SIZE / 2
+
+	if button == 1 then
+		-- select the villager if clicked, else select the tile (further down)
+		for k, v in pairs(VILLAGERS) do
+			x2 = v.position.x
+			y2 = v.position.y
+			local dist = cf.GetDistance(mousex, mousey, x2, y2)
+			if dist <= PERSON_DRAW_WIDTH then
+				if v.isSelected then
+					v:remove("isSelected")
+				else
+					v:ensure("isSelected")
+				end
+			end
+		end
+	end
+end
+
 function love.load()
 
-    res.setGame(SCREEN_WIDTH, SCREEN_HEIGHT)
+    --! res.setGame(SCREEN_WIDTH, SCREEN_HEIGHT)
 
     if love.filesystem.isFused( ) then
         void = love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT,{fullscreen=false,display=1,resizable=true, borderless=false})	-- display = monitor number (1 or 2)
@@ -69,28 +93,10 @@ end
 
 function love.draw()
 
-    res.start()
-    res.stop()
+    --! res.start()
+    --! res.stop()
 
     WORLD:emit("draw")
-
-    -- -- draw tile types (grass etc)
-    -- for col = 1, NUMBER_OF_COLS do
-    --     for row = 1,NUMBER_OF_ROWS do
-    --         -- convert col/row into x/y
-    --         local drawx, drawy = fun.getXYfromRowCol(row, col)
-    --         local imagex = IMAGES[MAP[row][col].tiletype]:getWidth()
-    --         local imagey = IMAGES[MAP[row][col].tiletype]:getHeight()
-    --
-    --         local drawscalex = (TILE_SIZE / imagex)
-    --         local drawscaley = (TILE_SIZE / imagey)
-    --
-    --         love.graphics.setColor(1,1,1,1)
-    --         love.graphics.draw(IMAGES[MAP[row][col].tiletype], drawx, drawy, 0, drawscalex, drawscaley)
-    --         -- love.graphics.print(MAP[row][col].tiletype, drawx, drawy)
-    --         -- love.graphics.print(MAP[row][col].height, drawx, drawy)
-    --     end
-    -- end
 
     -- draw contour lines (height)
     -- for col = 1, NUMBER_OF_COLS do
@@ -141,7 +147,7 @@ function love.update(dt)
 
     WORLD:emit("update", dt)
 
-	res.update()
+	--! res.update()
 
 
 end

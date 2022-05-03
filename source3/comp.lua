@@ -7,6 +7,7 @@ function comp.init()
     end)
     concord.component("drawable")
     concord.component("isPerson")
+    concord.component("isSelected")
 
     concord.component("position", function(c, row, col)
         c.row = row or love.math.random(1, NUMBER_OF_ROWS)
