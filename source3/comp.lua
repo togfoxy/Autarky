@@ -6,10 +6,11 @@ function comp.init()
         c.value = cf.Getuuid()
     end)
     concord.component("drawable")
+    concord.component("isPerson")
 
     concord.component("position", function(c, row, col)
-        c.row = row
-        c.col = col
+        c.row = row or love.math.random(1, NUMBER_OF_ROWS)
+        c.col = col or love.math.random(1, NUMBER_OF_COLS)
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
     end)
 

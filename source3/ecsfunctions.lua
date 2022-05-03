@@ -29,6 +29,15 @@ function ecsfunctions.init()
 				love.graphics.setColor(1,1,1,1)
                 love.graphics.draw(img, drawx, drawy, 0, drawscalex, drawscaley)
             end
+            if e.isPerson then
+                love.graphics.setColor(1,1,1,1)
+                local drawwidth = PERSON_DRAW_WIDTH
+                local drawx, drawy = e.position.x, e.position.y
+                local offsetx, offsety = TILE_SIZE / 2, TILE_SIZE / 2
+                drawx = drawx + offsetx
+                drawy = drawy + offsety
+                love.graphics.circle("fill", drawx, drawy, drawwidth)
+            end
         end
     end
 
@@ -81,6 +90,9 @@ function ecsfunctions.init()
     for i = 1, NUMBER_OF_VILLAGERS do
         local VILLAGER = concord.entity(WORLD)
         :give("drawable")
+        :give("position")
+        :give("uid")
+        :give("isPerson")
         table.insert(VILLAGERS, VILLAGER)
     end
 

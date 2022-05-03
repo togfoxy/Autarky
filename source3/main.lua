@@ -34,6 +34,7 @@ WELLS[1].row = love.math.random(3, NUMBER_OF_ROWS - 4)  -- The 3 and -2 keeps th
 WELLS[1].col = love.math.random(3, NUMBER_OF_COLS - 2)
 
 NUMBER_OF_VILLAGERS = 3
+PERSON_DRAW_WIDTH = 10
 
 MAP = {}			-- a 2d table of tiles
 VILLAGERS = {}
