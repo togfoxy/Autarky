@@ -28,8 +28,10 @@ UPPER_TERRAIN_HEIGHT = 6
 print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
 
 -- capture the tile that has the well
-WELL_ROW = love.math.random(3, NUMBER_OF_ROWS - 2)  -- The 3 and -2 keeps the well off the screen edge
-WELL_COL = love.math.random(3, NUMBER_OF_COLS - 2)
+WELLS = {}
+WELLS[1] = {}
+WELLS[1].row = love.math.random(3, NUMBER_OF_ROWS - 4)  -- The 3 and -2 keeps the well off the screen edge
+WELLS[1].col = love.math.random(3, NUMBER_OF_COLS - 2)
 
 NUMBER_OF_VILLAGERS = 3
 
@@ -67,6 +69,7 @@ function love.draw()
     res.start()
     res.stop()
 
+    -- draw tile types (grass etc)
     for col = 1, NUMBER_OF_COLS do
         for row = 1,NUMBER_OF_ROWS do
             -- convert col/row into x/y
@@ -74,8 +77,8 @@ function love.draw()
             local imagex = IMAGES[MAP[row][col].tiletype]:getWidth()
             local imagey = IMAGES[MAP[row][col].tiletype]:getHeight()
 
-            drawscalex = (TILE_SIZE / imagex)
-            drawscaley = (TILE_SIZE / imagey)
+            local drawscalex = (TILE_SIZE / imagex)
+            local drawscaley = (TILE_SIZE / imagey)
 
             love.graphics.setColor(1,1,1,1)
             love.graphics.draw(IMAGES[MAP[row][col].tiletype], drawx, drawy, 0, drawscalex, drawscaley)
@@ -84,7 +87,7 @@ function love.draw()
         end
     end
 
-    -- draw contour lines
+    -- draw contour lines (height)
     for col = 1, NUMBER_OF_COLS do
         for row = 1,NUMBER_OF_ROWS do
             -- check if top neighbour is different to current cell
@@ -111,6 +114,19 @@ function love.draw()
                 end
             end
         end
+    end
+
+    -- draw water wells
+    for k,well in pairs(WELLS) do
+        local drawx, drawy = fun.getXYfromRowCol(well.row, well.col)
+        local imagex = IMAGES[enum.terrainWell]:getWidth()
+        local imagey = IMAGES[enum.terrainWell]:getHeight()
+
+        local drawscalex = (TILE_SIZE / imagex)
+        local drawscaley = (TILE_SIZE / imagey)
+
+        love.graphics.setColor(1,1,1,1)
+        love.graphics.draw(IMAGES[enum.terrainWell], drawx, drawy, 0, drawscalex, drawscaley)
     end
 
 end
