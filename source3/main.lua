@@ -54,8 +54,8 @@ end
 function love.mousepressed( x, y, button, istouch, presses )
 
 	--! local mousex,mousey = res.toScreen(x, y)
-    local mousex = x - TILE_SIZE / 2    -- the villagers are drawn in the centre of the tile so need to fake mouse adjustment
-    local mousey = y - TILE_SIZE / 2
+    local mousex = x
+    local mousey = y
 
 	if button == 1 then
 		-- select the villager if clicked, else select the tile (further down)
