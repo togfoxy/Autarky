@@ -32,12 +32,6 @@ UPPER_TERRAIN_HEIGHT = 6
 
 print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
 
--- capture the tile that has the well
-WELLS = {}
-WELLS[1] = {}
-WELLS[1].row = love.math.random(3, NUMBER_OF_ROWS - 4)  -- The 3 and -2 keeps the well off the screen edge
-WELLS[1].col = love.math.random(3, NUMBER_OF_COLS - 2)
-
 NUMBER_OF_VILLAGERS = 3
 PERSON_DRAW_WIDTH = 10
 
@@ -88,6 +82,8 @@ function love.load()
     love.window.setTitle("Autarky " .. GAME_VERSION)
 
 	cf.AddScreen("World", SCREEN_STACK)
+
+
 
     fun.loadImages()
     fun.initialiseMap()     -- initialises 2d map with nils

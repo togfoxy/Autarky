@@ -55,7 +55,6 @@ function ecsfunctions.init()
                         love.graphics.line(x1, y1, x2, y2)
                     end
                 end
-
                 -- left side
                 if col > 1 then
                     if MAP[row][col-1].height ~= MAP[row][col].height then
@@ -73,6 +72,20 @@ function ecsfunctions.init()
                         love.graphics.setColor(1,1,1,alpha)
                         love.graphics.line(x1, y1, x2, y2)
                     end
+                end
+
+                if e.isTile.improvementType ~= nil then
+                    -- draw the improvement
+                    local imagenumber = e.isTile.improvementType
+                    local drawx, drawy = e.position.x, e.position.y
+                    local imagewidth = IMAGES[imagenumber]:getWidth()
+                    local imageheight = IMAGES[imagenumber]:getHeight()
+
+                    local drawscalex = (TILE_SIZE / imagewidth)
+                    local drawscaley = (TILE_SIZE / imageheight)
+
+                    love.graphics.setColor(1,1,1,1)
+                    love.graphics.draw(IMAGES[imagenumber], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
                 end
             end
 
@@ -112,6 +125,13 @@ function ecsfunctions.init()
     WORLD:addSystems(systemDraw, systemIsTile)
 
     -- create entities
+
+    -- capture the tile that has the well firs of all
+	WELLS = {}
+	WELLS[1] = {}
+	WELLS[1].row = love.math.random(3, NUMBER_OF_ROWS - 4)  -- The 3 and -2 keeps the well off the screen edge
+	WELLS[1].col = love.math.random(3, NUMBER_OF_COLS - 2)
+
     -- create tiles
     local terrainheightperlinseed
     local terraintypeperlinseed = love.math.random(0,20) / 20
@@ -119,6 +139,7 @@ function ecsfunctions.init()
         terrainheightperlinseed = love.math.random(0,20) / 20
     until terrainheightperlinseed ~= terraintypeperlinseed
 
+    -- create tile entities
     for col = 1, NUMBER_OF_COLS do
         for row = 1, NUMBER_OF_ROWS do
             local rowvalue = row / NUMBER_OF_ROWS
@@ -126,14 +147,16 @@ function ecsfunctions.init()
             -- the noise function only works with numbers between 0 and 1
             MAP[row][col].height = cf.round(love.math.noise(rowvalue, colvalue, terrainheightperlinseed) * UPPER_TERRAIN_HEIGHT)
             MAP[row][col].tileType = cf.round(love.math.noise(rowvalue, colvalue, terraintypeperlinseed) * 4)
-
--- print(row, col, MAP[row][col].height)
-
-            local TILES = concord.entity(WORLD)
+            local tiles = concord.entity(WORLD)
             :give("drawable")
             :give("position", row, col)
-            :give("isTile", MAP[row][col].tileType, MAP[row][col].height)
             :give("uid")
+            if row == WELLS[1].row and col == WELLS[1].col then
+                -- this tile has a well
+                tiles:give("isTile", MAP[row][col].tileType, MAP[row][col].height, enum.improvementWell)
+            else
+                tiles:give("isTile", MAP[row][col].tileType, MAP[row][col].height)
+            end
         end
     end
 
