@@ -24,7 +24,6 @@ gintNumAgents = 3
 gintTaxRate = 5		-- this is 1%
 gintZoneSize = 50		-- pixels
 
-
 Agents = {}						-- these are physics objects
 Zones = {}				-- area's of interest to agents
 tree = {}

@@ -9,10 +9,13 @@ concord = require 'lib.concord'
 res = require 'lib.resolution_solution'
 -- https://github.com/Vovkiv/resolution_solution
 
+ft = require 'lib.foxtree'		-- foxtree
+
 cf = require 'lib.commonfunctions'
 fun = require 'functions'
 ecs = require 'ecsfunctions'
 enum = require 'enum'
+bt = require 'behaviortree'
 
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
@@ -83,7 +86,7 @@ function love.load()
 
 	cf.AddScreen("World", SCREEN_STACK)
 
-
+	bt.EstablishTree()
 
     fun.loadImages()
     fun.initialiseMap()     -- initialises 2d map with nils

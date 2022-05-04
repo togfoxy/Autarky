@@ -10,14 +10,12 @@ function ecsfunctions.init()
     -- define components
     compmodule.init()
 
-    -- ## declare systems
+    -- declare systems
     systemDraw = concord.system({
         pool = {"position", "drawable"}
     })
-
     -- define same systems
     function systemDraw:draw()
-
         love.graphics.setColor(1,1,1,1)
         for _, e in ipairs(self.pool) do
             if e.isTile then
@@ -89,7 +87,6 @@ function ecsfunctions.init()
                 end
             end
 
-
             if e.isPerson then
                 if e.isSelected then
                     love.graphics.setColor(0,1,0,1)
@@ -118,11 +115,21 @@ function ecsfunctions.init()
         --end
     end
 
-    -- ## define more systems here
+    systemIsPerson = concord.system({
+        pool = {"isPerson"}
+    })
+    function systemIsPerson:update()
+        for _, e in ipairs(self.pool) do
+            if #e.isPerson.queue == 0 then
+                print("oops")
+            end
+        end
+    end
+
 
     -- add the systems to the world
     -- ## ensure all systems are added to the world
-    WORLD:addSystems(systemDraw, systemIsTile)
+    WORLD:addSystems(systemDraw, systemIsTile, systemIsPerson)
 
     -- create entities
 

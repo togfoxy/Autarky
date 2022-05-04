@@ -6,9 +6,13 @@ function comp.init()
         c.value = cf.Getuuid()
     end)
     concord.component("drawable")   -- will be drawn during love.draw()
-    concord.component("isPerson")
+
     concord.component("isSelected") -- clicked by the mouse
 
+    concord.component("isPerson", function(c)
+        c.queue = {}
+    end)
+    
     concord.component("position", function(c, row, col)         -- exists on the map/grid
         c.row = row or love.math.random(1, NUMBER_OF_ROWS)
         c.col = col or love.math.random(1, NUMBER_OF_COLS)
