@@ -120,15 +120,17 @@ function ecsfunctions.init()
     })
     function systemIsPerson:update()
         for _, e in ipairs(self.pool) do
+            -- check if queue is empty and if so then get a new action from the behavior tree
             if #e.isPerson.queue == 0 then
-
-
                 local nextaction = ft.DetermineAction(TREE, e)
-                -- print(nextaction)
+                local actionitem = {}
+                actionitem.type = nextaction
+                table.insert(e.isPerson.queue, actionitem)
             end
         end
-    end
 
+        --! process head of queue
+    end
 
     -- add the systems to the world
     -- ## ensure all systems are added to the world

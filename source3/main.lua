@@ -88,7 +88,6 @@ function love.load()
 	cf.AddScreen("World", SCREEN_STACK)
 
 	bt.EstablishTree(TREE)
-print(inspect(TREE))
 
     fun.loadImages()
     fun.initialiseMap()     -- initialises 2d map with nils

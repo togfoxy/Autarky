@@ -8,6 +8,9 @@ function behaviortree.EstablishTree()
 	-- the term 'agent' is probably a better term
 	-- functions will activate if some bot property meets a specified condition
 
+	-- low priority (e.g. 1) = less chance of occuring
+	-- high priroty (e.g. 10) = more chance of occuring
+
 	TREE = {}	--! works on global tree but should be fixed
 
 	TREE.goal = "root"
@@ -19,7 +22,7 @@ function behaviortree.EstablishTree()
 	TREE.child[1] = {}
 	TREE.child[1].goal = enum.goalRest
 	TREE.child[1].priority = function(bot)
-								return 5
+								return 1
 							end
 	TREE.child[1].activate = function(bot)
 								return true
