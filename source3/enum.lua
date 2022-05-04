@@ -11,7 +11,9 @@ terrainGrassDry = 1
 terrainGrassGreen = 2
 terrainTeal = 3
 
-
-
 -- improvement types ## ensure these numbers align to the image enum above
 improvementWell = 4
+
+
+-- goals/activities/queue items/actions
+goalRest = 1

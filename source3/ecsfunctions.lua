@@ -121,7 +121,10 @@ function ecsfunctions.init()
     function systemIsPerson:update()
         for _, e in ipairs(self.pool) do
             if #e.isPerson.queue == 0 then
-                print("oops")
+
+
+                local nextaction = ft.DetermineAction(TREE, e)
+                -- print(nextaction)
             end
         end
     end

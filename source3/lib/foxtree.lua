@@ -13,11 +13,13 @@ end
 function foxtree.DetermineAction(t, bot)
     -- returns an enum.goal (integer) based on rndnum and the BT
 
-    local nextlevel = {}
-    nextlevel = GetNextLevel(t)
 
+    local nextlevel = {}
+    nextlevel = GetNextLevel(t)     -- gets all the children below the current 'level'
+
+    -- cycle through all nodes, check if the node is active, and if it is, 'sum' it's priority for later use
     local totalchance = 0
-    for k,v in ipairs(nextlevel) do
+    for k,v in ipairs(nextlevel) do     -- cycle through all the nodes in nextlevel - which is really the children of the previous parents
 		-- print("g: " .. v.goal)
 		if v.activate == nil then
 			totalchance = totalchance + v.priority(bot)
@@ -26,27 +28,27 @@ function foxtree.DetermineAction(t, bot)
 			if v.activate(bot) == true then
 
 				totalchance = totalchance + v.priority(bot)
-				-- print(bot.workzone, bot.occupation)
 			else
 				-- node is deactivated so don't consider it's priority
 			end
 		end
     end
 
+    -- the sum of all priorities is now determined. "Roll the dice" and see which node is actually selected.
     local rndnum = love.math.random(1, totalchance)
     -- print("random action: " .. rndnum .. " from a total priority count of " .. totalchance)
 
-    for k,v in ipairs(nextlevel) do
-		if v.activate == nil or v.activate(bot) == true then		-- skips over nodes that are not active
-			if rndnum <= v.priority(bot) then
-				if v.child == nill then
-					-- print("Returning goal: " .. v.goal .. " for bot #" .. bot.ID)
-					return v.goal
+    for k,node in ipairs(nextlevel) do
+		if node.activate == nil or node.activate(bot) == true then		-- skips over nodes that are not active
+			if rndnum <= node.priority(bot) then
+				if node.child == nil then
+					-- print("Returning goal: " .. node.goal .. " for agent " .. bot.uid.value)   -- for debugging. Comment out if not needed
+					return node.goal
 				else
-					return foxtree.DetermineAction(v, bot)	-- v is a node
+					return foxtree.DetermineAction(node, bot)	-- node is a node but it is known it has child nodes so recursively repeat the process for them
 				end
 			else
-				rndnum = rndnum - v.priority(bot)
+				rndnum = rndnum - node.priority(bot)
 			end
 		end
     end

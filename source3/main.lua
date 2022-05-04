@@ -40,6 +40,7 @@ PERSON_DRAW_WIDTH = 10
 
 MAP = {}			-- a 2d table of tiles
 VILLAGERS = {}
+TREE = {}			-- a tree that holds all possible behaviours for a person
 
 function love.keyreleased( key, scancode )
 	if key == "escape" then
@@ -86,7 +87,8 @@ function love.load()
 
 	cf.AddScreen("World", SCREEN_STACK)
 
-	bt.EstablishTree()
+	bt.EstablishTree(TREE)
+print(inspect(TREE))
 
     fun.loadImages()
     fun.initialiseMap()     -- initialises 2d map with nils
@@ -101,22 +103,6 @@ function love.draw()
     --! res.stop()
 
     WORLD:emit("draw")
-
-
-    --
-    -- -- draw water wells
-    -- for k,well in pairs(WELLS) do
-    --     local drawx, drawy = fun.getXYfromRowCol(well.row, well.col)
-    --     local imagex = IMAGES[enum.terrainWell]:getWidth()
-    --     local imagey = IMAGES[enum.terrainWell]:getHeight()
-    --
-    --     local drawscalex = (TILE_SIZE / imagex)
-    --     local drawscaley = (TILE_SIZE / imagey)
-    --
-    --     love.graphics.setColor(1,1,1,1)
-    --     love.graphics.draw(IMAGES[enum.terrainWell], drawx, drawy, 0, drawscalex, drawscaley)
-    -- end
-
 end
 
 
