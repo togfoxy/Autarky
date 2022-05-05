@@ -1,11 +1,19 @@
 module(...,package.seeall)
 
 
+imagesGrassDry = 1
+imagesGrassGreen = 2
+imagesGrassTeal = 3
+imagesWell = 4
 
+-- terrain types
 terrainGrassDry = 1
 terrainGrassGreen = 2
 terrainTeal = 3
-terrainWell = 4
+
+-- improvement types ## ensure these numbers align to the image enum above
+improvementWell = 4
 
 
-buildingFarm = 5
+-- goals/activities/queue items/actions
+goalRest = 1

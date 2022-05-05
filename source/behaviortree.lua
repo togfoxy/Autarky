@@ -1,7 +1,7 @@
 local behaviortree = {}
 
 
-function behaviortree.EstablishTree()
+function behaviortree.EstablishTree(tree)
 	
 	
 	tree = {}

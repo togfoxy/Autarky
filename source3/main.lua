@@ -9,10 +9,13 @@ concord = require 'lib.concord'
 res = require 'lib.resolution_solution'
 -- https://github.com/Vovkiv/resolution_solution
 
+ft = require 'lib.foxtree'		-- foxtree
+
 cf = require 'lib.commonfunctions'
 fun = require 'functions'
 ecs = require 'ecsfunctions'
 enum = require 'enum'
+bt = require 'behaviortree'
 
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
@@ -22,22 +25,22 @@ IMAGES = {}
 TILE_SIZE = 50
 NUMBER_OF_ROWS = (cf.round(SCREEN_HEIGHT / TILE_SIZE)) - 2
 NUMBER_OF_COLS = (cf.round(SCREEN_WIDTH / TILE_SIZE)) - 1
+
+-- debugging
+-- NUMBER_OF_ROWS = 2
+-- NUMBER_OF_COLS = 2
+
 BORDER_SIZE = 25
 UPPER_TERRAIN_HEIGHT = 6
 
 print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
-
--- capture the tile that has the well
-WELLS = {}
-WELLS[1] = {}
-WELLS[1].row = love.math.random(3, NUMBER_OF_ROWS - 4)  -- The 3 and -2 keeps the well off the screen edge
-WELLS[1].col = love.math.random(3, NUMBER_OF_COLS - 2)
 
 NUMBER_OF_VILLAGERS = 3
 PERSON_DRAW_WIDTH = 10
 
 MAP = {}			-- a 2d table of tiles
 VILLAGERS = {}
+TREE = {}			-- a tree that holds all possible behaviours for a person
 
 function love.keyreleased( key, scancode )
 	if key == "escape" then
@@ -49,8 +52,8 @@ end
 function love.mousepressed( x, y, button, istouch, presses )
 
 	--! local mousex,mousey = res.toScreen(x, y)
-    local mousex = x - TILE_SIZE / 2    -- the villagers are drawn in the centre of the tile so need to fake mouse adjustment
-    local mousey = y - TILE_SIZE / 2
+    local mousex = x
+    local mousey = y
 
 	if button == 1 then
 		-- select the villager if clicked, else select the tile (further down)
@@ -84,6 +87,8 @@ function love.load()
 
 	cf.AddScreen("World", SCREEN_STACK)
 
+	bt.EstablishTree(TREE)
+
     fun.loadImages()
     fun.initialiseMap()     -- initialises 2d map with nils
     ecsfunctions.init()	    -- loads all the components etc
@@ -97,49 +102,6 @@ function love.draw()
     --! res.stop()
 
     WORLD:emit("draw")
-
-    -- draw contour lines (height)
-    -- for col = 1, NUMBER_OF_COLS do
-    --     for row = 1,NUMBER_OF_ROWS do
-    --         -- check if top neighbour is different to current cell
-    --         if row > 1 then
-    --             if MAP[row-1][col].height ~= MAP[row][col].height then
-    --                 -- draw line
-    --                 local x1, y1 = fun.getXYfromRowCol(row, col)
-    --                 local x2, y2 = x1 + TILE_SIZE, y1
-    --                 local alpha = MAP[row][col].height / UPPER_TERRAIN_HEIGHT
-    --                 love.graphics.setColor(1,1,1,alpha)
-    --                 love.graphics.line(x1, y1, x2, y2)
-    --             end
-    --         end
-    --         -- left side
-    --         if col > 1 then
-    --             if MAP[row][col-1].height ~= MAP[row][col].height then
-    --                 -- draw line
-    --                 local x1, y1 = fun.getXYfromRowCol(row, col)
-    --                 local x2 = x1
-    --                 local y2 = y1 + TILE_SIZE
-    --                 local alpha = MAP[row][col].height / UPPER_TERRAIN_HEIGHT
-    --                 love.graphics.setColor(1,1,1,alpha)
-    --                 love.graphics.line(x1, y1, x2, y2)
-    --             end
-    --         end
-    --     end
-    -- end
-    --
-    -- -- draw water wells
-    -- for k,well in pairs(WELLS) do
-    --     local drawx, drawy = fun.getXYfromRowCol(well.row, well.col)
-    --     local imagex = IMAGES[enum.terrainWell]:getWidth()
-    --     local imagey = IMAGES[enum.terrainWell]:getHeight()
-    --
-    --     local drawscalex = (TILE_SIZE / imagex)
-    --     local drawscaley = (TILE_SIZE / imagey)
-    --
-    --     love.graphics.setColor(1,1,1,1)
-    --     love.graphics.draw(IMAGES[enum.terrainWell], drawx, drawy, 0, drawscalex, drawscaley)
-    -- end
-
 end
 
 

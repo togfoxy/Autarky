@@ -78,7 +78,7 @@ function love.mousepressed( x, y, button, istouch, presses )
 				end
 				villagerclicked = true
 			end
-		end
+		endf
 
 		-- if a villager was clicked then don't click the underlying tile
 		if not villagerclicked then
