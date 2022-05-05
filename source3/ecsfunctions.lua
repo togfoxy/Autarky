@@ -118,18 +118,39 @@ function ecsfunctions.init()
     systemIsPerson = concord.system({
         pool = {"isPerson"}
     })
-    function systemIsPerson:update()
+    function systemIsPerson:update(dt)
         for _, e in ipairs(self.pool) do
             -- check if queue is empty and if so then get a new action from the behavior tree
             if #e.isPerson.queue == 0 then
-                local nextaction = ft.DetermineAction(TREE, e)
-                local actionitem = {}
-                actionitem.type = nextaction
-                table.insert(e.isPerson.queue, actionitem)
+                local goal = ft.DetermineAction(TREE, e)
+                local actionlist = {}
+                local actionlist = fun.createActions(goal, e.isPerson.queue)  -- turns a simple decision from the tree into a complex sequence of actions
+            end
+
+            assert(#e.isPerson.queue > 0)
+
+            -- process head of queue
+            local currentaction = {}
+            currentaction = e.isPerson.queue[1]      -- a table
+
+            if currentaction.action == "idle" then
+                currentaction.timeleft = currentaction.timeleft - dt
+                if currentaction.timeleft <= 0 then
+                    table.remove(e.isPerson.queue, 1)
+                end
+            end
+            if currentaction.action == "move" then
+                local destx = currentaction.x
+                local desty = currentaction.y
+                if e.position.x == destx and e.position.y == desty then
+                    -- arrived at destination
+                    table.remove(e.isPerson.queue, 1)
+                else
+                    -- move towards destination
+                    local newx, newy = fun.applyMovement(e, destx, desty, 50, dt)       -- entity, x, y, speed, dt
+                end
             end
         end
-
-        --! process head of queue
     end
 
     -- add the systems to the world

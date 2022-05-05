@@ -11,8 +11,10 @@ function comp.init()
 
     concord.component("isPerson", function(c)
         c.queue = {}
+        -- c.queue[1] = {}
+        -- c.queue[1] = {}
     end)
-    
+
     concord.component("position", function(c, row, col)         -- exists on the map/grid
         c.row = row or love.math.random(1, NUMBER_OF_ROWS)
         c.col = col or love.math.random(1, NUMBER_OF_COLS)
