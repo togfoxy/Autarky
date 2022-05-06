@@ -17,3 +17,7 @@ improvementWell = 4
 
 -- goals/activities/queue items/actions
 goalRest = 1
+
+
+-- jobs/occupations
+jobFarmer = 1

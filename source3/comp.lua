@@ -11,8 +11,11 @@ function comp.init()
 
     concord.component("isPerson", function(c)
         c.queue = {}
-        -- c.queue[1] = {}
-        -- c.queue[1] = {}
+        c.stamina = 100         -- fully rested
+    end)
+
+    concord.component("occupation", function(c, number)
+        c.value = number or 0       -- see enum.job
     end)
 
     concord.component("position", function(c, row, col)         -- exists on the map/grid

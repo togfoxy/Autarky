@@ -96,6 +96,17 @@ function ecsfunctions.init()
                 local drawwidth = PERSON_DRAW_WIDTH
                 local drawx, drawy = e.position.x, e.position.y
                 love.graphics.circle("fill", drawx, drawy, drawwidth)
+
+                -- draw the occupation
+                if e:has("occupation") then
+                    love.graphics.setColor(0,0,1,1)
+                    local offsetx = 5
+                    local offsety = 8
+                    local occupation = e.occupation.value
+                    if occupation == enum.jobFarmer then
+                        love.graphics.print("F", drawx, drawy, 0, 1, 1, offsetx, offsety)
+                    end
+                end
             end
         end
     end
@@ -127,7 +138,13 @@ function ecsfunctions.init()
                 local actionlist = fun.createActions(goal, e.isPerson.queue)  -- turns a simple decision from the tree into a complex sequence of actions
             end
 
-            assert(#e.isPerson.queue > 0)
+            if #e.isPerson.queue < 1 then
+                -- add an 'idle' action
+                action = {}
+                action.action = "idle"
+                action.timeleft = love.math.random(10, 30)
+                table.insert(e.isPerson.queue, action)
+            end
 
             -- process head of queue
             local currentaction = {}
@@ -135,6 +152,8 @@ function ecsfunctions.init()
 
             if currentaction.action == "idle" then
                 currentaction.timeleft = currentaction.timeleft - dt
+                e.isPerson.stamina = e.isPerson.stamina + dt
+                if e.isPerson.stamina > 100 then e.isPerson.stamina = 100 end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
                 end
@@ -147,7 +166,13 @@ function ecsfunctions.init()
                     table.remove(e.isPerson.queue, 1)
                 else
                     -- move towards destination
-                    local newx, newy = fun.applyMovement(e, destx, desty, 50, dt)       -- entity, x, y, speed, dt
+                    if e.isPerson.stamina > 0 then
+                        local newx, newy = fun.applyMovement(e, destx, desty, WALKING_SPEED, dt)       -- entity, x, y, speed, dt
+                    else
+                        local newx, newy = fun.applyMovement(e, destx, desty, WALKING_SPEED / 2, dt)       -- entity, x, y, speed, dt
+                    end
+                    e.isPerson.stamina = e.isPerson.stamina - dt
+                    if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
                 end
             end
         end
