@@ -105,6 +105,9 @@ function functions.createActions(goal, agent)
             local workplacerow, workplacecol = getBlankTile()
             agent:give("workplace", workplacerow, workplacecol)
             MAP[workplacerow][workplacecol].improvementType = agent.occupation.value
+
+    print(agent.occupation.value)
+
             MAP[workplacerow][workplacecol].stocktype = agent.occupation.stocktype
         end
         if agent:has("workplace") then

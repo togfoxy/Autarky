@@ -19,6 +19,8 @@ function ecsfunctions.init()
         love.graphics.setColor(1,1,1,1)
         for _, e in ipairs(self.pool) do
             if e.isTile then
+
+                -- draw tile image
                 local img = IMAGES[e.isTile.tileType]
                 local drawx, drawy = e.position.x, e.position.y
                 local imagewidth = img:getWidth()
@@ -72,15 +74,24 @@ function ecsfunctions.init()
                     end
                 end
 
-                if e.isTile.improvementType ~= nil then
+                --! will need to work this out some time
+                local imptype
+                if MAP[row][col].improvementType ~= nil then imptype = MAP[row][col].improvementType end
+                if e.isTile.improvementType ~= nil then imptype = e.isTile.improvementType end
+
+                if imptype ~= nil then
                     -- draw the improvement
-                    local imagenumber = e.isTile.improvementType
-                    local drawx, drawy = e.position.x, e.position.y
+                    local imagenumber = imptype
+                -- print(imagenumber)
+                    -- local drawx, drawy = e.position.x, e.position.y
                     local imagewidth = IMAGES[imagenumber]:getWidth()
                     local imageheight = IMAGES[imagenumber]:getHeight()
 
                     local drawscalex = (TILE_SIZE / imagewidth)
                     local drawscaley = (TILE_SIZE / imageheight)
+
+                    local offsetx = imagewidth / 2
+                    local offsety = imageheight / 2
 
                     love.graphics.setColor(1,1,1,1)
                     love.graphics.draw(IMAGES[imagenumber], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
@@ -146,8 +157,6 @@ function ecsfunctions.init()
     function systemIsPerson:update(dt)
         for _, e in ipairs(self.pool) do
             -- check if queue is empty and if so then get a new action from the behavior tree
-
-    -- print("alpha " .. #e.isPerson.queue)
             if #e.isPerson.queue == 0 then
                 local goal = ft.DetermineAction(TREE, e)
                 local actionlist = {}
