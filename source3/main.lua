@@ -41,10 +41,21 @@ PERSON_DRAW_WIDTH = 10
 MAP = {}			-- a 2d table of tiles
 VILLAGERS = {}
 TREE = {}			-- a tree that holds all possible behaviours for a person
+WALKING_SPEED = 50
 
 function love.keyreleased( key, scancode )
 	if key == "escape" then
 		cf.RemoveScreen(SCREEN_STACK)
+	end
+	-- turn selected agent into farmers
+	if key == "f" then
+		for k,v in pairs(VILLAGERS) do
+			if v:has("isSelected") and (not v:has("occupation")) then
+	print("occup granted")
+				v:ensure("occupation", enum.jobFarmer, enum.stockFruit)		-- a farmer that farms fruit
+				v:remove("isSelected")
+			end
+		end
 	end
 end
 

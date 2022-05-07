@@ -4,9 +4,8 @@ local behaviortree = {}
 
 
 function behaviortree.EstablishTree()
-	-- these functions take a 'bot' which is a table with properties e.g. bot.stamina
-	-- the term 'agent' is probably a better term
-	-- functions will activate if some bot property meets a specified condition
+	-- these functions take a 'agent' which is a table with properties e.g. agent.stamina
+	-- functions will activate if some agent property meets a specified condition
 
 	-- low priority (e.g. 1) = less chance of occuring
 	-- high priroty (e.g. 10) = more chance of occuring
@@ -14,19 +13,37 @@ function behaviortree.EstablishTree()
 	TREE = {}	--! works on global tree but should be fixed
 
 	TREE.goal = "root"
-	TREE.priority = function(bot)
+	TREE.priority = function(agent)
 						return 1
 					end
 
 	TREE.child = {}
 	TREE.child[1] = {}
 	TREE.child[1].goal = enum.goalRest
-	TREE.child[1].priority = function(bot)
-								return 1
+	TREE.child[1].priority = function(agent)
+								local priority = cf.round((100 - agent.isPerson.stamina) / 10)
+								if priority < 1 then priority = 1 end
+								return priority
 							end
-	TREE.child[1].activate = function(bot)
+	TREE.child[1].activate = function(agent)
 								return true
 							 end
+
+	local node = {}
+	node.goal = enum.goalWork
+	node.priority = function(agent)
+							return 5
+					end
+	node.activate = function(agent)
+						if agent:has("occupation") then
+							return true
+						else
+							return false
+						end
+					end
+	table.insert(TREE.child, node)
+
+
 
 	-- tree.child[2] = {}
 	-- tree.child[2].goal = enum.goalBuild

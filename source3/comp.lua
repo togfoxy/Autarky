@@ -11,8 +11,19 @@ function comp.init()
 
     concord.component("isPerson", function(c)
         c.queue = {}
-        -- c.queue[1] = {}
-        -- c.queue[1] = {}
+        c.stamina = 100         -- fully rested
+        c.wealth = 100         -- starting amount
+    end)
+
+    concord.component("occupation", function(c, number, stocktype)
+        c.value = number or 0       -- see enum.job
+        c.stocktype = stocktype or nil             -- see enum.stocktype
+    end)
+
+    concord.component("workplace", function(c,row,col)
+        c.row = row
+        c.col = col
+        c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
     end)
 
     concord.component("position", function(c, row, col)         -- exists on the map/grid
@@ -21,11 +32,14 @@ function comp.init()
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
     end)
 
+
     concord.component("isTile", function(c, tiletype, tileheight, improvementtype)
         -- c.imageNumber = imagenumber or love.math.random(1, Enum.terrainNumberOfTypes)
         c.tileType = tiletype
         c.tileHeight = tileheight
         c.improvementType = improvementtype or nil     -- an improvement = a building or structure
+        c.stockType = nil
+        c.stockLevel = 0
     end)
 
 

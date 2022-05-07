@@ -31,6 +31,7 @@ function functions.loadImages()
 	IMAGES[enum.imagesGrassGreen] = love.graphics.newImage("assets/images/grass_green_block_256x.png")
 	IMAGES[enum.imagesGrassTeal] = love.graphics.newImage("assets/images/grass_teal_block_256x.png")
     IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_256.png")
+    IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/house1.png")
 
 	-- buildings
 	-- IMAGES[enum.buildingFarm] = love.graphics.newImage("assets/images/house1.png")
@@ -45,10 +46,19 @@ function functions.getXYfromRowCol(row, col)
     return x, y
 end
 
-function functions.createActions(goal, queue)
+local function getBlankTile()
+    --! need to check that tile is blank and there is pathfinding to the well
+    local row = love.math.random(1, NUMBER_OF_ROWS)
+    local col = love.math.random(1, NUMBER_OF_COLS)
+    return row, col
+end
+
+function functions.createActions(goal, agent)
     -- takes the goal provided by the behavior tree and returns a complex set of actions to achieve that goal
     -- returns a table of actions
+    local queue = agent.isPerson.queue
     local actionlist = {}
+
     if goal == enum.goalRest then
         -- get a destination to rest
         -- add a 'move' action to that location
@@ -81,6 +91,43 @@ function functions.createActions(goal, queue)
         action.timeleft = love.math.random(10, 30)
         table.insert(queue, action)
     end
+    if goal == enum.goalWork then
+        -- time to earn a paycheck
+
+        -- if workplace does not exist then
+        --  Create a workplace and assign it to this agent
+        -- end
+
+        -- add a 'move to' action
+        -- add a 'work' action
+        if not agent:has("workplace") then
+            -- create a workplace
+            local workplacerow, workplacecol = getBlankTile()
+            agent:give("workplace", workplacerow, workplacecol)
+            MAP[workplacerow][workplacecol].improvementType = agent.occupation.value
+            MAP[workplacerow][workplacecol].stocktype = agent.occupation.stocktype
+        end
+        if agent:has("workplace") then
+            -- move to workplace
+            local action = {}
+            action.action = "move"
+            action.row = agent.workplace.row
+            action.col = agent.workplace.col
+            action.x = agent.workplace.x
+            action.y = agent.workplace.y
+            table.insert(queue, action)
+
+            -- do work
+            local action = {}
+            action.action = "work"
+            action.timeleft = love.math.random(10, 30)
+            table.insert(queue, action)
+
+        else
+            error()     -- should never happen
+        end
+    end
+
     return queue
 end
 
@@ -116,8 +163,8 @@ function functions.applyMovement(e, targetx, targety, velocity, dt)
 
   -- print(currentx, currenty, xvector  , yvector  )
 
-    e.position.row = (currenty / TILE_SIZE)
-    e.position.col = (currentx / TILE_SIZE)
+    e.position.row = cf.round(currenty / TILE_SIZE)
+    e.position.col = cf.round(currentx / TILE_SIZE)
     if e.position.row < 1 then e.position.row = 1 end
     if e.position.col < 1 then e.position.col = 1 end
     if e.position.row > NUMBER_OF_ROWS then e.position.row = NUMBER_OF_ROWS end

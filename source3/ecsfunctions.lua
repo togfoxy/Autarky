@@ -96,6 +96,31 @@ function ecsfunctions.init()
                 local drawwidth = PERSON_DRAW_WIDTH
                 local drawx, drawy = e.position.x, e.position.y
                 love.graphics.circle("fill", drawx, drawy, drawwidth)
+
+                -- draw the occupation
+                if e:has("occupation") then
+                    love.graphics.setColor(0,0,1,1)
+                    local offsetx = 5
+                    local offsety = 8
+                    local occupation = e.occupation.value
+                    if occupation == enum.jobFarmer then
+                        love.graphics.print("F", drawx, drawy, 0, 1, 1, offsetx, offsety)
+                    end
+                end
+
+                -- display some debugging information
+                if e.isPerson.queue[1] ~= nil then
+                    local txt = "action: " .. e.isPerson.queue[1].action .. "\n"
+                    if e.isPerson.queue[1].timeleft ~= nil then
+                        txt = txt .. "timer: " .. cf.round(e.isPerson.queue[1].timeleft) .. "\n"
+                    end
+                    txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina)
+
+                    love.graphics.setColor(1,1,1,1)
+                    love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 10)
+                end
+
+
             end
         end
     end
@@ -121,13 +146,22 @@ function ecsfunctions.init()
     function systemIsPerson:update(dt)
         for _, e in ipairs(self.pool) do
             -- check if queue is empty and if so then get a new action from the behavior tree
+
+    -- print("alpha " .. #e.isPerson.queue)
             if #e.isPerson.queue == 0 then
                 local goal = ft.DetermineAction(TREE, e)
                 local actionlist = {}
-                local actionlist = fun.createActions(goal, e.isPerson.queue)  -- turns a simple decision from the tree into a complex sequence of actions
+                --local actionlist = fun.createActions(goal, e.isPerson.queue)  -- turns a simple decision from the tree into a complex sequence of actions
+                local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
             end
 
-            assert(#e.isPerson.queue > 0)
+            if #e.isPerson.queue < 1 then
+                -- add an 'idle' action
+                action = {}
+                action.action = "idle"
+                action.timeleft = love.math.random(10, 30)
+                table.insert(e.isPerson.queue, action)
+            end
 
             -- process head of queue
             local currentaction = {}
@@ -135,6 +169,8 @@ function ecsfunctions.init()
 
             if currentaction.action == "idle" then
                 currentaction.timeleft = currentaction.timeleft - dt
+                e.isPerson.stamina = e.isPerson.stamina + (dt * 2)
+                if e.isPerson.stamina > 100 then e.isPerson.stamina = 100 end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
                 end
@@ -147,7 +183,37 @@ function ecsfunctions.init()
                     table.remove(e.isPerson.queue, 1)
                 else
                     -- move towards destination
-                    local newx, newy = fun.applyMovement(e, destx, desty, 50, dt)       -- entity, x, y, speed, dt
+                    if e.isPerson.stamina > 0 then
+                        local newx, newy = fun.applyMovement(e, destx, desty, WALKING_SPEED, dt)       -- entity, x, y, speed, dt
+                    else
+                        local newx, newy = fun.applyMovement(e, destx, desty, WALKING_SPEED / 2, dt)       -- entity, x, y, speed, dt
+                    end
+                    e.isPerson.stamina = e.isPerson.stamina - dt
+                    if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
+                end
+            end
+            if currentaction.action == "work" then
+                currentaction.timeleft = currentaction.timeleft - dt
+                if currentaction.timeleft <= 0 then
+                    table.remove(e.isPerson.queue, 1)
+                end
+
+                if e.occupation.stocktype ~= nil then
+                    -- accumulate stock
+                    local row = e.position.row
+                    local col = e.position.col
+                    if MAP[row][col].stockLevel == nil then MAP[row][col].stockLevel = 0 end
+                    local stockgained
+                    if e.isPerson.stamina > 0 then
+                        stockgained = dt
+                    else
+                        stockgained = dt / 2        -- less productive when tired
+                    end
+                    MAP[row][col].stockLevel = MAP[row][col].stockLevel + stockgained
+                    e.isPerson.wealth = e.isPerson.wealth + stockgained          --! this needs to be dt * the value of the product/good/service
+
+                    e.isPerson.stamina = e.isPerson.stamina - dt
+                    if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
                 end
             end
         end
