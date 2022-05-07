@@ -21,15 +21,29 @@ function behaviortree.EstablishTree()
 	TREE.child[1] = {}
 	TREE.child[1].goal = enum.goalRest
 	TREE.child[1].priority = function(agent)
-								return 1
+								local priority = cf.round((100 - agent.isPerson.stamina) / 10)
+								if priority < 1 then priority = 1 end
+								return priority
 							end
 	TREE.child[1].activate = function(agent)
-								if agent.isPerson.stamina > 70 then
-									return false
-								else
-									return true
-								end
+								return true
 							 end
+
+	local node = {}
+	node.goal = enum.goalWork
+	node.priority = function(agent)
+							return 5
+					end
+	node.activate = function(agent)
+						if agent:has("workplace") then
+							return true
+						else
+							return false
+						end
+					end
+	table.insert(TREE.child, node)
+
+
 
 	-- tree.child[2] = {}
 	-- tree.child[2].goal = enum.goalBuild

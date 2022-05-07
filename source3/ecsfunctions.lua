@@ -107,6 +107,19 @@ function ecsfunctions.init()
                         love.graphics.print("F", drawx, drawy, 0, 1, 1, offsetx, offsety)
                     end
                 end
+
+                -- display some debugging information
+                if e.isPerson.queue[1] ~= nil then
+                    local txt = e.isPerson.queue[1].action .. "\n"
+                    if e.isPerson.queue[1].timeleft ~= nil then
+                        txt = txt .. cf.round(e.isPerson.queue[1].timeleft)
+                    end
+
+                    love.graphics.setColor(1,1,1,1)
+                    love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 10)
+                end
+
+
             end
         end
     end
@@ -132,10 +145,15 @@ function ecsfunctions.init()
     function systemIsPerson:update(dt)
         for _, e in ipairs(self.pool) do
             -- check if queue is empty and if so then get a new action from the behavior tree
+
+    -- print("alpha " .. #e.isPerson.queue)
             if #e.isPerson.queue == 0 then
                 local goal = ft.DetermineAction(TREE, e)
                 local actionlist = {}
-                local actionlist = fun.createActions(goal, e.isPerson.queue)  -- turns a simple decision from the tree into a complex sequence of actions
+                --local actionlist = fun.createActions(goal, e.isPerson.queue)  -- turns a simple decision from the tree into a complex sequence of actions
+                local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
+    print("alpha " .. #e.isPerson.queue)
+    print(inspect(actionlist))
             end
 
             if #e.isPerson.queue < 1 then
@@ -152,10 +170,13 @@ function ecsfunctions.init()
 
             if currentaction.action == "idle" then
                 currentaction.timeleft = currentaction.timeleft - dt
-                e.isPerson.stamina = e.isPerson.stamina + dt
+                e.isPerson.stamina = e.isPerson.stamina + (dt * 2)
                 if e.isPerson.stamina > 100 then e.isPerson.stamina = 100 end
                 if currentaction.timeleft <= 0 then
+    print("beta " .. #e.isPerson.queue)
                     table.remove(e.isPerson.queue, 1)
+    print("charlie " .. #e.isPerson.queue)
+    print("~~~~")
                 end
             end
             if currentaction.action == "move" then
