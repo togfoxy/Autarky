@@ -100,28 +100,33 @@ function functions.createActions(goal, agent)
 
         -- add a 'move to' action
         -- add a 'work' action
-
-        if agent:has("workplace") then
-            --!move to workplace
-            --!work
-        else
+        if not agent:has("workplace") then
             -- create a workplace
             local workplacerow, workplacecol = getBlankTile()
             agent:give("workplace", workplacerow, workplacecol)
-            MAP[workplacerow][workplacecol].isTile.improvementType = agent.occupation.value
-    print("workplace is now " .. workplacerow, workplacerow)
-
-
+            MAP[workplacerow][workplacecol].improvementType = agent.occupation.value
+            MAP[workplacerow][workplacecol].stocktype = agent.occupation.stocktype
         end
+        if agent:has("workplace") then
+            -- move to workplace
+            local action = {}
+            action.action = "move"
+            action.row = agent.workplace.row
+            action.col = agent.workplace.col
+            action.x = agent.workplace.x
+            action.y = agent.workplace.y
+            table.insert(queue, action)
 
+            -- do work
+            local action = {}
+            action.action = "work"
+            action.timeleft = love.math.random(10, 30)
+            table.insert(queue, action)
 
-
+        else
+            error()     -- should never happen
+        end
     end
-
-
-
-
-
 
     return queue
 end
@@ -158,8 +163,8 @@ function functions.applyMovement(e, targetx, targety, velocity, dt)
 
   -- print(currentx, currenty, xvector  , yvector  )
 
-    e.position.row = (currenty / TILE_SIZE)
-    e.position.col = (currentx / TILE_SIZE)
+    e.position.row = cf.round(currenty / TILE_SIZE)
+    e.position.col = cf.round(currentx / TILE_SIZE)
     if e.position.row < 1 then e.position.row = 1 end
     if e.position.col < 1 then e.position.col = 1 end
     if e.position.row > NUMBER_OF_ROWS then e.position.row = NUMBER_OF_ROWS end

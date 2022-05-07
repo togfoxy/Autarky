@@ -25,3 +25,8 @@ goalWork = 2
 -- jobs/occupations
 -- NOTE: ensure these occupations align ti the improvement type (which aligns to the image!)
 jobFarmer = 5
+
+
+
+-- stock types
+stockFruit = 1

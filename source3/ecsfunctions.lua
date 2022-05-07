@@ -110,10 +110,11 @@ function ecsfunctions.init()
 
                 -- display some debugging information
                 if e.isPerson.queue[1] ~= nil then
-                    local txt = e.isPerson.queue[1].action .. "\n"
+                    local txt = "action: " .. e.isPerson.queue[1].action .. "\n"
                     if e.isPerson.queue[1].timeleft ~= nil then
-                        txt = txt .. cf.round(e.isPerson.queue[1].timeleft)
+                        txt = txt .. "timer: " .. cf.round(e.isPerson.queue[1].timeleft) .. "\n"
                     end
+                    txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina)
 
                     love.graphics.setColor(1,1,1,1)
                     love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 10)
@@ -152,8 +153,6 @@ function ecsfunctions.init()
                 local actionlist = {}
                 --local actionlist = fun.createActions(goal, e.isPerson.queue)  -- turns a simple decision from the tree into a complex sequence of actions
                 local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
-    print("alpha " .. #e.isPerson.queue)
-    print(inspect(actionlist))
             end
 
             if #e.isPerson.queue < 1 then
@@ -173,10 +172,7 @@ function ecsfunctions.init()
                 e.isPerson.stamina = e.isPerson.stamina + (dt * 2)
                 if e.isPerson.stamina > 100 then e.isPerson.stamina = 100 end
                 if currentaction.timeleft <= 0 then
-    print("beta " .. #e.isPerson.queue)
                     table.remove(e.isPerson.queue, 1)
-    print("charlie " .. #e.isPerson.queue)
-    print("~~~~")
                 end
             end
             if currentaction.action == "move" then
@@ -192,6 +188,30 @@ function ecsfunctions.init()
                     else
                         local newx, newy = fun.applyMovement(e, destx, desty, WALKING_SPEED / 2, dt)       -- entity, x, y, speed, dt
                     end
+                    e.isPerson.stamina = e.isPerson.stamina - dt
+                    if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
+                end
+            end
+            if currentaction.action == "work" then
+                currentaction.timeleft = currentaction.timeleft - dt
+                if currentaction.timeleft <= 0 then
+                    table.remove(e.isPerson.queue, 1)
+                end
+
+                if e.occupation.stocktype ~= nil then
+                    -- accumulate stock
+                    local row = e.position.row
+                    local col = e.position.col
+                    if MAP[row][col].stockLevel == nil then MAP[row][col].stockLevel = 0 end
+                    local stockgained
+                    if e.isPerson.stamina > 0 then
+                        stockgained = dt
+                    else
+                        stockgained = dt / 2        -- less productive when tired
+                    end
+                    MAP[row][col].stockLevel = MAP[row][col].stockLevel + stockgained
+                    e.isPerson.wealth = e.isPerson.wealth + stockgained          --! this needs to be dt * the value of the product/good/service
+
                     e.isPerson.stamina = e.isPerson.stamina - dt
                     if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
                 end

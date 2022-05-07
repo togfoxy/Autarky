@@ -52,7 +52,7 @@ function love.keyreleased( key, scancode )
 		for k,v in pairs(VILLAGERS) do
 			if v:has("isSelected") and (not v:has("occupation")) then
 	print("occup granted")
-				v:ensure("occupation", enum.jobFarmer)
+				v:ensure("occupation", enum.jobFarmer, enum.stockFruit)		-- a farmer that farms fruit
 				v:remove("isSelected")
 			end
 		end

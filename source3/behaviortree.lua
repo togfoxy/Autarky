@@ -35,7 +35,7 @@ function behaviortree.EstablishTree()
 							return 5
 					end
 	node.activate = function(agent)
-						if agent:has("workplace") then
+						if agent:has("occupation") then
 							return true
 						else
 							return false
