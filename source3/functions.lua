@@ -46,19 +46,73 @@ function functions.getXYfromRowCol(row, col)
     return x, y
 end
 
+local function convertToCollisionMap(map)
+    -- takes the game map (not entities) and converts it inot a jumper-compatible collision map
+    local thismap = {}
+
+    -- initalise thismap
+    for row = 1, NUMBER_OF_ROWS do
+		thismap[row] = {}
+	end
+	for col = 1, NUMBER_OF_COLS do
+		for row = 1,NUMBER_OF_ROWS do
+			thismap[row][col] = {}
+        end
+    end
+
+    -- copy improvements from MAP to thismap
+    for col = 1, NUMBER_OF_COLS do
+        for row = 1, NUMBER_OF_ROWS do
+            if map[row][col].entity.isTile.improvementType ~= nil then
+                thismap[row][col] = 1
+            else
+                thismap[row][col] = 0
+            end
+        end
+    end
+
+    return thismap
+end
+
 local function getBlankTile()
     --! need to check that tile is pathfinding to the well
-    --! need to check that the tile is not inside the town square
 
     local row, col
+    local tilevalid = true
     local count = 0
 
     repeat
+        count = count + 1
         row = love.math.random(1, NUMBER_OF_ROWS)
         col = love.math.random(1, NUMBER_OF_COLS)
-        local imptype = MAP[row][col].entity.isTile.improvementType
-        count = count + 1
-    until imptype == nil or count > 1000
+
+        if MAP[row][col].entity.isTile.improvementType ~= nil then tilevalid = false end
+        if row >= WELLS[1].row - 3 and row <= WELLS[1].row + 3 and
+            col >= WELLS[1].col - 3 and col <= WELLS[1].col + 3 then
+                tilevalid = false
+        end
+    until tilevalid or count > 1000
+
+
+    local cmap = {
+	{0,1,0,1,0},
+	{0,1,0,1,0},
+	{0,1,1,1,0},
+	{0,0,0,0,0},
+                }
+
+    local path = cf.findPath(cmap, 0, 1, 1, 5, 1)        -- startx, starty, endx, endy
+
+
+
+
+
+
+
+
+
+
+    error()
 
     if count > 1000 then
         return nil, nil     --! need to check if nil is returned (no blank tiles available)

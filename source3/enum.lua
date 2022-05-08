@@ -30,3 +30,7 @@ jobFarmer = 5
 
 -- stock types
 stockFruit = 1
+
+
+-- jumper stuff
+enum.tileInitialised = 0

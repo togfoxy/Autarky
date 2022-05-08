@@ -74,11 +74,7 @@ function ecsfunctions.init()
                     end
                 end
 
-                --! will need to work this out some time
                 local imptype
-                -- if MAP[row][col].improvementType ~= nil then imptype = MAP[row][col].improvementType end
-                -- if e.isTile.improvementType ~= nil then imptype = e.isTile.improvementType end
-
                 if MAP[row][col].entity.isTile.improvementType ~= nil then imptype = e.isTile.improvementType end
 
                 -- draw the improvement
@@ -98,7 +94,7 @@ function ecsfunctions.init()
                     love.graphics.draw(IMAGES[imagenumber], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
                 end
 
-                -- draw stocklevels
+                -- draw stocklevels for each tile
                 if e.isTile.stockLevel > 0 then
                     love.graphics.setColor(0/255,0/255,115/255,1)
                     love.graphics.print(cf.round("stock: " .. e.isTile.stockLevel), drawx, drawy, 0, 1, 1, 20, 20)
