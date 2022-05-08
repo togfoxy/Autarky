@@ -21,6 +21,7 @@ improvementFarm = 5 -- job, improvement and image should be the same integer val
 -- goals/activities/queue items/actions
 goalRest = 1
 goalWork = 2
+goalEat = 3
 
 -- jobs/occupations
 -- NOTE: ensure these occupations align ti the improvement type (which aligns to the image!)
@@ -29,7 +30,8 @@ jobFarmer = 5
 
 
 -- stock types
-stockFruit = 1
+-- NOTE: ensure this lines up with the improvement type that sells this stock
+stockFruit = 5
 
 
 -- jumper stuff

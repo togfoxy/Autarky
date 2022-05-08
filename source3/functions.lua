@@ -110,6 +110,83 @@ local function getBlankTile()
     end
 end
 
+local function getClosestBuilding(buildingtype, startrow, startcol)
+    -- returns the closest building of required type
+    local closestvalue = -1
+    local closestrow, closestcol
+
+    for col = 1, NUMBER_OF_COLS do
+        for row = 1, NUMBER_OF_ROWS do
+            if MAP[row][col].entity.isTile.improvementType == buildingtype then
+                local cmap = convertToCollisionMap(MAP)
+                cmap[row][col] = enum.tileWalkable
+                local _, dist = cf.findPath(cmap, enum.tileWalkable, startcol, startrow, col, row, false)
+                if closestvalue < 0 then
+                    closestvalue = dist
+                    closestrow = row
+                    closestcol = col
+                elseif dist < closestvalue then
+                    closestvalue = dist
+                    closestrow = row
+                    closestcol = col
+                end
+            end
+        end
+    end
+    return closestrow, closestcol       --! need to manage nils
+end
+
+local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
+    -- uses jumper to add as many "move" actions as necessary to get to the waypoint
+
+    -- get path to destination
+    local cmap = convertToCollisionMap(MAP)
+    -- need to 'blank' out the destination so jumper can find a path.
+    cmap[stoprow][stopcol] = enum.tileWalkable
+
+    -- jumper uses x and y which is really col and row
+    local startx = startcol
+    local starty = startrow
+    local endx = stopcol
+    local endy = stoprow
+    local path = cf.findPath(cmap, enum.tileWalkable, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
+
+    for index, node in ipairs(path) do
+        if index > 1 then   -- don't apply the first waypoint as it is too close to the agent
+            local action = {}
+            action.action = "move"
+            action.row = node.y
+            action.col = node.x
+            action.x, action.y = fun.getXYfromRowCol(action.row, action.col)    -- returns x and y (in that order)
+            table.insert(queue, action)
+        end
+    end
+end
+
+local function buyStock(agent, stocktype, qty)
+
+    local agentrow = agent.position.row
+    local agentcol = agent.position.col
+    local imptype = MAP[agentrow][agentcol].entity.isTile.improvementType
+    -- check if agent is at the right shop
+    if imptype ~= nil then
+        if imptype == stocktype then
+            -- determine how much stock the agent can afford to buy
+            local sellprice = MAP[agentrow][agentcol].entity.isTile.stockSellPrice
+            local stockavail = MAP[agentrow][agentcol].entity.isTile.stockLevel
+            local canafford = math.floor(agent.isPerson.wealth / sellprice)     -- rounds down
+            local purchaseamt = math.min(stockavail, canafford)
+            local funds = purchaseamt * sellprice
+
+            MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
+            agent.isPerson.fullness = agent.isPerson.fullness + purchaseamt
+
+            MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + funds
+            agent.isPerson.wealth = agent.isPerson.wealth - funds
+        end
+    end
+end
+
 function functions.createActions(goal, agent)
     -- takes the goal provided by the behavior tree and returns a complex set of actions to achieve that goal
     -- returns a table of actions
@@ -157,9 +234,13 @@ function functions.createActions(goal, agent)
             -- create a workplace
             local workplacerow, workplacecol = getBlankTile()
             agent:give("workplace", workplacerow, workplacecol)
-            MAP[workplacerow][workplacecol].improvementType = agent.occupation.value
+            -- MAP[workplacerow][workplacecol].improvementType = agent.occupation.value
+            -- MAP[workplacerow][workplacecol].stocktype = agent.occupation.stocktype
+
             MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
-            MAP[workplacerow][workplacecol].stocktype = agent.occupation.stocktype
+            MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stocktype
+            MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
+
         end
         if agent:has("workplace") then
             -- move to workplace
@@ -176,7 +257,7 @@ function functions.createActions(goal, agent)
             local starty = agent.position.row
             local endx = workplacecol
             local endy = workplacerow
-            local path = cf.findPath(cmap, enum.tileWalkable, startx, starty, endx, endy, true)        -- startx, starty, endx, endy
+            local path = cf.findPath(cmap, enum.tileWalkable, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
 
             for index, node in ipairs(path) do
                 if index > 1 then   -- don't apply the first waypoint as it is too close to the agent
@@ -195,6 +276,20 @@ function functions.createActions(goal, agent)
             table.insert(queue, action)
         else
             error()     -- should never happen
+        end
+    end
+    if goal == enum.goalEat then
+        -- scan for a farmer
+        local agentrow = agent.position.row
+        local agentcol = agent.position.col
+        local shoprow, shopcol = getClosestBuilding(enum.improvementFarm, agentrow, agentcol)
+        if shoprow ~= nil then  --! need to properly deal with nils
+           addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+           -- buy food
+           buyStock(agent, enum.stockFruit, 10)
+
+           -- eat food
+
         end
     end
 

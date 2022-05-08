@@ -43,6 +43,21 @@ function behaviortree.EstablishTree()
 					end
 	table.insert(TREE.child, node)
 
+	local node = {}
+	node.goal = enum.goalEat
+	node.priority = function(agent)
+						local priority = cf.round((100 - agent.isPerson.fullness) / 10)
+						if priority < 1 then priority = 1 end
+						return priority
+					end
+	node.activate = function(agent)
+						if agent.isPerson.fullness < 70 then
+							return true
+						else
+							return false
+						end
+					end
+	table.insert(TREE.child, node)
 
 
 	-- tree.child[2] = {}

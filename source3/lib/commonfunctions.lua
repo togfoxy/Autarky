@@ -180,7 +180,7 @@ function findPath(map, walkable, startx, starty, endx, endy, debug)
 			print("No path found.")
 		end
 	end
-	return path
+	return path, length
 end
 
 function bolTableHasValue (tab, val)

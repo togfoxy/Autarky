@@ -12,7 +12,8 @@ function comp.init()
     concord.component("isPerson", function(c)
         c.queue = {}
         c.stamina = 100         -- fully rested
-        c.wealth = 100         -- starting amount
+        c.wealth = 100          -- starting amount
+        c.fullness = 100        -- hunger
     end)
 
     concord.component("occupation", function(c, number, stocktype)
@@ -37,9 +38,11 @@ function comp.init()
         -- c.imageNumber = imagenumber or love.math.random(1, Enum.terrainNumberOfTypes)
         c.tileType = tiletype
         c.tileHeight = tileheight
+        c.tileOwner = {}
         c.improvementType = improvementtype or nil     -- an improvement = a building or structure
         c.stockType = nil
         c.stockLevel = 0
+        c.stockSellPrice = 1
     end)
 
 

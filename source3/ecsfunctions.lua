@@ -128,7 +128,9 @@ function ecsfunctions.init()
                     if e.isPerson.queue[1].timeleft ~= nil then
                         txt = txt .. "timer: " .. cf.round(e.isPerson.queue[1].timeleft) .. "\n"
                     end
-                    txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina)
+                    txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina) .. "\n"
+                    txt = txt .. "fullness: " .. cf.round(e.isPerson.fullness) .. "\n"
+                    txt = txt .. "wealth: " .. cf.round(e.isPerson.wealth) .. "\n"
 
                     love.graphics.setColor(1,1,1,1)
                     love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 10)
@@ -160,6 +162,9 @@ function ecsfunctions.init()
     function systemIsPerson:update(dt)
         for _, e in ipairs(self.pool) do
             -- check if queue is empty and if so then get a new action from the behavior tree
+
+            e.isPerson.fullness = e.isPerson.fullness - dt
+
             if #e.isPerson.queue == 0 then
                 local goal = ft.DetermineAction(TREE, e)
                 local actionlist = {}
@@ -225,7 +230,7 @@ function ecsfunctions.init()
                     MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + stockgained
                     -- MAP[row][col].stockLevel = MAP[row][col].stockLevel + stockgained
 
-                    e.isPerson.wealth = e.isPerson.wealth + stockgained          --! this needs to be dt * the value of the product/good/service
+                    -- e.isPerson.wealth = e.isPerson.wealth + stockgained          --! this needs to be dt * the value of the product/good/service
                     e.isPerson.stamina = e.isPerson.stamina - dt
                     if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
                 end
