@@ -156,17 +156,18 @@ function findPath(map, walkable, startx, starty, endx, endy)
 	local myFinder = Pathfinder(grid, 'JPS', walkable)
 	-- Calculates the path, and its length
 	local path, length = myFinder:getPath(startx, starty, endx, endy)
-	
-	-- path.x and path.y
-	if path then
-	  print(('Path found! Length: %.2f'):format(length))
-		for node, count in path:iter() do
-			print(('Step: %d - x: %d - y: %d'):format(count, node.x, node.y))
 
-		end
-	else
-		print("No path found.")
-	end
+	-- path.x and path.y
+	-- if path then
+	--   print(('Path found! Length: %.2f'):format(length))
+	-- 	for node, count in path:iter() do
+	-- 		print(('Step: %d - x: %d - y: %d'):format(count, node.x, node.y))
+	--
+	-- 	end
+	-- else
+	-- 	print("No path found.")
+	-- end
+	return path
 
 end
 

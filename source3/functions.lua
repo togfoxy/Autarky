@@ -87,37 +87,22 @@ local function getBlankTile()
         col = love.math.random(1, NUMBER_OF_COLS)
 
         if MAP[row][col].entity.isTile.improvementType ~= nil then tilevalid = false end
+
         if row >= WELLS[1].row - 3 and row <= WELLS[1].row + 3 and
             col >= WELLS[1].col - 3 and col <= WELLS[1].col + 3 then
                 tilevalid = false
         end
+
+        local cmap = convertToCollisionMap(MAP)
+        -- jumper uses x and y which is really col and row
+        local startx = WELLS[1].col
+        local starty = WELLS[1].row
+        local endx = col
+        local endy = row
+
+        local path = cf.findPath(cmap, 0, startx, starty, endx, endy)        -- startx, starty, endx, endy
+        if path == nil then tilevalid = false end
     until tilevalid or count > 1000
-
-
---     local cmap = {
--- 	{0,1,0,1,0},
--- 	{0,1,0,1,0},
--- 	{0,1,1,1,0},
--- 	{0,0,0,0,0},
---                 }
--- print(#cmap, #cmap[1], #cmap[2])
-
-    cmap = convertToCollisionMap(MAP)
-
-    print(inspect(cmap))
-
-    local path = cf.findPath(cmap, 0, 1, 1, 5, 1)        -- startx, starty, endx, endy
-
-
-
-
-
-
-
-
-
-
-    error()
 
     if count > 1000 then
         return nil, nil     --! need to check if nil is returned (no blank tiles available)
