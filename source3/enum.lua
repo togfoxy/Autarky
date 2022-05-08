@@ -33,4 +33,4 @@ stockFruit = 1
 
 
 -- jumper stuff
-enum.tileInitialised = 0
+tileWalkable = 0

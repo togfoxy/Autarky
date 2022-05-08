@@ -47,7 +47,7 @@ function functions.getXYfromRowCol(row, col)
 end
 
 local function convertToCollisionMap(map)
-    -- takes the game map (not entities) and converts it inot a jumper-compatible collision map
+    -- takes the game map (not entities) and converts it to a jumper-compatible collision map
     local thismap = {}
 
     -- initalise thismap
@@ -70,7 +70,6 @@ local function convertToCollisionMap(map)
             end
         end
     end
-
     return thismap
 end
 
@@ -100,7 +99,7 @@ local function getBlankTile()
         local endx = col
         local endy = row
 
-        local path = cf.findPath(cmap, 0, startx, starty, endx, endy)        -- startx, starty, endx, endy
+        local path = cf.findPath(cmap, 0, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
         if path == nil then tilevalid = false end
     until tilevalid or count > 1000
 
@@ -138,7 +137,7 @@ function functions.createActions(goal, agent)
         action.row = destrow
         action.col = destcol
         -- adjust the x/y to be a little bit off centre for asthetics
-        action.x, action.y = fun.getXYfromRowCol(destrow, destcol)
+        action.x, action.y = fun.getXYfromRowCol(destrow, destcol)      -- returns x and y (in that order)
         action.x = action.x + love.math.random(-20, 20)
         action.y = action.y + love.math.random(-20, 20)
         table.insert(queue, action)
@@ -164,20 +163,36 @@ function functions.createActions(goal, agent)
         end
         if agent:has("workplace") then
             -- move to workplace
-            local action = {}
-            action.action = "move"
-            action.row = agent.workplace.row
-            action.col = agent.workplace.col
-            action.x = agent.workplace.x
-            action.y = agent.workplace.y
-            table.insert(queue, action)
+            local workplacerow = agent.workplace.row
+            local workplacecol = agent.workplace.col
 
+            -- get path to workplace
+            local cmap = convertToCollisionMap(MAP)
+            -- need to 'blank' out the workplace so jumper can find a path.
+            cmap[workplacerow][workplacecol] = enum.tileWalkable
+
+            -- jumper uses x and y which is really col and row
+            local startx = agent.position.col
+            local starty = agent.position.row
+            local endx = workplacecol
+            local endy = workplacerow
+            local path = cf.findPath(cmap, enum.tileWalkable, startx, starty, endx, endy, true)        -- startx, starty, endx, endy
+
+            for index, node in ipairs(path) do
+                if index > 1 then   -- don't apply the first waypoint as it is too close to the agent
+                    local action = {}
+                    action.action = "move"
+                    action.row = node.y
+                    action.col = node.x
+                    action.x, action.y = fun.getXYfromRowCol(action.row, action.col)    -- returns x and y (in that order)
+                    table.insert(queue, action)
+                end
+            end
             -- do work
             local action = {}
             action.action = "work"
             action.timeleft = love.math.random(10, 30)
             table.insert(queue, action)
-
         else
             error()     -- should never happen
         end

@@ -145,7 +145,16 @@ function strFormatThousand(v)
     return sign .. string.sub(s, 1, pos) .. string.gsub(string.sub(s, pos+1), "(...)", ",%1")
 end
 
-function findPath(map, walkable, startx, starty, endx, endy)
+function findPath(map, walkable, startx, starty, endx, endy, debug)
+	-- jumper algorithm, example use:
+
+	-- local cmap = convertToCollisionMap(MAP)		-- < write your own conversion function
+	-- -- jumper uses x and y which is really col and row
+	-- local startx = object.col
+	-- local starty = object.row
+	-- local endx = col
+	-- local endy = row
+	-- local path = cf.findPath(cmap, 0, startx, starty, endx, endy)        -- startx, starty, endx, endy
 
 	-- Library setup
 	local Grid = require ("lib.jumper.grid") -- The grid class
@@ -157,84 +166,22 @@ function findPath(map, walkable, startx, starty, endx, endy)
 	-- Calculates the path, and its length
 	local path, length = myFinder:getPath(startx, starty, endx, endy)
 
+	-- printing code for debugging
 	-- path.x and path.y
-	-- if path then
-	--   print(('Path found! Length: %.2f'):format(length))
-	-- 	for node, count in path:iter() do
-	-- 		print(('Step: %d - x: %d - y: %d'):format(count, node.x, node.y))
-	--
-	-- 	end
-	-- else
-	-- 	print("No path found.")
-	-- end
+	if debug then
+		if path then
+			print("#### jumper debug ####")
+			print(('Path found! Length: %.2f'):format(length))
+			for node, count in path:iter() do
+				print(('Step: %d - x: %d - y: %d'):format(count, node.x, node.y))
+			end
+			print("####")
+		else
+			print("No path found.")
+		end
+	end
 	return path
-
 end
-
-
-
--- local function GetCollisionMap(objMap)
--- 	-- used by jumper. Don't call this directly
--- 	-- set up colmap to be the same as map but slightly tweak tiles that are occupied by players
--- 	-- sets 'walls' via objMap.tileType which is a number
---
--- 	local row,col
--- 	local colmap = {}
--- 	-- set up a 2D array
--- 	for rows = 1,#objMap do
--- 		colmap[rows] = {}
--- 	end
--- 	for rows = 1,#objMap do
--- 		for cols = 1,#objMap[rows] do
--- 			colmap[rows][cols] = {}
--- 			colmap[rows][cols] = objMap[rows][cols].tiletype
--- 		end
--- 	end
--- 	return colmap
--- end
---
--- function Findpath(mymap, starttilerow,starttilecol,stoptilerow, stoptilecol )
--- 	-- receives row/col tile for start and stop and returns an array of paths
--- 	-- returns col/row format (x,y) and not row/col!!
--- 	-- assumes lib.jumper.pathfinder.lua exists
--- 	-- assumes enum.tileInitialised has a value
---
--- 	-- mymap = GetCollisionMap(m)
---
--- 	-- print(inspect(mymap[1]))
--- 	-- print(inspect(mymap[2]))
---
--- 	-- Value for walkable tiles
--- 	local walkable = enum.tileInitialised		-- see below
---
--- 	-- Library setup
--- 	local Pathfinder = require ("lib.jumper.pathfinder") -- The pathfinder class
--- 	local Grid = require ("lib.jumper.grid") -- The grid class
---
--- 	-- Creates a grid object
--- 	local grid = Grid(mymap)
--- 	-- Creates a pathfinder object using Jump Point Search
--- 	local myFinder = Pathfinder(grid, 'JPS', walkable)
--- 	--local myFinder = Pathfinder(grid, 'JPS', (function(value) return value == 1 end))
---
--- 	-- Calculates the path, and its length
--- 	local path, length = myFinder:getPath(starttilecol, starttilerow, stoptilecol, stoptilerow)
--- 	-- path.x and path.y
---
--- 	--[[
--- 	if path then
--- 	  print(('Path found! Length: %.2f'):format(length))
--- 		for node, count in path:iter() do
--- 			print(('Step: %d - x: %d - y: %d'):format(count, node.x, node.y))
---
--- 		end
--- 	else
--- 		print("No path found.")
--- 	end
--- 	]]--
---
--- 	return path
--- end
 
 function bolTableHasValue (tab, val)
 	-- returns true if tab contains val
