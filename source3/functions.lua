@@ -94,12 +94,17 @@ local function getBlankTile()
     until tilevalid or count > 1000
 
 
-    local cmap = {
-	{0,1,0,1,0},
-	{0,1,0,1,0},
-	{0,1,1,1,0},
-	{0,0,0,0,0},
-                }
+--     local cmap = {
+-- 	{0,1,0,1,0},
+-- 	{0,1,0,1,0},
+-- 	{0,1,1,1,0},
+-- 	{0,0,0,0,0},
+--                 }
+-- print(#cmap, #cmap[1], #cmap[2])
+
+    cmap = convertToCollisionMap(MAP)
+
+    print(inspect(cmap))
 
     local path = cf.findPath(cmap, 0, 1, 1, 5, 1)        -- startx, starty, endx, endy
 
