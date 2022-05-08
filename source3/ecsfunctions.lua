@@ -76,13 +76,14 @@ function ecsfunctions.init()
 
                 --! will need to work this out some time
                 local imptype
-                if MAP[row][col].improvementType ~= nil then imptype = MAP[row][col].improvementType end
-                if e.isTile.improvementType ~= nil then imptype = e.isTile.improvementType end
+                -- if MAP[row][col].improvementType ~= nil then imptype = MAP[row][col].improvementType end
+                -- if e.isTile.improvementType ~= nil then imptype = e.isTile.improvementType end
 
+                if MAP[row][col].entity.isTile.improvementType ~= nil then imptype = e.isTile.improvementType end
+
+                -- draw the improvement
                 if imptype ~= nil then
-                    -- draw the improvement
                     local imagenumber = imptype
-                -- print(imagenumber)
                     -- local drawx, drawy = e.position.x, e.position.y
                     local imagewidth = IMAGES[imagenumber]:getWidth()
                     local imageheight = IMAGES[imagenumber]:getHeight()
@@ -95,6 +96,12 @@ function ecsfunctions.init()
 
                     love.graphics.setColor(1,1,1,1)
                     love.graphics.draw(IMAGES[imagenumber], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
+                end
+
+                -- draw stocklevels
+                if e.isTile.stockLevel > 0 then
+                    love.graphics.setColor(0/255,0/255,115/255,1)
+                    love.graphics.print(cf.round("stock: " .. e.isTile.stockLevel), drawx, drawy, 0, 1, 1, 20, 20)
                 end
             end
 
@@ -144,7 +151,7 @@ function ecsfunctions.init()
         self.pool.onEntityAdded = function(_, entity)
             local row = entity.position.row
             local col = entity.position.col
-            -- MAP[row][col] = entity
+            MAP[row][col].entity = entity
         end
         --self.poolB.onEntityAdded = function(_, entity)
         --    table.insert(VILLAGERS, entity)
@@ -218,9 +225,11 @@ function ecsfunctions.init()
                     else
                         stockgained = dt / 2        -- less productive when tired
                     end
-                    MAP[row][col].stockLevel = MAP[row][col].stockLevel + stockgained
-                    e.isPerson.wealth = e.isPerson.wealth + stockgained          --! this needs to be dt * the value of the product/good/service
 
+                    MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + stockgained
+                    -- MAP[row][col].stockLevel = MAP[row][col].stockLevel + stockgained
+
+                    e.isPerson.wealth = e.isPerson.wealth + stockgained          --! this needs to be dt * the value of the product/good/service
                     e.isPerson.stamina = e.isPerson.stamina - dt
                     if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
                 end

@@ -47,10 +47,24 @@ function functions.getXYfromRowCol(row, col)
 end
 
 local function getBlankTile()
-    --! need to check that tile is blank and there is pathfinding to the well
-    local row = love.math.random(1, NUMBER_OF_ROWS)
-    local col = love.math.random(1, NUMBER_OF_COLS)
-    return row, col
+    --! need to check that tile is pathfinding to the well
+    --! need to check that the tile is not inside the town square
+
+    local row, col
+    local count = 0
+
+    repeat
+        row = love.math.random(1, NUMBER_OF_ROWS)
+        col = love.math.random(1, NUMBER_OF_COLS)
+        local imptype = MAP[row][col].entity.isTile.improvementType
+        count = count + 1
+    until imptype == nil or count > 1000
+
+    if count > 1000 then
+        return nil, nil     --! need to check if nil is returned (no blank tiles available)
+    else
+        return row, col
+    end
 end
 
 function functions.createActions(goal, agent)
@@ -94,10 +108,6 @@ function functions.createActions(goal, agent)
     if goal == enum.goalWork then
         -- time to earn a paycheck
 
-        -- if workplace does not exist then
-        --  Create a workplace and assign it to this agent
-        -- end
-
         -- add a 'move to' action
         -- add a 'work' action
         if not agent:has("workplace") then
@@ -105,9 +115,7 @@ function functions.createActions(goal, agent)
             local workplacerow, workplacecol = getBlankTile()
             agent:give("workplace", workplacerow, workplacecol)
             MAP[workplacerow][workplacecol].improvementType = agent.occupation.value
-
-    print(agent.occupation.value)
-
+            MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
             MAP[workplacerow][workplacecol].stocktype = agent.occupation.stocktype
         end
         if agent:has("workplace") then

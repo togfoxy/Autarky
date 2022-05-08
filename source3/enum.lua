@@ -15,7 +15,7 @@ terrainTeal = 3
 -- improvement types ## ensure these numbers align to the image enum above
 -- NOTE: ensure these numbers align to the image enum above
 improvementWell = 4
-improvementFarm = 5 --! needs to be a farm
+improvementFarm = 5 -- job, improvement and image should be the same integer value
 
 
 -- goals/activities/queue items/actions
