@@ -46,11 +46,69 @@ function functions.getXYfromRowCol(row, col)
     return x, y
 end
 
+local function convertToCollisionMap(map)
+    -- takes the game map (not entities) and converts it inot a jumper-compatible collision map
+    local thismap = {}
+
+    -- initalise thismap
+    for row = 1, NUMBER_OF_ROWS do
+		thismap[row] = {}
+	end
+	for col = 1, NUMBER_OF_COLS do
+		for row = 1,NUMBER_OF_ROWS do
+			thismap[row][col] = {}
+        end
+    end
+
+    -- copy improvements from MAP to thismap
+    for col = 1, NUMBER_OF_COLS do
+        for row = 1, NUMBER_OF_ROWS do
+            if map[row][col].entity.isTile.improvementType ~= nil then
+                thismap[row][col] = 1
+            else
+                thismap[row][col] = 0
+            end
+        end
+    end
+
+    return thismap
+end
+
 local function getBlankTile()
-    --! need to check that tile is blank and there is pathfinding to the well
-    local row = love.math.random(1, NUMBER_OF_ROWS)
-    local col = love.math.random(1, NUMBER_OF_COLS)
-    return row, col
+    --! need to check that tile is pathfinding to the well
+
+    local row, col
+    local tilevalid = true
+    local count = 0
+
+    repeat
+        count = count + 1
+        row = love.math.random(1, NUMBER_OF_ROWS)
+        col = love.math.random(1, NUMBER_OF_COLS)
+
+        if MAP[row][col].entity.isTile.improvementType ~= nil then tilevalid = false end
+
+        if row >= WELLS[1].row - 3 and row <= WELLS[1].row + 3 and
+            col >= WELLS[1].col - 3 and col <= WELLS[1].col + 3 then
+                tilevalid = false
+        end
+
+        local cmap = convertToCollisionMap(MAP)
+        -- jumper uses x and y which is really col and row
+        local startx = WELLS[1].col
+        local starty = WELLS[1].row
+        local endx = col
+        local endy = row
+
+        local path = cf.findPath(cmap, 0, startx, starty, endx, endy)        -- startx, starty, endx, endy
+        if path == nil then tilevalid = false end
+    until tilevalid or count > 1000
+
+    if count > 1000 then
+        return nil, nil     --! need to check if nil is returned (no blank tiles available)
+    else
+        return row, col
+    end
 end
 
 function functions.createActions(goal, agent)
@@ -94,10 +152,6 @@ function functions.createActions(goal, agent)
     if goal == enum.goalWork then
         -- time to earn a paycheck
 
-        -- if workplace does not exist then
-        --  Create a workplace and assign it to this agent
-        -- end
-
         -- add a 'move to' action
         -- add a 'work' action
         if not agent:has("workplace") then
@@ -105,6 +159,7 @@ function functions.createActions(goal, agent)
             local workplacerow, workplacecol = getBlankTile()
             agent:give("workplace", workplacerow, workplacecol)
             MAP[workplacerow][workplacecol].improvementType = agent.occupation.value
+            MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
             MAP[workplacerow][workplacecol].stocktype = agent.occupation.stocktype
         end
         if agent:has("workplace") then

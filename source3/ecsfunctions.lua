@@ -19,6 +19,8 @@ function ecsfunctions.init()
         love.graphics.setColor(1,1,1,1)
         for _, e in ipairs(self.pool) do
             if e.isTile then
+
+                -- draw tile image
                 local img = IMAGES[e.isTile.tileType]
                 local drawx, drawy = e.position.x, e.position.y
                 local imagewidth = img:getWidth()
@@ -72,18 +74,30 @@ function ecsfunctions.init()
                     end
                 end
 
-                if e.isTile.improvementType ~= nil then
-                    -- draw the improvement
-                    local imagenumber = e.isTile.improvementType
-                    local drawx, drawy = e.position.x, e.position.y
+                local imptype
+                if MAP[row][col].entity.isTile.improvementType ~= nil then imptype = e.isTile.improvementType end
+
+                -- draw the improvement
+                if imptype ~= nil then
+                    local imagenumber = imptype
+                    -- local drawx, drawy = e.position.x, e.position.y
                     local imagewidth = IMAGES[imagenumber]:getWidth()
                     local imageheight = IMAGES[imagenumber]:getHeight()
 
                     local drawscalex = (TILE_SIZE / imagewidth)
                     local drawscaley = (TILE_SIZE / imageheight)
 
+                    local offsetx = imagewidth / 2
+                    local offsety = imageheight / 2
+
                     love.graphics.setColor(1,1,1,1)
                     love.graphics.draw(IMAGES[imagenumber], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
+                end
+
+                -- draw stocklevels for each tile
+                if e.isTile.stockLevel > 0 then
+                    love.graphics.setColor(0/255,0/255,115/255,1)
+                    love.graphics.print(cf.round("stock: " .. e.isTile.stockLevel), drawx, drawy, 0, 1, 1, 20, 20)
                 end
             end
 
@@ -133,7 +147,7 @@ function ecsfunctions.init()
         self.pool.onEntityAdded = function(_, entity)
             local row = entity.position.row
             local col = entity.position.col
-            -- MAP[row][col] = entity
+            MAP[row][col].entity = entity
         end
         --self.poolB.onEntityAdded = function(_, entity)
         --    table.insert(VILLAGERS, entity)
@@ -146,8 +160,6 @@ function ecsfunctions.init()
     function systemIsPerson:update(dt)
         for _, e in ipairs(self.pool) do
             -- check if queue is empty and if so then get a new action from the behavior tree
-
-    -- print("alpha " .. #e.isPerson.queue)
             if #e.isPerson.queue == 0 then
                 local goal = ft.DetermineAction(TREE, e)
                 local actionlist = {}
@@ -209,9 +221,11 @@ function ecsfunctions.init()
                     else
                         stockgained = dt / 2        -- less productive when tired
                     end
-                    MAP[row][col].stockLevel = MAP[row][col].stockLevel + stockgained
-                    e.isPerson.wealth = e.isPerson.wealth + stockgained          --! this needs to be dt * the value of the product/good/service
 
+                    MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + stockgained
+                    -- MAP[row][col].stockLevel = MAP[row][col].stockLevel + stockgained
+
+                    e.isPerson.wealth = e.isPerson.wealth + stockgained          --! this needs to be dt * the value of the product/good/service
                     e.isPerson.stamina = e.isPerson.stamina - dt
                     if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
                 end

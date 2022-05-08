@@ -66,7 +66,6 @@ function GetDistance(x1, y1, x2, y2)
     local c = a + b
     local distance = math.sqrt(c)
     return distance
-
 end
 function SubtractVectors(x1,y1,x2,y2)
 	-- subtracts vector2 from vector1 i.e. v1 - v2
@@ -75,9 +74,12 @@ function SubtractVectors(x1,y1,x2,y2)
 end
 function dotVectors(x1,y1,x2,y2)
 	-- receives two vectors (deltas) and assumes same origin
+	-- x1/y1 vector is facing/looking
+	-- x2/y2 is the position relative to the object doing the looking
 	-- eg: guard is looking in direction x1/y1. His looking vector is 1,1
 	-- thief vector from guard is 2,-1  (he's on the right side of the guard)
-	-- dot product is 1. This is positive so thief is infront of guard (assuming 180 deg viewing angle)
+	-- dot product is 1. This is positive so thief is in front of guard (assuming 180 deg viewing angle)
+	-- http://blog.wolfire.com/2009/07/linear-algebra-for-game-developers-part-2/
 	return (x1*x2)+(y1*y2)
 end
 function ScaleVector(x,y,fctor)
@@ -86,6 +88,22 @@ function ScaleVector(x,y,fctor)
 	return x * fctor, y * fctor
 	--! should create a vector module
 end
+function AddVectorToPoint(x,y,headingdegrees,distance)
+	-- x/y = a point in space
+	-- heading is the angle in degrees where 0 = NORTH
+	-- distance = distance
+	-- returns x and y (whole numbers)
+	-- Note: a negative distance (< 0) will provide a point that is behind or backwards.
+
+	local convertedheading = headingdegrees - 90
+	if convertedheading < 0 then convertedheading = 360 + convertedheading end
+	if convertedheading > 359 then convertedheading = convertedheading - 360 end
+	local rads = math.rad(convertedheading)
+	local xdelta = cf.round(distance * math.cos(rads))
+	local ydelta = cf.round(distance * math.sin(rads))
+	return (x + xdelta), (y + ydelta)		-- 0 = NORTH!
+end
+
 function Getuuid()
 	local random = math.random
     local template ='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
@@ -96,7 +114,7 @@ function Getuuid()
 end
 
 function DeDupeArray(myarray)
--- dedupes myarray and returns same array (not a new array)
+	-- dedupes myarray and returns same array (not a new array)
 	local seen = {}
 	for index,item in ipairs(myarray) do
 		if seen[item] then
@@ -105,15 +123,13 @@ function DeDupeArray(myarray)
 			seen[item] = true
 		end
 	end
-
 end
 
 function fltAbsoluteTileDistance(x1,y1,x2,y2)
--- given two tiles, determine the distance between those tiles
--- this returns the number of steps or tiles in whole numbers and not in diagonals
+	-- given two tiles, determine the distance between those tiles
+	-- this returns the number of steps or tiles in whole numbers and not in diagonals
 
 	return math.max (math.abs(x2-x1), math.abs(y2-y1))
-
 end
 
 function strFormatThousand(v)
@@ -129,91 +145,100 @@ function strFormatThousand(v)
     return sign .. string.sub(s, 1, pos) .. string.gsub(string.sub(s, pos+1), "(...)", ",%1")
 end
 
-local function GetCollisionMap(objMap)
--- used by jumper. Don't call this directly
--- set up colmap to be the same as map but slightly tweak tiles that are occupied by players
-
-	local row,col
-	local colmap = {}
-	-- set up a 2D array
-	for rows = 1,#objMap do
-		colmap[rows] = {}
-	end
-	for rows = 1,#objMap do
-		for cols = 1,#objMap[rows] do
-			colmap[rows][cols] = {}
-			colmap[rows][cols] = objMap[rows][cols].tiletype
-		end
-	end
-
--- print(inspect(colmap[2]))
-
-
-	-- -- after colmap is established, tweak individual tiles that occupy a player
-	-- for i = 1 , #parray do
-        -- if parray[i].health > 0 then
-            -- if parray[i].ismoving == false then
-                -- -- player is not moving so the tile they are on is obstructed
-                -- row = parray[i].row
-                -- col = parray[i].col
-            -- else
-                -- -- the tile the player is moving too is obstructed
-                -- row = parray[i].row
-                -- col = parray[i].col
-            -- end
-              -- colmap[row][col] = enum.tilePlayer
-		-- end
-	-- end
-
-	return colmap
-end
-
-function Findpath(m, starttilerow,starttilecol,stoptilerow, stoptilecol )
-	-- receives x/y tile start and stop and returns an array of paths
-	-- returns col/row format (x,y) and not row/col!!
-
-	mymap = GetCollisionMap(m)
-
--- print(inspect(mymap[1]))
--- print(inspect(mymap[2]))
-
-	-- Value for walkable tiles
-	local walkable = enum.tileInitialised		-- see below - actually looking for < 10
+function findPath(map, walkable, startx, starty, endx, endy)
 
 	-- Library setup
-	local Pathfinder = require ("jumper.pathfinder") -- The pathfinder class
-
+	local Grid = require ("lib.jumper.grid") -- The grid class
+	local Pathfinder = require ("lib.jumper.pathfinder") -- The pathfinder class
 	-- Creates a grid object
-	local grid = Grid(mymap)
+	local grid = Grid(map)
 	-- Creates a pathfinder object using Jump Point Search
 	local myFinder = Pathfinder(grid, 'JPS', walkable)
-	--local myFinder = Pathfinder(grid, 'JPS', (function(value) return value == 1 end))
-
 	-- Calculates the path, and its length
-	local path, length = myFinder:getPath(starttilerow, starttilecol, stoptilerow, stoptilecol)
+	local path, length = myFinder:getPath(startx, starty, endx, endy)
+
 	-- path.x and path.y
-
-	--[[
-	if path then
-	  print(('Path found! Length: %.2f'):format(length))
-		for node, count in path:iter() do
-			print(('Step: %d - x: %d - y: %d'):format(count, node.x, node.y))
-
-		end
-	else
-		print("No path found.")
-	end
-	]]--
-
+	-- if path then
+	--   print(('Path found! Length: %.2f'):format(length))
+	-- 	for node, count in path:iter() do
+	-- 		print(('Step: %d - x: %d - y: %d'):format(count, node.x, node.y))
+	--
+	-- 	end
+	-- else
+	-- 	print("No path found.")
+	-- end
 	return path
 
 end
 
-function bolTableHasValue (tab, val)
--- returns true if tab contains val
-	if tab == nil then return false end
 
-    for index, value in pairs(tab) do
+
+-- local function GetCollisionMap(objMap)
+-- 	-- used by jumper. Don't call this directly
+-- 	-- set up colmap to be the same as map but slightly tweak tiles that are occupied by players
+-- 	-- sets 'walls' via objMap.tileType which is a number
+--
+-- 	local row,col
+-- 	local colmap = {}
+-- 	-- set up a 2D array
+-- 	for rows = 1,#objMap do
+-- 		colmap[rows] = {}
+-- 	end
+-- 	for rows = 1,#objMap do
+-- 		for cols = 1,#objMap[rows] do
+-- 			colmap[rows][cols] = {}
+-- 			colmap[rows][cols] = objMap[rows][cols].tiletype
+-- 		end
+-- 	end
+-- 	return colmap
+-- end
+--
+-- function Findpath(mymap, starttilerow,starttilecol,stoptilerow, stoptilecol )
+-- 	-- receives row/col tile for start and stop and returns an array of paths
+-- 	-- returns col/row format (x,y) and not row/col!!
+-- 	-- assumes lib.jumper.pathfinder.lua exists
+-- 	-- assumes enum.tileInitialised has a value
+--
+-- 	-- mymap = GetCollisionMap(m)
+--
+-- 	-- print(inspect(mymap[1]))
+-- 	-- print(inspect(mymap[2]))
+--
+-- 	-- Value for walkable tiles
+-- 	local walkable = enum.tileInitialised		-- see below
+--
+-- 	-- Library setup
+-- 	local Pathfinder = require ("lib.jumper.pathfinder") -- The pathfinder class
+-- 	local Grid = require ("lib.jumper.grid") -- The grid class
+--
+-- 	-- Creates a grid object
+-- 	local grid = Grid(mymap)
+-- 	-- Creates a pathfinder object using Jump Point Search
+-- 	local myFinder = Pathfinder(grid, 'JPS', walkable)
+-- 	--local myFinder = Pathfinder(grid, 'JPS', (function(value) return value == 1 end))
+--
+-- 	-- Calculates the path, and its length
+-- 	local path, length = myFinder:getPath(starttilecol, starttilerow, stoptilecol, stoptilerow)
+-- 	-- path.x and path.y
+--
+-- 	--[[
+-- 	if path then
+-- 	  print(('Path found! Length: %.2f'):format(length))
+-- 		for node, count in path:iter() do
+-- 			print(('Step: %d - x: %d - y: %d'):format(count, node.x, node.y))
+--
+-- 		end
+-- 	else
+-- 		print("No path found.")
+-- 	end
+-- 	]]--
+--
+-- 	return path
+-- end
+
+function bolTableHasValue (tab, val)
+	-- returns true if tab contains val
+    for index, value in ipairs(tab) do
         if value == val then
             return true
         end
@@ -223,7 +248,7 @@ function bolTableHasValue (tab, val)
 end
 
 function beep()
---** doesn't seem to work
+	--** doesn't seem to work
 
 	local samplerate = 44100 -- Hz
 	local duration = 1 -- second
@@ -237,8 +262,8 @@ function beep()
 end
 
 function fromImageToQuads(spritesheet, spritewidth, spriteheight)
--- Where spritesheet is an image and spritewidth is the width
--- and height of your textures
+	-- Where spritesheet is an image and spritewidth is the width
+	-- and height of your textures
   local quadtiles = {} -- A table containing the quads to return
   local imageWidth = spritesheet:getWidth()
   local imageHeight = spritesheet:getHeight()
@@ -264,14 +289,73 @@ function RemoveScreen(screenStack)
 end
 
 function CurrentScreenName(screenStack)
--- returns the current active screen
+	-- returns the current active screen
+	-- input: the screen stack array
+	-- output: string
 	return screenStack[#screenStack]
 end
 
 function SwapScreen(newScreen, screenStack)
--- swaps screens so that the old screen is removed from the stack
--- this adds the new screen then removes the 2nd last screen.
+	-- swaps screens so that the old screen is removed from the stack
+	-- this adds the new screen then removes the 2nd last screen.
 
-    AddScreen(newScreen)
+    AddScreen(newScreen, screenStack)
     table.remove(screenStack, #screenStack - 1)
+end
+
+function getBearing(x1,y1,x2,y2)
+	-- returns the bearing between two points assuming straight up (north) is zero degrees
+	-- Straight down (below/south) is 180 degrees
+	-- another way to think of this is the first point is a vector from 0,0 to 0,inf (y axis/north)
+	-- and the other vector is from 0,0 to x2,y2. Function returns the angle between those two vectors
+	-- input: x1, y1 - the anchor or origin to determine the bearing
+	-- output: number - 0 -> 359. Degrees. 0 = north/up/above
+
+    -- if there is an imaginary triangle from the positionx/y to the correctx/y then calculate opp/adj/hyp
+	if x1 == x2 and y1 == y2 then targetqudrant = 0 end
+    if x2 >= x1 and y2 <= y1 then targetqudrant = 1 end
+    if x2 > x1 and y2 > y1 then targetqudrant = 2 end
+    if x2 <= x1 and y2 >= y1 then targetqudrant = 3 end
+    if x2 < x1 and y2 < y1 then targetqudrant = 4 end
+
+    if targetqudrant == 0 then
+        return 0    -- just face north I guess
+    elseif targetqudrant == 1 then
+        -- tan(angle) = opp / adj
+        -- angle = atan(opp/adj)
+        local adj = x2 - x1
+        local opp = y1 - y2
+        local angletocorrectposition = math.deg( math.atan(opp/adj) )   -- atan returns radians. Convert to degrees from east (90 degrees)
+        -- convert so it is relative to zero/north
+        return cf.round(90 - angletocorrectposition)
+    elseif targetqudrant == 2 then
+        local adj = x2 - x1
+        local opp = y2 - y1
+        local angletocorrectposition = math.deg( math.atan(opp/adj) )   -- atan returns radians. Convert to degrees from east (90 degrees)
+        -- convert so it is relative to zero/north
+        return cf.round(90 + angletocorrectposition)
+    elseif targetqudrant == 3 then
+        local adj = x1 - x2
+        local opp = y2 - y1
+        local angletocorrectposition = math.deg( math.atan(opp/adj) )   -- atan returns radians. Convert to degrees from east (90 degrees)
+        -- convert so it is relative to zero/north
+        return cf.round(270 - angletocorrectposition)
+    elseif targetqudrant == 4 then
+        local adj = x1 - x2
+        local opp = y1 - y2
+        local angletocorrectposition = math.deg( math.atan(opp/adj) )   -- atan returns radians. Convert to degrees from east (90 degrees)
+        -- convert so it is relative to zero/north
+        return cf.round(270 + angletocorrectposition)
+    end
+end
+
+function adjustHeading(heading, amount)
+    -- adjusts HEADING by AMOUNT. A positive moves the heading right/clockwise. A negative value moves left/anti-clockwise
+    -- will adjust if moves past north/zero/360
+	-- input: original heading, amount to adjust
+    -- output: new heading
+    local newheading = heading + amount
+    if newheading > 359 then newheading = newheading - 360 end
+    if newheading < 0 then newheading = 360 + newheading end     -- heading is a negative value so '+' it and 360
+    return newheading
 end
