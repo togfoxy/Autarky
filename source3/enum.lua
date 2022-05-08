@@ -30,7 +30,8 @@ jobFarmer = 5
 
 
 -- stock types
-stockFruit = 1
+-- NOTE: ensure this lines up with the improvement type that sells this stock
+stockFruit = 5
 
 
 -- jumper stuff

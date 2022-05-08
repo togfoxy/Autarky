@@ -230,7 +230,7 @@ function ecsfunctions.init()
                     MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + stockgained
                     -- MAP[row][col].stockLevel = MAP[row][col].stockLevel + stockgained
 
-                    e.isPerson.wealth = e.isPerson.wealth + stockgained          --! this needs to be dt * the value of the product/good/service
+                    -- e.isPerson.wealth = e.isPerson.wealth + stockgained          --! this needs to be dt * the value of the product/good/service
                     e.isPerson.stamina = e.isPerson.stamina - dt
                     if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
                 end

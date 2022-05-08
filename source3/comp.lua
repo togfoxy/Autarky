@@ -38,9 +38,11 @@ function comp.init()
         -- c.imageNumber = imagenumber or love.math.random(1, Enum.terrainNumberOfTypes)
         c.tileType = tiletype
         c.tileHeight = tileheight
+        c.tileOwner = {}
         c.improvementType = improvementtype or nil     -- an improvement = a building or structure
         c.stockType = nil
         c.stockLevel = 0
+        c.stockSellPrice = 1
     end)
 
 

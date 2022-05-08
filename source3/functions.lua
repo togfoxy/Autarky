@@ -163,19 +163,28 @@ local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
     end
 end
 
-local function buyStock(agent, stock, qty)
-    -- if at shop then
-    --      if agent has money
-    --          see how much agent can affort
-    --          see how much stock is available
-    --          increase agent stocklevel
-    --          decrease shop stocklevel
-    --          increase sellers wealth
-    --          decrease agents wealth
-    --  end end
+local function buyStock(agent, stocktype, qty)
 
+    local agentrow = agent.position.row
+    local agentcol = agent.position.col
+    local imptype = MAP[agentrow][agentcol].entity.isTile.improvementType
+    -- check if agent is at the right shop
+    if imptype ~= nil then
+        if imptype == stocktype then
+            -- determine how much stock the agent can afford to buy
+            local sellprice = MAP[agentrow][agentcol].entity.isTile.stockSellPrice
+            local stockavail = MAP[agentrow][agentcol].entity.isTile.stockLevel
+            local canafford = math.floor(agent.isPerson.wealth / sellprice)     -- rounds down
+            local purchaseamt = math.min(stockavail, canafford)
+            local funds = purchaseamt * sellprice
 
+            MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
+            agent.isPerson.fullness = agent.isPerson.fullness + purchaseamt
 
+            MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + funds
+            agent.isPerson.wealth = agent.isPerson.wealth - funds
+        end
+    end
 end
 
 function functions.createActions(goal, agent)
@@ -225,9 +234,13 @@ function functions.createActions(goal, agent)
             -- create a workplace
             local workplacerow, workplacecol = getBlankTile()
             agent:give("workplace", workplacerow, workplacecol)
-            MAP[workplacerow][workplacecol].improvementType = agent.occupation.value
+            -- MAP[workplacerow][workplacecol].improvementType = agent.occupation.value
+            -- MAP[workplacerow][workplacecol].stocktype = agent.occupation.stocktype
+
             MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
-            MAP[workplacerow][workplacecol].stocktype = agent.occupation.stocktype
+            MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stocktype
+            MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
+
         end
         if agent:has("workplace") then
             -- move to workplace
