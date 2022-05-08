@@ -95,9 +95,9 @@ function ecsfunctions.init()
                 end
 
                 -- draw stocklevels for each tile
-                if e.isTile.stockLevel > 0 then
+                if MAP[row][col].entity.isTile.stockLevel > 0 then
                     love.graphics.setColor(0/255,0/255,115/255,1)
-                    love.graphics.print(cf.round("stock: " .. e.isTile.stockLevel), drawx, drawy, 0, 1, 1, 20, 20)
+                    love.graphics.print(cf.round(MAP[row][col].entity.isTile.stockLevel), drawx, drawy, 0, 1, 1, 20, 20)
                 end
             end
 
@@ -221,7 +221,7 @@ function ecsfunctions.init()
                     else
                         stockgained = dt / 2        -- less productive when tired
                     end
-
+                    stockgained = cf.round(stockgained, 2)
                     MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + stockgained
                     -- MAP[row][col].stockLevel = MAP[row][col].stockLevel + stockgained
 
