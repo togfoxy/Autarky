@@ -12,7 +12,8 @@ function comp.init()
     concord.component("isPerson", function(c)
         c.queue = {}
         c.stamina = 100         -- fully rested
-        c.wealth = 100         -- starting amount
+        c.wealth = 100          -- starting amount
+        c.fullness = 100        -- hunger
     end)
 
     concord.component("occupation", function(c, number, stocktype)

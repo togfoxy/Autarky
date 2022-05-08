@@ -110,6 +110,74 @@ local function getBlankTile()
     end
 end
 
+local function getClosestBuilding(buildingtype, startrow, startcol)
+    -- returns the closest building of required type
+    local closestvalue = -1
+    local closestrow, closestcol
+
+    for col = 1, NUMBER_OF_COLS do
+        for row = 1, NUMBER_OF_ROWS do
+            if MAP[row][col].entity.isTile.improvementType == buildingtype then
+                local cmap = convertToCollisionMap(MAP)
+                cmap[row][col] = enum.tileWalkable
+                local _, dist = cf.findPath(cmap, enum.tileWalkable, startcol, startrow, col, row, false)
+                if closestvalue < 0 then
+                    closestvalue = dist
+                    closestrow = row
+                    closestcol = col
+                elseif dist < closestvalue then
+                    closestvalue = dist
+                    closestrow = row
+                    closestcol = col
+                end
+            end
+        end
+    end
+    return closestrow, closestcol       --! need to manage nils
+end
+
+local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
+    -- uses jumper to add as many "move" actions as necessary to get to the waypoint
+
+    -- get path to destination
+    local cmap = convertToCollisionMap(MAP)
+    -- need to 'blank' out the destination so jumper can find a path.
+    cmap[stoprow][stopcol] = enum.tileWalkable
+
+    -- jumper uses x and y which is really col and row
+    local startx = startcol
+    local starty = startrow
+    local endx = stopcol
+    local endy = stoprow
+    local path = cf.findPath(cmap, enum.tileWalkable, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
+
+    for index, node in ipairs(path) do
+        if index > 1 then   -- don't apply the first waypoint as it is too close to the agent
+            local action = {}
+            action.action = "move"
+            action.row = node.y
+            action.col = node.x
+            action.x, action.y = fun.getXYfromRowCol(action.row, action.col)    -- returns x and y (in that order)
+            table.insert(queue, action)
+        end
+    end
+end
+
+local function buyStock(agent, stock, qty)
+    -- if at shop then
+    --      if agent has money
+    --          see how much agent can affort
+    --          see how much stock is available
+    --          increase agent stocklevel
+    --          decrease shop stocklevel
+    --          increase sellers wealth
+    --          decrease agents wealth
+    --  end end
+
+
+
+end
+
 function functions.createActions(goal, agent)
     -- takes the goal provided by the behavior tree and returns a complex set of actions to achieve that goal
     -- returns a table of actions
@@ -176,7 +244,7 @@ function functions.createActions(goal, agent)
             local starty = agent.position.row
             local endx = workplacecol
             local endy = workplacerow
-            local path = cf.findPath(cmap, enum.tileWalkable, startx, starty, endx, endy, true)        -- startx, starty, endx, endy
+            local path = cf.findPath(cmap, enum.tileWalkable, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
 
             for index, node in ipairs(path) do
                 if index > 1 then   -- don't apply the first waypoint as it is too close to the agent
@@ -195,6 +263,20 @@ function functions.createActions(goal, agent)
             table.insert(queue, action)
         else
             error()     -- should never happen
+        end
+    end
+    if goal == enum.goalEat then
+        -- scan for a farmer
+        local agentrow = agent.position.row
+        local agentcol = agent.position.col
+        local shoprow, shopcol = getClosestBuilding(enum.improvementFarm, agentrow, agentcol)
+        if shoprow ~= nil then  --! need to properly deal with nils
+           addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+           -- buy food
+           buyStock(agent, enum.stockFruit, 10)
+
+           -- eat food
+
         end
     end
 
