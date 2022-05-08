@@ -164,6 +164,7 @@ function ecsfunctions.init()
             -- check if queue is empty and if so then get a new action from the behavior tree
 
             e.isPerson.fullness = e.isPerson.fullness - dt
+            if e.isPerson.fullness < 0 then e.isPerson.fullness = 0 end
 
             if #e.isPerson.queue == 0 then
                 local goal = ft.DetermineAction(TREE, e)
@@ -214,7 +215,6 @@ function ecsfunctions.init()
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
                 end
-
                 if e.occupation.stocktype ~= nil then
                     -- accumulate stock
                     local row = e.position.row
@@ -234,6 +234,22 @@ function ecsfunctions.init()
                     e.isPerson.stamina = e.isPerson.stamina - dt
                     if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
                 end
+            end
+            if currentaction.action == "buy" then
+                local agentrow = e.position.row
+                local agentcol = e.position.col
+                local imptype = MAP[agentrow][agentcol].entity.isTile.improvementType
+                -- check if agent is at the right shop
+                if imptype ~= nil then
+                    if imptype == action.stockType then
+                        local amtbought = fun.buyStock(e, action.stockType, action.PurchaseAmount)
+    print("Bought " .. amtbought .. " food")
+                        if action.stockType == enum.stockFruit then
+                            e.isPerson.fullness = e.isPerson.fullness + amtbought
+                        end
+                    end
+                end
+                table.remove(e.isPerson.queue, 1)
             end
         end
     end

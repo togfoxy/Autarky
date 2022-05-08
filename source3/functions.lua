@@ -104,6 +104,7 @@ local function getBlankTile()
     until tilevalid or count > 1000
 
     if count > 1000 then
+        print("Can't find a blank tile")
         return nil, nil     --! need to check if nil is returned (no blank tiles available)
     else
         return row, col
@@ -163,28 +164,23 @@ local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
     end
 end
 
-local function buyStock(agent, stocktype, qty)
-
+function functions.buyStock(agent, stocktype, maxqty)
+    -- returns the amount of stock purchased
+    -- assumes agent is in the correct location
     local agentrow = agent.position.row
     local agentcol = agent.position.col
-    local imptype = MAP[agentrow][agentcol].entity.isTile.improvementType
-    -- check if agent is at the right shop
-    if imptype ~= nil then
-        if imptype == stocktype then
-            -- determine how much stock the agent can afford to buy
-            local sellprice = MAP[agentrow][agentcol].entity.isTile.stockSellPrice
-            local stockavail = MAP[agentrow][agentcol].entity.isTile.stockLevel
-            local canafford = math.floor(agent.isPerson.wealth / sellprice)     -- rounds down
-            local purchaseamt = math.min(stockavail, canafford)
-            local funds = purchaseamt * sellprice
+    local sellprice = MAP[agentrow][agentcol].entity.isTile.stockSellPrice
+    local stockavail = MAP[agentrow][agentcol].entity.isTile.stockLevel
+    local canafford = math.floor(agent.isPerson.wealth / sellprice)     -- rounds down
+    local purchaseamt = math.min(stockavail, canafford)
+    purchaseamt = math.min(purchaseamt, maxqty)       -- limit purchase to the requested amount
+    purchaseamt = math.floor(purchaseamt)
+    local funds = purchaseamt * sellprice
 
-            MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
-            agent.isPerson.fullness = agent.isPerson.fullness + purchaseamt
-
-            MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + funds
-            agent.isPerson.wealth = agent.isPerson.wealth - funds
-        end
-    end
+    MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
+    MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + funds
+    agent.isPerson.wealth = agent.isPerson.wealth - funds
+    return purchaseamt
 end
 
 function functions.createActions(goal, agent)
@@ -233,14 +229,12 @@ function functions.createActions(goal, agent)
         if not agent:has("workplace") then
             -- create a workplace
             local workplacerow, workplacecol = getBlankTile()
+            assert(workplacerow ~= nil)
             agent:give("workplace", workplacerow, workplacecol)
-            -- MAP[workplacerow][workplacecol].improvementType = agent.occupation.value
-            -- MAP[workplacerow][workplacecol].stocktype = agent.occupation.stocktype
-
             MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
             MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stocktype
             MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
-
+            print("Onwer assigned to " .. workplacerow, workplacecol)
         end
         if agent:has("workplace") then
             -- move to workplace
@@ -284,12 +278,14 @@ function functions.createActions(goal, agent)
         local agentcol = agent.position.col
         local shoprow, shopcol = getClosestBuilding(enum.improvementFarm, agentrow, agentcol)
         if shoprow ~= nil then  --! need to properly deal with nils
-           addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
-           -- buy food
-           buyStock(agent, enum.stockFruit, 10)
-
-           -- eat food
-
+            addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+            -- buy food
+            action = {}
+            action.action = "buy"
+            action.stockType = enum.stockFruit
+            action.PurchaseAmount = 10
+            table.insert(queue, action)
+    print("Added 'buy' goal")
         end
     end
 
