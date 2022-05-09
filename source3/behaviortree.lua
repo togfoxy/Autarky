@@ -23,41 +23,45 @@ function behaviortree.EstablishTree()
 	TREE.child[1].priority = function(agent)
 								local priority = cf.round((100 - agent.isPerson.stamina) / 10)
 								if priority < 1 then priority = 1 end
+								if DEBUG then print("Rest priority is " .. priority) end
 								return priority
 							end
 	TREE.child[1].activate = function(agent)
-								return true
+								return true	-- resting is the default action and must always be an option
 							 end
 
-	local node = {}
-	node.goal = enum.goalWork
-	node.priority = function(agent)
-							return 5
-					end
-	node.activate = function(agent)
-						if agent:has("occupation") then
-							return true
-						else
-							return false
-						end
-					end
-	table.insert(TREE.child, node)
+ 	TREE.child[2] = {}
+ 	TREE.child[2].goal = enum.goalWork
+ 	TREE.child[2].priority = function(agent)
+								if DEBUG then print("Work priority is 5") end
+ 								return 5
+ 							end
+ 	TREE.child[2].activate = function(agent)
+								if agent:has("occupation") then
+									return true
+								else
+									return false
+								end
+							end
 
-	local node = {}
-	node.goal = enum.goalEat
-	node.priority = function(agent)
-						local priority = cf.round((100 - agent.isPerson.fullness) / 10)
-						if priority < 1 then priority = 1 end
-						return priority
-					end
-	node.activate = function(agent)
-						if agent.isPerson.fullness < 70 then
-							return true
-						else
-							return false
-						end
-					end
-	table.insert(TREE.child, node)
+	TREE.child[3] = {}
+ 	TREE.child[3].goal = enum.goalEat
+ 	TREE.child[3].priority = function(agent)
+								local priority = cf.round((100 - agent.isPerson.fullness) / 10)
+								if priority < 1 then priority = 1 end
+								if DEBUG then print("Eat priority is " .. priority) end
+								return priority
+ 							end
+ 	TREE.child[3].activate = function(agent)
+								if agent.isPerson.fullness > 70 or agent.isPerson.wealth < 10 then
+									return false
+								else
+									return true
+								end
+							end
+
+
+
 
 
 	-- tree.child[2] = {}

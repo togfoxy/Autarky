@@ -26,7 +26,6 @@ function foxtree.DetermineAction(t, bot)
 		else
 			-- activate is not nil (but could be false)
 			if v.activate(bot) == true then
-
 				totalchance = totalchance + v.priority(bot)
 			else
 				-- node is deactivated so don't consider it's priority

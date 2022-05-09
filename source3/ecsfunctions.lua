@@ -167,7 +167,9 @@ function ecsfunctions.init()
             if e.isPerson.fullness < 0 then e.isPerson.fullness = 0 end
 
             if #e.isPerson.queue == 0 then
+                -- if DEBUG then print("***") end
                 local goal = ft.DetermineAction(TREE, e)
+                -- if DEBUG then print("***") end
                 local actionlist = {}
                 --local actionlist = fun.createActions(goal, e.isPerson.queue)  -- turns a simple decision from the tree into a complex sequence of actions
                 local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
@@ -243,7 +245,7 @@ function ecsfunctions.init()
                 if imptype ~= nil then
                     if imptype == action.stockType then
                         local amtbought = fun.buyStock(e, action.stockType, action.PurchaseAmount)
-    print("Bought " .. amtbought .. " food")
+                        -- print("Bought " .. amtbought .. " food")
                         if action.stockType == enum.stockFruit then
                             e.isPerson.fullness = e.isPerson.fullness + amtbought
                         end
