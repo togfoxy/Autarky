@@ -130,7 +130,7 @@ function ecsfunctions.init()
                     end
                     txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina) .. "\n"
                     txt = txt .. "fullness: " .. cf.round(e.isPerson.fullness) .. "\n"
-                    txt = txt .. "wealth: " .. cf.round(e.isPerson.wealth) .. "\n"
+                    txt = txt .. "wealth: " .. cf.round(e.isPerson.wealth,1) .. "\n"
 
                     love.graphics.setColor(1,1,1,1)
                     love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 10)
@@ -166,7 +166,7 @@ function ecsfunctions.init()
             e.isPerson.fullness = e.isPerson.fullness - (0.33 * dt)
             if e.isPerson.fullness < 0 then e.isPerson.fullness = 0 end
 
-            e.isPerson.stamina = e.isPerson.stamina - (0.33 * dt)
+            e.isPerson.stamina = e.isPerson.stamina - (0.5 * dt)
             if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
 
             -- determine new action for queue (or none)
@@ -194,7 +194,7 @@ function ecsfunctions.init()
 
             if currentaction.action == "idle" then
                 currentaction.timeleft = currentaction.timeleft - dt
-                e.isPerson.stamina = e.isPerson.stamina + (1 * dt)
+                e.isPerson.stamina = e.isPerson.stamina + (1.5 * dt)        -- gain 1 per second + recover the 0.5 applied above
                 if e.isPerson.stamina > 100 then e.isPerson.stamina = 100 end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
@@ -246,7 +246,7 @@ function ecsfunctions.init()
                         local amtbought = fun.buyStock(e, action.stockType, action.PurchaseAmount)
                         -- print("Bought " .. amtbought .. " food")
                         if action.stockType == enum.stockFruit then
-                            e.isPerson.fullness = e.isPerson.fullness + amtbought
+                            e.isPerson.fullness = e.isPerson.fullness + (amtbought * 100)   -- each food restores 100 fullness
                         end
                     end
                 end

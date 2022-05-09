@@ -173,7 +173,7 @@ function functions.buyStock(agent, stocktype, maxqty)
     local agentrow = agent.position.row
     local agentcol = agent.position.col
     local sellprice = MAP[agentrow][agentcol].entity.isTile.stockSellPrice
-    local stockavail = MAP[agentrow][agentcol].entity.isTile.stockLevel
+    local stockavail = math.floor(MAP[agentrow][agentcol].entity.isTile.stockLevel)
     local canafford = math.floor(agent.isPerson.wealth / sellprice)     -- rounds down
     local purchaseamt = math.min(stockavail, canafford)
     purchaseamt = math.min(purchaseamt, maxqty)       -- limit purchase to the requested amount

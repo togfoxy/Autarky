@@ -53,7 +53,7 @@ function behaviortree.EstablishTree()
 								return priority
  							end
  	TREE.child[3].activate = function(agent)
-								if agent.isPerson.fullness > 70 or agent.isPerson.wealth < 10 then
+								if agent.isPerson.fullness > 70 or agent.isPerson.wealth < 1 then
 									return false
 								else
 									return true
