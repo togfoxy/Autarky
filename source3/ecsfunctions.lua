@@ -255,6 +255,7 @@ function ecsfunctions.init()
                     MAP[wprow][wpcol].entity.isTile.improvementType = nil
                     MAP[wprow][wpcol].entity.isTile.stockType = nil
                     MAP[wprow][wpcol].entity.isTile.tileOwner = nil
+                    MAP[wprow][wpcol].entity.isTile.stockLevel = 0
                 end
                 fun.killAgent(e.uid.value)  -- removes the agent from the VILLAGERS table
                 e:destroy()                 -- destroys the entity from the world
