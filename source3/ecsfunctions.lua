@@ -151,9 +151,6 @@ function ecsfunctions.init()
             local col = entity.position.col
             MAP[row][col].entity = entity
         end
-        --self.poolB.onEntityAdded = function(_, entity)
-        --    table.insert(VILLAGERS, entity)
-        --end
     end
 
     systemIsPerson = concord.system({
@@ -162,12 +159,6 @@ function ecsfunctions.init()
     function systemIsPerson:update(dt)
         for _, e in ipairs(self.pool) do
             -- check if queue is empty and if so then get a new action from the behavior tree
-
-            e.isPerson.fullness = e.isPerson.fullness - (0.33 * dt)
-            if e.isPerson.fullness < 0 then e.isPerson.fullness = 0 end
-
-            e.isPerson.stamina = e.isPerson.stamina - (0.5 * dt)
-            if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
 
             -- determine new action for queue (or none)
             if #e.isPerson.queue == 0 then
@@ -252,6 +243,18 @@ function ecsfunctions.init()
                 end
                 table.remove(e.isPerson.queue, 1)
             end
+
+            e.isPerson.stamina = e.isPerson.stamina - (0.5 * dt)
+            if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
+
+            -- do this last as it may nullify the entity
+            e.isPerson.fullness = e.isPerson.fullness - (0.33 * dt)
+            -- if e.isPerson.fullness < 0 then e.isPerson.fullness = 0 end
+            if e.isPerson.fullness < 0 then
+                fun.killAgent(e.uid.value)  -- removes the agent from the VILLAGERS table
+                e:destroy()                 -- destroys the entity from the world
+                --! add a graveyard somewhere
+            end
         end
     end
 
@@ -297,12 +300,12 @@ function ecsfunctions.init()
 
     -- add starting villagers
     for i = 1, NUMBER_OF_VILLAGERS do
-        local VILLAGER = concord.entity(WORLD)
+        local villager = concord.entity(WORLD)
         :give("drawable")
         :give("position")
         :give("uid")
         :give("isPerson")
-        table.insert(VILLAGERS, VILLAGER)
+        table.insert(VILLAGERS, villager)
     end
 
 end

@@ -332,4 +332,21 @@ function functions.applyMovement(e, targetx, targety, velocity, dt)
     if e.position.col > NUMBER_OF_COLS then e.position.col = NUMBER_OF_COLS end
 end
 
+function functions.killAgent(uniqueid)
+    local deadID
+    for k, v in ipairs(VILLAGERS) do
+        -- print(uniqueid, v.uid.value)
+        if v.uid.value == uniqueid then
+print("Found dead guy. " .. k)
+            deadID = k
+            break
+        end
+    end
+print("deadid: " .. deadID)
+    assert(deadID ~= nil)
+    table.remove(VILLAGERS, deadID)
+print("There are now " .. #VILLAGERS .. " villagers.")
+
+end
+
 return functions

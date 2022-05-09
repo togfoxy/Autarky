@@ -13,7 +13,7 @@ function comp.init()
         c.queue = {}
         c.stamina = 100         -- fully rested
         c.wealth = 3            -- starting amount. 3 days worth of food.
-        c.fullness = 150        -- hunger. Start a little topped up so they have a chance to establish themselves.
+        c.fullness = 5        -- hunger. Start a little topped up so they have a chance to establish themselves.
     end)
 
     concord.component("occupation", function(c, number, stocktype)
