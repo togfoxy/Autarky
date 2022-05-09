@@ -47,16 +47,31 @@ function behaviortree.EstablishTree()
 	TREE.child[3] = {}
  	TREE.child[3].goal = enum.goalEat
  	TREE.child[3].priority = function(agent)
-								local priority = cf.round((100 - agent.isPerson.fullness) / 10)
-								if priority < 1 then priority = 1 end
-								-- if DEBUG then print("Eat priority is " .. priority) end
-								return priority
+								if agent.isPerson.fullness < 25 then
+									return 50
+								else
+									local priority = cf.round((100 - agent.isPerson.fullness) / 10)
+									if priority < 1 then priority = 1 end
+									-- if DEBUG then print("Eat priority is " .. priority) end
+									return priority
+								end
  							end
  	TREE.child[3].activate = function(agent)
-								if agent.isPerson.fullness > 70 or agent.isPerson.wealth < 1 then
+								-- deactivate if person is full or broke and not a farmer
+								if agent.isPerson.fullness > 70 then
 									return false
+								elseif agent.isPerson.wealth < 1 and agent:has("occupation") then
+									if agent.occupation.value == enum.jobFarmer then
+										return true
+									else
+										return false
+									end
 								else
-									return true
+									if agent.isPerson.wealth >= 1 then
+										return true
+									else
+										return false
+									end
 								end
 							end
 

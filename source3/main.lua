@@ -26,12 +26,13 @@ IMAGES = {}
 TILE_SIZE = 50
 NUMBER_OF_ROWS = (cf.round(SCREEN_HEIGHT / TILE_SIZE)) - 2
 NUMBER_OF_COLS = (cf.round(SCREEN_WIDTH / TILE_SIZE)) - 1
+LEFT_MARGIN = TILE_SIZE / 2
+TOP_MARGIN = TILE_SIZE / 2
 
 -- debugging
 -- NUMBER_OF_ROWS = 4
 -- NUMBER_OF_COLS = 5
 
-BORDER_SIZE = 25
 UPPER_TERRAIN_HEIGHT = 6
 
 print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
@@ -74,7 +75,7 @@ function love.mousepressed( x, y, button, istouch, presses )
 		for k, v in pairs(VILLAGERS) do
 			x2 = v.position.x
 			y2 = v.position.y
-			local dist = cf.GetDistance(mousex, mousey, x2, y2)
+			local dist = cf.GetDistance(mousex - LEFT_MARGIN, mousey - TOP_MARGIN, x2, y2)
 			if dist <= PERSON_DRAW_WIDTH then
 				if v.isSelected then
 					v:remove("isSelected")
