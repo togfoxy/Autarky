@@ -74,7 +74,6 @@ local function convertToCollisionMap(map)
 end
 
 local function getBlankTile()
-    --! need to check that tile is pathfinding to the well
 
     local row, col
     local tilevalid = true
@@ -90,6 +89,7 @@ local function getBlankTile()
         if row >= WELLS[1].row - 3 and row <= WELLS[1].row + 3 and
             col >= WELLS[1].col - 3 and col <= WELLS[1].col + 3 then
                 tilevalid = false
+                print("New improvement inside town square. Trying to find a new tile.")
         end
 
         local cmap = convertToCollisionMap(MAP)
@@ -100,11 +100,14 @@ local function getBlankTile()
         local endy = row
 
         local path = cf.findPath(cmap, 0, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
-        if path == nil then tilevalid = false end
+        if path == nil then
+            tilevalid = false
+            print("Can't find path to new tile. Trying to find a new tile")
+        end
     until tilevalid or count > 1000
 
     if count > 1000 then
-        print("Can't find a blank tile")
+        print("Can't find a blank tile. Giving up after 1000 tries.")
         return nil, nil     --! need to check if nil is returned (no blank tiles available)
     else
         return row, col
@@ -223,9 +226,6 @@ function functions.createActions(goal, agent)
     end
     if goal == enum.goalWork then
         -- time to earn a paycheck
-
-        -- add a 'move to' action
-        -- add a 'work' action
         if not agent:has("workplace") then
             -- create a workplace
             local workplacerow, workplacecol = getBlankTile()
@@ -266,7 +266,7 @@ function functions.createActions(goal, agent)
             -- do work
             local action = {}
             action.action = "work"
-            action.timeleft = love.math.random(10, 30)
+            action.timeleft = love.math.random(40, 80)
             table.insert(queue, action)
         else
             error()     -- should never happen

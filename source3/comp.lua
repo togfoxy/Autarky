@@ -12,7 +12,7 @@ function comp.init()
     concord.component("isPerson", function(c)
         c.queue = {}
         c.stamina = 100         -- fully rested
-        c.wealth = 100          -- starting amount
+        c.wealth = 3            -- starting amount. 3 days worth of food.
         c.fullness = 150        -- hunger. Start a little topped up so they have a chance to establish themselves.
     end)
 
@@ -42,7 +42,7 @@ function comp.init()
         c.improvementType = improvementtype or nil     -- an improvement = a building or structure
         c.stockType = nil
         c.stockLevel = 0
-        c.stockSellPrice = 1
+        c.stockSellPrice = 1.2
     end)
 
 

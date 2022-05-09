@@ -97,7 +97,7 @@ function ecsfunctions.init()
                 -- draw stocklevels for each tile
                 if MAP[row][col].entity.isTile.stockLevel > 0 then
                     love.graphics.setColor(0/255,0/255,115/255,1)
-                    love.graphics.print(cf.round(MAP[row][col].entity.isTile.stockLevel), drawx, drawy, 0, 1, 1, 20, 20)
+                    love.graphics.print(cf.round(MAP[row][col].entity.isTile.stockLevel,1), drawx, drawy, 0, 1, 1, 20, 20)
                 end
             end
 
@@ -163,9 +163,13 @@ function ecsfunctions.init()
         for _, e in ipairs(self.pool) do
             -- check if queue is empty and if so then get a new action from the behavior tree
 
-            e.isPerson.fullness = e.isPerson.fullness - dt
+            e.isPerson.fullness = e.isPerson.fullness - (0.33 * dt)
             if e.isPerson.fullness < 0 then e.isPerson.fullness = 0 end
 
+            e.isPerson.stamina = e.isPerson.stamina - (0.33 * dt)
+            if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
+
+            -- determine new action for queue (or none)
             if #e.isPerson.queue == 0 then
                 -- if DEBUG then print("***") end
                 local goal = ft.DetermineAction(TREE, e)
@@ -175,6 +179,7 @@ function ecsfunctions.init()
                 local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
             end
 
+            -- add 'idle' action if queue is still empty
             if #e.isPerson.queue < 1 then
                 -- add an 'idle' action
                 action = {}
@@ -189,7 +194,7 @@ function ecsfunctions.init()
 
             if currentaction.action == "idle" then
                 currentaction.timeleft = currentaction.timeleft - dt
-                e.isPerson.stamina = e.isPerson.stamina + (dt * 2)
+                e.isPerson.stamina = e.isPerson.stamina + (1 * dt)
                 if e.isPerson.stamina > 100 then e.isPerson.stamina = 100 end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
@@ -208,8 +213,7 @@ function ecsfunctions.init()
                     else
                         local newx, newy = fun.applyMovement(e, destx, desty, WALKING_SPEED / 2, dt)       -- entity, x, y, speed, dt
                     end
-                    e.isPerson.stamina = e.isPerson.stamina - dt
-                    if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
+
                 end
             end
             if currentaction.action == "work" then
@@ -224,17 +228,12 @@ function ecsfunctions.init()
                     if MAP[row][col].stockLevel == nil then MAP[row][col].stockLevel = 0 end
                     local stockgained
                     if e.isPerson.stamina > 0 then
-                        stockgained = dt
+                        stockgained = (0.0267 * dt)
                     else
-                        stockgained = dt / 2        -- less productive when tired
+                        stockgained = (0.0267 * dt) / 2        -- less productive when tired
                     end
-                    stockgained = cf.round(stockgained, 2)
+                    stockgained = cf.round(stockgained, 4)
                     MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + stockgained
-                    -- MAP[row][col].stockLevel = MAP[row][col].stockLevel + stockgained
-
-                    -- e.isPerson.wealth = e.isPerson.wealth + stockgained          --! this needs to be dt * the value of the product/good/service
-                    e.isPerson.stamina = e.isPerson.stamina - dt
-                    if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
                 end
             end
             if currentaction.action == "buy" then
