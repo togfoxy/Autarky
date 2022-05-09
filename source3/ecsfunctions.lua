@@ -135,15 +135,12 @@ function ecsfunctions.init()
                     love.graphics.setColor(1,1,1,1)
                     love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 10)
                 end
-
-
             end
         end
     end
 
     systemIsTile = concord.system({
         pool = {"isTile"}
-        --poolB = {"isPerson"}
     })
     function systemIsTile:init()
         self.pool.onEntityAdded = function(_, entity)
