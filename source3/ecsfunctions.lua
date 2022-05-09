@@ -141,7 +141,6 @@ function ecsfunctions.init()
 
     systemIsTile = concord.system({
         pool = {"isTile"}
-        --poolB = {"isPerson"}
     })
     function systemIsTile:init()
         self.pool.onEntityAdded = function(_, entity)
