@@ -177,17 +177,28 @@ function functions.buyStock(agent, stocktype, maxqty)
     -- assumes agent is in the correct location
     local agentrow = agent.position.row
     local agentcol = agent.position.col
-    local sellprice = MAP[agentrow][agentcol].entity.isTile.stockSellPrice
+    local sellprice
+    local purchaseamt
     local stockavail = math.floor(MAP[agentrow][agentcol].entity.isTile.stockLevel)
-    local canafford = math.floor(agent.isPerson.wealth / sellprice)     -- rounds down
-    local purchaseamt = math.min(stockavail, canafford)
-    purchaseamt = math.min(purchaseamt, maxqty)       -- limit purchase to the requested amount
-    purchaseamt = math.floor(purchaseamt)
-    local funds = purchaseamt * sellprice
 
-    MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
-    MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + funds
-    agent.isPerson.wealth = agent.isPerson.wealth - funds
+    if MAP[agentrow][agentcol].entity.isTile.tileOwner == agent then
+        -- agent is buying from own shop. Waive the purchase price
+        -- doing this allows farms with 0 wealth to still buy and survive
+        purchaseamt = math.min(maxqty, stockavail)
+        MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
+    else
+        -- normal purchase transaction
+        sellprice = MAP[agentrow][agentcol].entity.isTile.stockSellPrice
+        local canafford = math.floor(agent.isPerson.wealth / sellprice)     -- rounds down
+        purchaseamt = math.min(stockavail, canafford)
+        purchaseamt = math.min(purchaseamt, maxqty)       -- limit purchase to the requested amount
+        purchaseamt = math.floor(purchaseamt)
+        local funds = purchaseamt * sellprice
+
+        MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
+        MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + funds
+        agent.isPerson.wealth = agent.isPerson.wealth - funds
+    end
     return purchaseamt
 end
 
@@ -197,6 +208,12 @@ function functions.createActions(goal, agent)
     local queue = agent.isPerson.queue
     local agentrow = agent.position.row
     local agentcol = agent.position.col
+    local workplacerow
+    local workplacecol
+    if agent:has("workplace") then
+        workplacerow = agent.workplace.row
+        workplacecol = agent.workplace.col
+    end
 
     if goal == enum.goalRest then
         -- get a destination to rest
@@ -226,7 +243,7 @@ function functions.createActions(goal, agent)
         -- time to earn a paycheck
         if not agent:has("workplace") then
             -- create a workplace
-            local workplacerow, workplacecol = getBlankTile()
+            workplacerow, workplacecol = getBlankTile()
             assert(workplacerow ~= nil)
             agent:give("workplace", workplacerow, workplacecol)
             MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
@@ -236,12 +253,8 @@ function functions.createActions(goal, agent)
         end
         if agent:has("workplace") then
             -- move to workplace
-            local workplacerow = agent.workplace.row
-            local workplacecol = agent.workplace.col
-
             -- add a 'move' action
             addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
-
             -- do work
             local action = {}
             action.action = "work"
@@ -253,19 +266,30 @@ function functions.createActions(goal, agent)
     end
     if goal == enum.goalEat then
         local qtyneeded = 1
-        local shoprow, shopcol = getClosestBuilding(enum.improvementFarm, qtyneeded, agentrow, agentcol)
-        if shoprow ~= nil then
-            addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
-            -- buy food
-            action = {}
-            action.action = "buy"
-            action.stockType = enum.stockFruit
-            action.purchaseAmount = qtyneeded
-            table.insert(queue, action)
-            -- print("Added 'buy' goal")
+        local ownsFruitshop = false
+        if agent:has("workplace") and agent.isPerson.wealth <= 1.5 then
+            if MAP[workplacerow][workplacecol].entity.isTile.stockLevel >= qtyneeded and
+                MAP[workplacerow][workplacecol].entity.isTile.stockType == enum.stockFruit then
+                    ownsFruitshop = true
+            end
         end
+        if ownsFruitshop then
+            addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+        else
+            -- not a farmer or rich or own farm has no stock
+            local shoprow, shopcol = getClosestBuilding(enum.improvementFarm, qtyneeded, agentrow, agentcol)
+            if shoprow ~= nil then
+                addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+            end
+        end
+        -- buy food
+        action = {}
+        action.action = "buy"
+        action.stockType = enum.stockFruit
+        action.purchaseAmount = qtyneeded
+        -- print("Added 'buy' goal")
+        table.insert(queue, action)
     end
-
     return queue
 end
 

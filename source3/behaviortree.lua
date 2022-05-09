@@ -57,10 +57,21 @@ function behaviortree.EstablishTree()
 								end
  							end
  	TREE.child[3].activate = function(agent)
-								if agent.isPerson.fullness > 70 or agent.isPerson.wealth < 1 then
+								-- deactivate if person is full or broke and not a farmer
+								if agent.isPerson.fullness > 70 then
 									return false
+								elseif agent.isPerson.wealth < 1 and agent:has("occupation") then
+									if agent.occupation.value == enum.jobFarmer then
+										return true
+									else
+										return false
+									end
 								else
-									return true
+									if agent.isPerson.wealth >= 1 then
+										return true
+									else
+										return false
+									end
 								end
 							end
 
