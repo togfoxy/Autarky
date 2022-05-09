@@ -22,7 +22,7 @@ function ecsfunctions.init()
 
                 -- draw tile image
                 local img = IMAGES[e.isTile.tileType]
-                local drawx, drawy = e.position.x, e.position.y
+                local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
                 local imagewidth = img:getWidth()
                 local imageheight = img:getHeight()
                 local drawscalex = (TILE_SIZE / imagewidth)
@@ -47,10 +47,10 @@ function ecsfunctions.init()
                         local x1, y1 = fun.getXYfromRowCol(row, col)
                         local x2, y2 = x1 + TILE_SIZE, y1
                         local alpha = MAP[row][col].height / UPPER_TERRAIN_HEIGHT
-                        x1 = x1 - (TILE_SIZE / 2)
-                        y1 = y1 - (TILE_SIZE / 2)
-                        x2 = x2 - (TILE_SIZE / 2)
-                        y2 = y2 - (TILE_SIZE / 2)
+                        x1 = x1 - (TILE_SIZE / 2) + LEFT_MARGIN
+                        y1 = y1 - (TILE_SIZE / 2) + TOP_MARGIN
+                        x2 = x2 - (TILE_SIZE / 2) + LEFT_MARGIN
+                        y2 = y2 - (TILE_SIZE / 2) + TOP_MARGIN
                         love.graphics.setColor(1,1,1,alpha)
                         love.graphics.line(x1, y1, x2, y2)
                     end
@@ -63,10 +63,10 @@ function ecsfunctions.init()
                         local x2 = x1
                         local y2 = y1 + TILE_SIZE
                         local alpha = MAP[row][col].height / UPPER_TERRAIN_HEIGHT
-                        x1 = x1 - (TILE_SIZE / 2)
-                        y1 = y1 - (TILE_SIZE / 2)
-                        x2 = x2 - (TILE_SIZE / 2)
-                        y2 = y2 - (TILE_SIZE / 2)
+                        x1 = x1 - (TILE_SIZE / 2) + LEFT_MARGIN
+                        y1 = y1 - (TILE_SIZE / 2) + TOP_MARGIN
+                        x2 = x2 - (TILE_SIZE / 2) + LEFT_MARGIN
+                        y2 = y2 - (TILE_SIZE / 2) + TOP_MARGIN
 
 
                         love.graphics.setColor(1,1,1,alpha)
@@ -80,7 +80,6 @@ function ecsfunctions.init()
                 -- draw the improvement
                 if imptype ~= nil then
                     local imagenumber = imptype
-                    -- local drawx, drawy = e.position.x, e.position.y
                     local imagewidth = IMAGES[imagenumber]:getWidth()
                     local imageheight = IMAGES[imagenumber]:getHeight()
 
@@ -108,7 +107,7 @@ function ecsfunctions.init()
                     love.graphics.setColor(1,1,1,1)
                 end
                 local drawwidth = PERSON_DRAW_WIDTH
-                local drawx, drawy = e.position.x, e.position.y
+                local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
                 love.graphics.circle("fill", drawx, drawy, drawwidth)
 
                 -- draw the occupation
@@ -183,7 +182,7 @@ function ecsfunctions.init()
             if currentaction.action == "idle" then
                 currentaction.timeleft = currentaction.timeleft - dt
                 e.isPerson.stamina = e.isPerson.stamina + (1.5 * dt)        -- gain 1 per second + recover the 0.5 applied above
-                if e.isPerson.stamina > 100 then e.isPerson.stamina = 100 end
+                -- if e.isPerson.stamina > 100 then e.isPerson.stamina = 100 end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
                 end
@@ -231,7 +230,7 @@ function ecsfunctions.init()
                 -- check if agent is at the right shop
                 if imptype ~= nil then
                     if imptype == action.stockType then
-                        local amtbought = fun.buyStock(e, action.stockType, action.PurchaseAmount)
+                        local amtbought = fun.buyStock(e, action.stockType, action.purchaseAmount)
                         -- print("Bought " .. amtbought .. " food")
                         if action.stockType == enum.stockFruit then
                             e.isPerson.fullness = e.isPerson.fullness + (amtbought * 100)   -- each food restores 100 fullness
@@ -248,6 +247,15 @@ function ecsfunctions.init()
             e.isPerson.fullness = e.isPerson.fullness - (0.33 * dt)
             -- if e.isPerson.fullness < 0 then e.isPerson.fullness = 0 end
             if e.isPerson.fullness < 0 then
+                -- destroy any improvement belonging to starving agent
+                if e:has("workplace") then
+                    -- destroy workplace
+                    local wprow = e.workplace.row
+                    local wpcol = e.workplace.col
+                    MAP[wprow][wpcol].entity.isTile.improvementType = nil
+                    MAP[wprow][wpcol].entity.isTile.stockType = nil
+                    MAP[wprow][wpcol].entity.isTile.tileOwner = nil
+                end
                 fun.killAgent(e.uid.value)  -- removes the agent from the VILLAGERS table
                 e:destroy()                 -- destroys the entity from the world
                 --! add a graveyard somewhere

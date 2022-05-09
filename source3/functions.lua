@@ -41,8 +41,8 @@ function functions.getXYfromRowCol(row, col)
     -- determine the drawing x based on column
     -- input row and col
     -- returns x, y (reverse order)
-    local x = (col * TILE_SIZE) - TILE_SIZE + BORDER_SIZE
-    local y = (row * TILE_SIZE) - TILE_SIZE + BORDER_SIZE
+    local x = LEFT_MARGIN + (col * TILE_SIZE) - TILE_SIZE
+    local y = TOP_MARGIN + (row * TILE_SIZE) - TILE_SIZE
     return x, y
 end
 
@@ -118,14 +118,14 @@ local function getBlankTile()
     end
 end
 
-local function getClosestBuilding(buildingtype, startrow, startcol)
+local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, startcol)
     -- returns the closest building of required type
     local closestvalue = -1
     local closestrow, closestcol
 
     for col = 1, NUMBER_OF_COLS do
         for row = 1, NUMBER_OF_ROWS do
-            if MAP[row][col].entity.isTile.improvementType == buildingtype then
+            if MAP[row][col].entity.isTile.improvementType == buildingtype and MAP[row][col].entity.isTile.stockLevel >= requiredstocklevel then
                 local cmap = convertToCollisionMap(MAP)
                 cmap[row][col] = enum.tileWalkable
                 local _, dist = cf.findPath(cmap, enum.tileWalkable, startcol, startrow, col, row, false)
@@ -138,9 +138,8 @@ local function getClosestBuilding(buildingtype, startrow, startcol)
         end
     end
     if closestrow == nil then
-        print(closestrow, closestcol, closestvalue)
+        print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
     end
-    assert(closestrow ~= nil)
     return closestrow, closestcol       --! need to manage nils
 end
 
@@ -220,7 +219,7 @@ function functions.createActions(goal, agent)
         -- add an 'idle' action
         action = {}
         action.action = "idle"
-        action.timeleft = love.math.random(10, 30)
+        action.timeleft = ((100 - agent.isPerson.stamina) / 2) + love.math.random(5, 30)      -- some random formula. Please tweak!
         table.insert(queue, action)
     end
     if goal == enum.goalWork then
@@ -253,16 +252,15 @@ function functions.createActions(goal, agent)
         end
     end
     if goal == enum.goalEat then
-        -- scan for a farmer
-
-        local shoprow, shopcol = getClosestBuilding(enum.improvementFarm, agentrow, agentcol)
-        if shoprow ~= nil then  --! need to properly deal with nils
+        local qtyneeded = 1
+        local shoprow, shopcol = getClosestBuilding(enum.improvementFarm, qtyneeded, agentrow, agentcol)
+        if shoprow ~= nil then
             addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
             -- buy food
             action = {}
             action.action = "buy"
             action.stockType = enum.stockFruit
-            action.PurchaseAmount = 10
+            action.purchaseAmount = qtyneeded
             table.insert(queue, action)
             -- print("Added 'buy' goal")
         end
@@ -316,16 +314,15 @@ function functions.killAgent(uniqueid)
     for k, v in ipairs(VILLAGERS) do
         -- print(uniqueid, v.uid.value)
         if v.uid.value == uniqueid then
-print("Found dead guy. " .. k)
+            print("Found dead guy. " .. k)
             deadID = k
             break
         end
     end
-print("deadid: " .. deadID)
+    print("deadid: " .. deadID)
     assert(deadID ~= nil)
     table.remove(VILLAGERS, deadID)
-print("There are now " .. #VILLAGERS .. " villagers.")
-
+    print("There are now " .. #VILLAGERS .. " villagers.")
 end
 
 return functions

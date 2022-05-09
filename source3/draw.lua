@@ -49,7 +49,7 @@ function draw.HUD()
     txt = txt .. "Stock: " .. avgstocklevel .. "\n"
 
     love.graphics.setColor(1,1,1,1)
-    love.graphics.print(txt, 25, 40)
+    love.graphics.print(txt, 30, 35)
 
 
 end
