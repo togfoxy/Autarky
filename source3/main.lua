@@ -16,6 +16,7 @@ fun = require 'functions'
 ecs = require 'ecsfunctions'
 enum = require 'enum'
 bt = require 'behaviortree'
+draw = require 'draw'
 
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
@@ -53,7 +54,7 @@ function love.keyreleased( key, scancode )
 	if key == "f" then
 		for k,v in pairs(VILLAGERS) do
 			if v:has("isSelected") and (not v:has("occupation")) then
-	print("occup granted")
+				-- print("occup granted")
 				v:ensure("occupation", enum.jobFarmer, enum.stockFruit)		-- a farmer that farms fruit
 				v:remove("isSelected")
 			end
@@ -117,12 +118,16 @@ function love.draw()
     --! res.stop()
 
     WORLD:emit("draw")
+
+	draw.HUD()
 end
 
 
 function love.update(dt)
 
     WORLD:emit("update", dt)
+
+
 
 	--! res.update()
 

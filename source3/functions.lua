@@ -76,20 +76,24 @@ end
 local function getBlankTile()
 
     local row, col
-    local tilevalid = true
+
     local count = 0
 
     repeat
         count = count + 1
+        local tilevalid = true
         row = love.math.random(1, NUMBER_OF_ROWS)
         col = love.math.random(1, NUMBER_OF_COLS)
 
-        if MAP[row][col].entity.isTile.improvementType ~= nil then tilevalid = false end
+        if MAP[row][col].entity.isTile.improvementType ~= nil then
+            tilevalid = false
+            print("Selected tile is already improved." .. count)
+        end
 
         if row >= WELLS[1].row - 3 and row <= WELLS[1].row + 3 and
             col >= WELLS[1].col - 3 and col <= WELLS[1].col + 3 then
                 tilevalid = false
-                print("New improvement inside town square. Trying to find a new tile.")
+                print("New improvement inside town square. Trying to find a new tile. " .. count, row, col)
         end
 
         local cmap = convertToCollisionMap(MAP)
@@ -102,12 +106,12 @@ local function getBlankTile()
         local path = cf.findPath(cmap, 0, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
         if path == nil then
             tilevalid = false
-            print("Can't find path to new tile. Trying to find a new tile")
+            print("Can't find path to new tile. Trying to find a new tile. " .. count)
         end
-    until tilevalid or count > 1000
+    until tilevalid or count > 10000
 
-    if count > 1000 then
-        print("Can't find a blank tile. Giving up after 1000 tries.")
+    if count > 10000 then
+        print("Can't find a blank tile. Giving up after 1000 tries." .. count)
         return nil, nil     --! need to check if nil is returned (no blank tiles available)
     else
         return row, col
@@ -125,11 +129,7 @@ local function getClosestBuilding(buildingtype, startrow, startcol)
                 local cmap = convertToCollisionMap(MAP)
                 cmap[row][col] = enum.tileWalkable
                 local _, dist = cf.findPath(cmap, enum.tileWalkable, startcol, startrow, col, row, false)
-                if closestvalue < 0 then
-                    closestvalue = dist
-                    closestrow = row
-                    closestcol = col
-                elseif dist < closestvalue then
+                if closestvalue < 0 or dist < closestvalue then
                     closestvalue = dist
                     closestrow = row
                     closestcol = col
@@ -137,6 +137,10 @@ local function getClosestBuilding(buildingtype, startrow, startcol)
             end
         end
     end
+    if closestrow == nil then
+        print(closestrow, closestcol, closestvalue)
+    end
+    assert(closestrow ~= nil)
     return closestrow, closestcol       --! need to manage nils
 end
 
@@ -154,6 +158,8 @@ local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
     local endx = stopcol
     local endy = stoprow
     local path = cf.findPath(cmap, enum.tileWalkable, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
+
+    assert(path ~= nil) --! not sure how this is possible
 
     for index, node in ipairs(path) do
         if index > 1 then   -- don't apply the first waypoint as it is too close to the agent
@@ -190,7 +196,8 @@ function functions.createActions(goal, agent)
     -- takes the goal provided by the behavior tree and returns a complex set of actions to achieve that goal
     -- returns a table of actions
     local queue = agent.isPerson.queue
-    local actionlist = {}
+    local agentrow = agent.position.row
+    local agentcol = agent.position.col
 
     if goal == enum.goalRest then
         -- get a destination to rest
@@ -208,15 +215,7 @@ function functions.createActions(goal, agent)
         if destcol > NUMBER_OF_COLS then destcol = NUMBER_OF_COLS end
 
         -- add a 'move' action
-        local action = {}
-        action.action = "move"
-        action.row = destrow
-        action.col = destcol
-        -- adjust the x/y to be a little bit off centre for asthetics
-        action.x, action.y = fun.getXYfromRowCol(destrow, destcol)      -- returns x and y (in that order)
-        action.x = action.x + love.math.random(-20, 20)
-        action.y = action.y + love.math.random(-20, 20)
-        table.insert(queue, action)
+        addMoveAction(queue, agentrow, agentcol, destrow, destcol)   -- will add as many 'move' actions as necessary
 
         -- add an 'idle' action
         action = {}
@@ -234,35 +233,16 @@ function functions.createActions(goal, agent)
             MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
             MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stocktype
             MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
-            print("Onwer assigned to " .. workplacerow, workplacecol)
+            -- print("Onwer assigned to " .. workplacerow, workplacecol)
         end
         if agent:has("workplace") then
             -- move to workplace
             local workplacerow = agent.workplace.row
             local workplacecol = agent.workplace.col
 
-            -- get path to workplace
-            local cmap = convertToCollisionMap(MAP)
-            -- need to 'blank' out the workplace so jumper can find a path.
-            cmap[workplacerow][workplacecol] = enum.tileWalkable
+            -- add a 'move' action
+            addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
 
-            -- jumper uses x and y which is really col and row
-            local startx = agent.position.col
-            local starty = agent.position.row
-            local endx = workplacecol
-            local endy = workplacerow
-            local path = cf.findPath(cmap, enum.tileWalkable, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
-
-            for index, node in ipairs(path) do
-                if index > 1 then   -- don't apply the first waypoint as it is too close to the agent
-                    local action = {}
-                    action.action = "move"
-                    action.row = node.y
-                    action.col = node.x
-                    action.x, action.y = fun.getXYfromRowCol(action.row, action.col)    -- returns x and y (in that order)
-                    table.insert(queue, action)
-                end
-            end
             -- do work
             local action = {}
             action.action = "work"
@@ -274,8 +254,7 @@ function functions.createActions(goal, agent)
     end
     if goal == enum.goalEat then
         -- scan for a farmer
-        local agentrow = agent.position.row
-        local agentcol = agent.position.col
+
         local shoprow, shopcol = getClosestBuilding(enum.improvementFarm, agentrow, agentcol)
         if shoprow ~= nil then  --! need to properly deal with nils
             addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
@@ -285,7 +264,7 @@ function functions.createActions(goal, agent)
             action.stockType = enum.stockFruit
             action.PurchaseAmount = 10
             table.insert(queue, action)
-    print("Added 'buy' goal")
+            -- print("Added 'buy' goal")
         end
     end
 
