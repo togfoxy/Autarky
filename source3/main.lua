@@ -43,6 +43,8 @@ VILLAGERS = {}
 TREE = {}			-- a tree that holds all possible behaviours for a person
 WALKING_SPEED = 50
 
+DEBUG = false
+
 function love.keyreleased( key, scancode )
 	if key == "escape" then
 		cf.RemoveScreen(SCREEN_STACK)
@@ -88,9 +90,11 @@ function love.load()
     --! res.setGame(SCREEN_WIDTH, SCREEN_HEIGHT)
 
     if love.filesystem.isFused( ) then
+		DEBUG = false
         void = love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT,{fullscreen=false,display=1,resizable=true, borderless=false})	-- display = monitor number (1 or 2)
         gbolDebug = false
     else
+		DEBUG = true
         void = love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT,{fullscreen=false,display=1,resizable=true, borderless=false})	-- display = monitor number (1 or 2)
     end
 

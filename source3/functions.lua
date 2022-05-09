@@ -74,7 +74,6 @@ local function convertToCollisionMap(map)
 end
 
 local function getBlankTile()
-    --! need to check that tile is pathfinding to the well
 
     local row, col
     local tilevalid = true
@@ -90,6 +89,7 @@ local function getBlankTile()
         if row >= WELLS[1].row - 3 and row <= WELLS[1].row + 3 and
             col >= WELLS[1].col - 3 and col <= WELLS[1].col + 3 then
                 tilevalid = false
+                print("New improvement inside town square. Trying to find a new tile.")
         end
 
         local cmap = convertToCollisionMap(MAP)
@@ -100,10 +100,14 @@ local function getBlankTile()
         local endy = row
 
         local path = cf.findPath(cmap, 0, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
-        if path == nil then tilevalid = false end
+        if path == nil then
+            tilevalid = false
+            print("Can't find path to new tile. Trying to find a new tile")
+        end
     until tilevalid or count > 1000
 
     if count > 1000 then
+        print("Can't find a blank tile. Giving up after 1000 tries.")
         return nil, nil     --! need to check if nil is returned (no blank tiles available)
     else
         return row, col
@@ -163,28 +167,23 @@ local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
     end
 end
 
-local function buyStock(agent, stocktype, qty)
-
+function functions.buyStock(agent, stocktype, maxqty)
+    -- returns the amount of stock purchased
+    -- assumes agent is in the correct location
     local agentrow = agent.position.row
     local agentcol = agent.position.col
-    local imptype = MAP[agentrow][agentcol].entity.isTile.improvementType
-    -- check if agent is at the right shop
-    if imptype ~= nil then
-        if imptype == stocktype then
-            -- determine how much stock the agent can afford to buy
-            local sellprice = MAP[agentrow][agentcol].entity.isTile.stockSellPrice
-            local stockavail = MAP[agentrow][agentcol].entity.isTile.stockLevel
-            local canafford = math.floor(agent.isPerson.wealth / sellprice)     -- rounds down
-            local purchaseamt = math.min(stockavail, canafford)
-            local funds = purchaseamt * sellprice
+    local sellprice = MAP[agentrow][agentcol].entity.isTile.stockSellPrice
+    local stockavail = math.floor(MAP[agentrow][agentcol].entity.isTile.stockLevel)
+    local canafford = math.floor(agent.isPerson.wealth / sellprice)     -- rounds down
+    local purchaseamt = math.min(stockavail, canafford)
+    purchaseamt = math.min(purchaseamt, maxqty)       -- limit purchase to the requested amount
+    purchaseamt = math.floor(purchaseamt)
+    local funds = purchaseamt * sellprice
 
-            MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
-            agent.isPerson.fullness = agent.isPerson.fullness + purchaseamt
-
-            MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + funds
-            agent.isPerson.wealth = agent.isPerson.wealth - funds
-        end
-    end
+    MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
+    MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + funds
+    agent.isPerson.wealth = agent.isPerson.wealth - funds
+    return purchaseamt
 end
 
 function functions.createActions(goal, agent)
@@ -227,20 +226,15 @@ function functions.createActions(goal, agent)
     end
     if goal == enum.goalWork then
         -- time to earn a paycheck
-
-        -- add a 'move to' action
-        -- add a 'work' action
         if not agent:has("workplace") then
             -- create a workplace
             local workplacerow, workplacecol = getBlankTile()
+            assert(workplacerow ~= nil)
             agent:give("workplace", workplacerow, workplacecol)
-            -- MAP[workplacerow][workplacecol].improvementType = agent.occupation.value
-            -- MAP[workplacerow][workplacecol].stocktype = agent.occupation.stocktype
-
             MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
             MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stocktype
             MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
-
+            print("Onwer assigned to " .. workplacerow, workplacecol)
         end
         if agent:has("workplace") then
             -- move to workplace
@@ -272,7 +266,7 @@ function functions.createActions(goal, agent)
             -- do work
             local action = {}
             action.action = "work"
-            action.timeleft = love.math.random(10, 30)
+            action.timeleft = love.math.random(40, 80)
             table.insert(queue, action)
         else
             error()     -- should never happen
@@ -284,12 +278,14 @@ function functions.createActions(goal, agent)
         local agentcol = agent.position.col
         local shoprow, shopcol = getClosestBuilding(enum.improvementFarm, agentrow, agentcol)
         if shoprow ~= nil then  --! need to properly deal with nils
-           addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
-           -- buy food
-           buyStock(agent, enum.stockFruit, 10)
-
-           -- eat food
-
+            addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+            -- buy food
+            action = {}
+            action.action = "buy"
+            action.stockType = enum.stockFruit
+            action.PurchaseAmount = 10
+            table.insert(queue, action)
+    print("Added 'buy' goal")
         end
     end
 
@@ -334,6 +330,23 @@ function functions.applyMovement(e, targetx, targety, velocity, dt)
     if e.position.col < 1 then e.position.col = 1 end
     if e.position.row > NUMBER_OF_ROWS then e.position.row = NUMBER_OF_ROWS end
     if e.position.col > NUMBER_OF_COLS then e.position.col = NUMBER_OF_COLS end
+end
+
+function functions.killAgent(uniqueid)
+    local deadID
+    for k, v in ipairs(VILLAGERS) do
+        -- print(uniqueid, v.uid.value)
+        if v.uid.value == uniqueid then
+print("Found dead guy. " .. k)
+            deadID = k
+            break
+        end
+    end
+print("deadid: " .. deadID)
+    assert(deadID ~= nil)
+    table.remove(VILLAGERS, deadID)
+print("There are now " .. #VILLAGERS .. " villagers.")
+
 end
 
 return functions
