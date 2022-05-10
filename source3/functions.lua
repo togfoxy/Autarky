@@ -32,7 +32,7 @@ function functions.loadImages()
 	IMAGES[enum.imagesGrassTeal] = love.graphics.newImage("assets/images/grass_teal_block_256x.png")
     --IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_256.png")
     IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_alpha.png")
-    IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/house1.png")
+    IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/appletree_37x50.png")
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
 
 	-- buildings
@@ -175,7 +175,11 @@ local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
             action.action = "move"
             action.row = node.y
             action.col = node.x
-            action.x, action.y = fun.getXYfromRowCol(action.row, action.col)    -- returns x and y (in that order)
+            -- action.x, action.y = fun.getXYfromRowCol(action.row, action.col)    -- returns x and y (in that order)
+            local x, y = fun.getXYfromRowCol(action.row, action.col)    -- returns x and y (in that order)
+            x = x + love.math.random(-10, 10) -- add some randomness to movement
+            y = y + love.math.random(-10, 10)
+            action.x, action.y = x, y
             table.insert(queue, action)
         end
     end
@@ -258,7 +262,7 @@ function functions.createActions(goal, agent)
             MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
             MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stocktype
             MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
-            -- print("Onwer assigned to " .. workplacerow, workplacecol)
+            print("Owner assigned to " .. workplacerow, workplacecol)
         end
         if agent:has("workplace") then
             -- move to workplace
@@ -334,8 +338,8 @@ function functions.applyMovement(e, targetx, targety, velocity, dt)
 
   -- print(currentx, currenty, xvector  , yvector  )
 
-    e.position.row = cf.round(currenty / TILE_SIZE)
-    e.position.col = cf.round(currentx / TILE_SIZE)
+    e.position.row = cf.round((currenty + TOP_MARGIN) / TILE_SIZE)
+    e.position.col = cf.round((currentx + LEFT_MARGIN) / TILE_SIZE)
     if e.position.row < 1 then e.position.row = 1 end
     if e.position.col < 1 then e.position.col = 1 end
     if e.position.row > NUMBER_OF_ROWS then e.position.row = NUMBER_OF_ROWS end
