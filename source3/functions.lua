@@ -41,7 +41,7 @@ function functions.loadImages()
 
     SPRITES[enum.spriteRedMan] = love.graphics.newImage("assets/images/Civilian Male Walk Red.png")
     QUADS[enum.spriteRedMan] = cf.fromImageToQuads(SPRITES[enum.spriteRedMan], 15, 32)
-    
+
 
 
 end
@@ -56,13 +56,16 @@ function functions.loadAudio()
     AUDIO[enum.musicHiddenPond] = love.audio.newSource("assets/audio/Hidden-Pond.mp3", "stream")
     AUDIO[enum.musicDistantMountains] = love.audio.newSource("assets/audio/Distant-Mountains.mp3", "stream")
 
-    AUDIO[enum.musicBirdsinForest] = love.audio.newSource("assets/audio/Distant-Mountains.mp3", "stream")
-    AUDIO[enum.musicBirds] = love.audio.newSource("assets/audio/Distant-Mountains.mp3", "stream")
+    AUDIO[enum.musicBirdsinForest] = love.audio.newSource("assets/audio/430917__ihitokage__birds-in-forest-5.ogg", "stream")
+    AUDIO[enum.musicBirds] = love.audio.newSource("assets/audio/532148__patchytherat__birds-1.wav", "stream")
 
     AUDIO[enum.audioYawn] = love.audio.newSource("assets/audio/272030__aldenroth2__male-yawn.wav", "static")
     AUDIO[enum.audioWork] = love.audio.newSource("assets/audio/working.wav", "static")
     AUDIO[enum.audioEat] = love.audio.newSource("assets/audio/543386__chomp.wav", "static")
     AUDIO[enum.audioNewVillager] = love.audio.newSource("assets/audio/387232__steaq__badge-coin-win.wav", "static")
+
+
+    AUDIO[enum.audioWork]:setVolume(0.2) -- 50% volume
 end
 
 function functions.PlayAmbientMusic()
@@ -71,7 +74,9 @@ function functions.PlayAmbientMusic()
 		if love.math.random(1,2000) == 1 then		-- allow for some silence between ambient music
 			if love.math.random(1,2) == 1 then
                 -- music
-                AUDIO[love.math.random(1,7)]:play()
+                local random = love.math.random(1, 7)
+                AUDIO[random]:play()
+    print("Playing music #" .. random)
 			else
 				AUDIO[love.math.random(21,22)]:play()
 			end
