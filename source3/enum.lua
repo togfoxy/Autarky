@@ -43,19 +43,19 @@ stockFruit = 5
 tileWalkable = 0    -- should be a constant
 
 
--- audio
+-- audio/music  ## ensure they have their own sequence without overlaps
 audioYawn = 1
 audioWork = 2
 audioEat = 3
 audioNewVillager = 4
 
-musicCityofMagic = 1
-musicOvertheHills = 2
-musicSpring = 3
-musicMedievalFiesta = 4
-musicFuji = 5
-musicHiddenPond = 6
-musicDistantMountains = 7
+musicCityofMagic = 11
+musicOvertheHills = 12
+musicSpring = 13
+musicMedievalFiesta = 14
+musicFuji = 15
+musicHiddenPond = 16
+musicDistantMountains = 17
 
 musicBirds = 21
 musicBirdsinForest = 22
