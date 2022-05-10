@@ -22,6 +22,7 @@ SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
 SCREEN_STACK = {}
 IMAGES = {}
+AUDIO = {}
 
 TILE_SIZE = 50
 NUMBER_OF_ROWS = (cf.round(SCREEN_HEIGHT / TILE_SIZE)) - 2
@@ -46,6 +47,7 @@ TREE = {}			-- a tree that holds all possible behaviours for a person
 WALKING_SPEED = 50
 
 DEBUG = false
+NEW_VILLAGER_TIMER = 0
 
 function love.keyreleased( key, scancode )
 	if key == "escape" then
@@ -108,6 +110,8 @@ function love.load()
 
     fun.loadImages()
     fun.initialiseMap()     -- initialises 2d map with nils
+	fun.loadAudio()
+
     ecsfunctions.init()	    -- loads all the components etc
     WORLD:emit("init")      -- triggers the init functions which load arrays and tables
 
@@ -128,9 +132,15 @@ function love.update(dt)
 
     WORLD:emit("update", dt)
 
-
-
+	NEW_VILLAGER_TIMER = NEW_VILLAGER_TIMER + dt
+	if NEW_VILLAGER_TIMER > 300 then
+		NEW_VILLAGER_TIMER = 0
+		local villager = concord.entity(WORLD)
+		:give("drawable")
+		:give("position")
+		:give("uid")
+		:give("isPerson")
+		table.insert(VILLAGERS, villager)
+	end
 	--! res.update()
-
-
 end

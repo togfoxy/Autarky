@@ -37,6 +37,12 @@ function functions.loadImages()
 	-- IMAGES[enum.buildingFarm] = love.graphics.newImage("assets/images/house1.png")
 end
 
+function functions.loadAudio()
+    AUDIO[enum.audioYawn] = love.audio.newSource("assets/audio/272030__aldenroth2__male-yawn.wav", "static")
+    AUDIO[enum.audioWork] = love.audio.newSource("assets/audio/working.wav", "static")
+    AUDIO[enum.audioEat] = love.audio.newSource("assets/audio/543386__chomp.wav", "static")
+end
+
 function functions.getXYfromRowCol(row, col)
     -- determine the drawing x based on column
     -- input row and col
@@ -138,7 +144,7 @@ local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, st
         end
     end
     if closestrow == nil then
-        print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
+        -- print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
     end
     return closestrow, closestcol       --! need to manage nils
 end
@@ -258,7 +264,7 @@ function functions.createActions(goal, agent)
             -- do work
             local action = {}
             action.action = "work"
-            action.timeleft = love.math.random(40, 80)
+            action.timeleft = love.math.random(30, 60)
             table.insert(queue, action)
         else
             error()     -- should never happen

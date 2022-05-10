@@ -121,18 +121,33 @@ function ecsfunctions.init()
                     end
                 end
 
-                -- display some debugging information
-                if e.isPerson.queue[1] ~= nil then
-                    local txt = "action: " .. e.isPerson.queue[1].action .. "\n"
-                    if e.isPerson.queue[1].timeleft ~= nil then
-                        txt = txt .. "timer: " .. cf.round(e.isPerson.queue[1].timeleft) .. "\n"
+                local txt = ""
+                if love.keyboard.isDown("lctrl") or love.keyboard.isDown("rctrl") then
+                    -- display some debugging information
+                    if e.isPerson.queue[1] ~= nil then
+                        txt = "action: " .. e.isPerson.queue[1].action .. "\n"
+                        if e.isPerson.queue[1].timeleft ~= nil then
+                            txt = txt .. "timer: " .. cf.round(e.isPerson.queue[1].timeleft) .. "\n"
+                        end
                     end
                     txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina) .. "\n"
                     txt = txt .. "fullness: " .. cf.round(e.isPerson.fullness) .. "\n"
                     txt = txt .. "wealth: " .. cf.round(e.isPerson.wealth,1) .. "\n"
 
                     love.graphics.setColor(1,1,1,1)
-                    love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 10)
+                    love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 25)
+                else
+                    if e.isPerson.stamina < 25 then
+                        txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina) .. "\n"
+                    end
+                    if e.isPerson.fullness < 25 then
+                        txt = txt .. "fullness: " .. cf.round(e.isPerson.fullness) .. "\n"
+                    end
+                    if e.isPerson.wealth < 1 then
+                        txt = txt .. "wealth: " .. cf.round(e.isPerson.wealth,1) .. "\n"
+                    end
+                    love.graphics.setColor(1,1,1,1)
+                    love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 25)
                 end
             end
         end
@@ -181,6 +196,11 @@ function ecsfunctions.init()
 
             if currentaction.action == "idle" then
                 currentaction.timeleft = currentaction.timeleft - dt
+                if currentaction.timeleft > 3 and love.math.random(1, 10000) == 1 then
+                    -- play audio
+                    AUDIO[enum.audioYawn]:play()
+                end
+
                 e.isPerson.stamina = e.isPerson.stamina + (1.5 * dt)        -- gain 1 per second + recover the 0.5 applied above
                 -- if e.isPerson.stamina > 100 then e.isPerson.stamina = 100 end
                 if currentaction.timeleft <= 0 then
@@ -205,6 +225,10 @@ function ecsfunctions.init()
             end
             if currentaction.action == "work" then
                 currentaction.timeleft = currentaction.timeleft - dt
+                if currentaction.timeleft > 3 and love.math.random(1, 5000) == 1 then
+                    -- play audio
+                    AUDIO[enum.audioWork]:play()
+                end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
                 end
@@ -234,6 +258,9 @@ function ecsfunctions.init()
                         -- print("Bought " .. amtbought .. " food")
                         if action.stockType == enum.stockFruit then
                             e.isPerson.fullness = e.isPerson.fullness + (amtbought * 100)   -- each food restores 100 fullness
+                            if amtbought > 0 and love.math.random(1, 5000) == 1 then
+                                    AUDIO[enum.audioWork]:play()
+                            end
                         end
                     end
                 end
