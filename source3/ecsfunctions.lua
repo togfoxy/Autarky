@@ -255,7 +255,7 @@ function ecsfunctions.init()
                         if action.stockType == enum.stockFruit then
                             e.isPerson.fullness = e.isPerson.fullness + (amtbought * 100)   -- each food restores 100 fullness
                             if amtbought > 0 and love.math.random(1, 5000) == 1 then
-                                    AUDIO[enum.audioWork]:play()
+                                    AUDIO[enum.audioEat]:play()
                             end
                         end
                     end
