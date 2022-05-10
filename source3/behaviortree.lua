@@ -34,7 +34,7 @@ function behaviortree.EstablishTree()
  	TREE.child[2].goal = enum.goalWork
  	TREE.child[2].priority = function(agent)
 								-- if DEBUG then print("Work priority is 5") end
- 								return 5
+ 								return 3
  							end
  	TREE.child[2].activate = function(agent)
 								if agent:has("occupation") then
@@ -47,7 +47,7 @@ function behaviortree.EstablishTree()
 	TREE.child[3] = {}
  	TREE.child[3].goal = enum.goalEat
  	TREE.child[3].priority = function(agent)
-								if agent.isPerson.fullness < 25 then
+								if agent.isPerson.fullness < 35 then
 									return 50
 								else
 									local priority = cf.round((100 - agent.isPerson.fullness) / 10)

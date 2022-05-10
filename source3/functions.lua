@@ -138,7 +138,7 @@ local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, st
         end
     end
     if closestrow == nil then
-        print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
+        -- print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
     end
     return closestrow, closestcol       --! need to manage nils
 end
@@ -258,7 +258,7 @@ function functions.createActions(goal, agent)
             -- do work
             local action = {}
             action.action = "work"
-            action.timeleft = love.math.random(40, 80)
+            action.timeleft = love.math.random(30, 60)
             table.insert(queue, action)
         else
             error()     -- should never happen
