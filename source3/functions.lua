@@ -41,6 +41,7 @@ function functions.loadAudio()
     AUDIO[enum.audioYawn] = love.audio.newSource("assets/audio/272030__aldenroth2__male-yawn.wav", "static")
     AUDIO[enum.audioWork] = love.audio.newSource("assets/audio/working.wav", "static")
     AUDIO[enum.audioEat] = love.audio.newSource("assets/audio/543386__chomp.wav", "static")
+    AUDIO[enum.audioNewVillager] = love.audio.newSource("assets/audio/387232__steaq__badge-coin-win.wav", "static")
 end
 
 function functions.getXYfromRowCol(row, col)

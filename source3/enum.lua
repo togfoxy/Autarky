@@ -42,3 +42,4 @@ tileWalkable = 0    -- should be a constant
 audioYawn = 1
 audioWork = 2
 audioEat = 3
+audioNewVillager = 4

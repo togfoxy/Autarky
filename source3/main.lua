@@ -141,6 +141,7 @@ function love.update(dt)
 		:give("uid")
 		:give("isPerson")
 		table.insert(VILLAGERS, villager)
+		AUDIO[enum.audioNewVillager]:play()
 	end
 	--! res.update()
 end
