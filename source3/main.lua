@@ -22,6 +22,7 @@ SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
 SCREEN_STACK = {}
 IMAGES = {}
+QUAD = {}
 AUDIO = {}
 
 TILE_SIZE = 50
@@ -144,5 +145,7 @@ function love.update(dt)
 		table.insert(VILLAGERS, villager)
 		AUDIO[enum.audioNewVillager]:play()
 	end
+
+	fun.PlayAmbientMusic()
 	--! res.update()
 end

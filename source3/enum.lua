@@ -1,12 +1,15 @@
 module(...,package.seeall)
 
-
+-- images (not quads)
 imagesGrassDry = 1
 imagesGrassGreen = 2
 imagesGrassTeal = 3
 imagesWell = 4
 imagesFarm = 5
 imagesMud = 99
+
+-- quads
+quadManBlue = 1
 
 -- terrain types
 terrainGrassDry = 1
@@ -44,3 +47,14 @@ audioYawn = 1
 audioWork = 2
 audioEat = 3
 audioNewVillager = 4
+
+musicCityofMagic = 1
+musicOvertheHills = 2
+musicSpring = 3
+musicMedievalFiesta = 4
+musicFuji = 5
+musicHiddenPond = 6
+musicDistantMountains = 7
+
+musicBirds = 21
+musicBirdsinForest = 22

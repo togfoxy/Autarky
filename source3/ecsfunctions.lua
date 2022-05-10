@@ -115,13 +115,14 @@ function ecsfunctions.init()
                 end
                 local drawwidth = PERSON_DRAW_WIDTH
                 local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
-                love.graphics.circle("fill", drawx, drawy, drawwidth)
+                --love.graphics.circle("fill", drawx, drawy, drawwidth)
+                love.graphics.draw(spritesheetBlueMan,quads[1],drawx,drawy, 0, 1, 1, 10, 25)
 
                 -- draw the occupation
                 if e:has("occupation") then
                     love.graphics.setColor(0,0,1,1)
                     local offsetx = 5
-                    local offsety = 8
+                    local offsety = 30
                     local occupation = e.occupation.value
                     if occupation == enum.jobFarmer then
                         love.graphics.print("F", drawx, drawy, 0, 1, 1, offsetx, offsety)
@@ -255,7 +256,7 @@ function ecsfunctions.init()
                         if action.stockType == enum.stockFruit then
                             e.isPerson.fullness = e.isPerson.fullness + (amtbought * 100)   -- each food restores 100 fullness
                             if amtbought > 0 and love.math.random(1, 5000) == 1 then
-                                    AUDIO[enum.audioWork]:play()
+                                    AUDIO[enum.audioEat]:play()
                             end
                         end
                     end
