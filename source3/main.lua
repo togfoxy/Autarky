@@ -61,6 +61,7 @@ function love.keyreleased( key, scancode )
 				v:ensure("occupation", enum.jobFarmer, enum.stockFruit)		-- a farmer that farms fruit
 				v:remove("isSelected")
 			end
+			v:remove("isSelected")
 		end
 	end
 end
