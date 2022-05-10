@@ -38,7 +38,7 @@ UPPER_TERRAIN_HEIGHT = 6
 
 print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
 
-NUMBER_OF_VILLAGERS = 3
+NUMBER_OF_VILLAGERS = 30
 PERSON_DRAW_WIDTH = 10
 
 MAP = {}			-- a 2d table of tiles
@@ -61,6 +61,7 @@ function love.keyreleased( key, scancode )
 				v:ensure("occupation", enum.jobFarmer, enum.stockFruit)		-- a farmer that farms fruit
 				v:remove("isSelected")
 			end
+			v:remove("isSelected")
 		end
 	end
 end
@@ -141,6 +142,7 @@ function love.update(dt)
 		:give("uid")
 		:give("isPerson")
 		table.insert(VILLAGERS, villager)
+		AUDIO[enum.audioNewVillager]:play()
 	end
 	--! res.update()
 end

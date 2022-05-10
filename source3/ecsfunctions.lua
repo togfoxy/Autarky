@@ -38,6 +38,11 @@ function ecsfunctions.init()
                 -- love.graphics.print(e.isTile.tileType, drawx, drawy)
                 -- love.graphics.print(e.isTile.tileHeight, drawx, drawy)
 
+                -- draw the mud
+                local mudalpha = cf.round((e.isTile.mudLevel / 255),3)
+                love.graphics.setColor(1,1,1,mudalpha)
+                love.graphics.draw(IMAGES[enum.imagesMud], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
+
                 -- draw contour lines
                 local row, col = e.position.row, e.position.col
                 -- check if top neighbour is different to current cell
@@ -98,6 +103,13 @@ function ecsfunctions.init()
                     love.graphics.setColor(0/255,0/255,115/255,1)
                     love.graphics.print(cf.round(MAP[row][col].entity.isTile.stockLevel,1), drawx, drawy, 0, 1, 1, 20, 20)
                 end
+
+                -- debugging
+                -- draw mud levels for each tile
+                -- if MAP[row][col].entity.isTile.mudLevel > 0 then
+                --     love.graphics.setColor(1,1,1,1)
+                --     love.graphics.print(cf.round(MAP[row][col].entity.isTile.mudLevel,4), drawx, drawy, 0, 1, 1, 20, 20)
+                -- end
             end
 
             if e.isPerson then
@@ -150,17 +162,6 @@ function ecsfunctions.init()
                     love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 25)
                 end
             end
-        end
-    end
-
-    systemIsTile = concord.system({
-        pool = {"isTile"}
-    })
-    function systemIsTile:init()
-        self.pool.onEntityAdded = function(_, entity)
-            local row = entity.position.row
-            local col = entity.position.col
-            MAP[row][col].entity = entity
         end
     end
 
@@ -267,6 +268,14 @@ function ecsfunctions.init()
                 table.remove(e.isPerson.queue, 1)
             end
 
+            -- do things that don't depend on an action
+            local row = e.position.row  --! try to refact this so all the good stuff is only at the top
+            local col = e.position.col
+
+            -- add mud
+            MAP[row][col].entity.isTile.mudLevel = MAP[row][col].entity.isTile.mudLevel + dt
+            if MAP[row][col].entity.isTile.mudLevel > 255 then MAP[row][col].entity.isTile.mudLevel = 255 end
+
             e.isPerson.stamina = e.isPerson.stamina - (0.5 * dt)
             if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
 
@@ -291,9 +300,32 @@ function ecsfunctions.init()
         end
     end
 
+    systemIsTile = concord.system({
+        pool = {"isTile"}
+    })
+    function systemIsTile:init()
+        self.pool.onEntityAdded = function(_, entity)
+            local row = entity.position.row
+            local col = entity.position.col
+            MAP[row][col].entity = entity
+        end
+    end
+
+    systemIsTileUpdate = concord.system({
+        pool = {"isTile"}
+    })
+    function systemIsTileUpdate:update(dt)
+        for _, e in ipairs(self.pool) do
+
+            -- decrease mud so that grass grows
+            e.isTile.mudLevel = cf.round(e.isTile.mudLevel - (dt / 3), 4)
+            if e.isTile.mudLevel < 0 then e.isTile.mudLevel = 0 end
+        end
+    end
+
     -- add the systems to the world
     -- ## ensure all systems are added to the world
-    WORLD:addSystems(systemDraw, systemIsTile, systemIsPerson)
+    WORLD:addSystems(systemDraw, systemIsTile, systemIsTileUpdate, systemIsPerson)
 
     -- create entities
 

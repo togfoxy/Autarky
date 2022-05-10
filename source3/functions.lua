@@ -30,8 +30,10 @@ function functions.loadImages()
 	IMAGES[enum.imagesGrassDry] = love.graphics.newImage("assets/images/grass_dry_block_256x.png")
 	IMAGES[enum.imagesGrassGreen] = love.graphics.newImage("assets/images/grass_green_block_256x.png")
 	IMAGES[enum.imagesGrassTeal] = love.graphics.newImage("assets/images/grass_teal_block_256x.png")
-    IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_256.png")
+    --IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_256.png")
+    IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_alpha.png")
     IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/house1.png")
+    IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
 
 	-- buildings
 	-- IMAGES[enum.buildingFarm] = love.graphics.newImage("assets/images/house1.png")
@@ -41,6 +43,7 @@ function functions.loadAudio()
     AUDIO[enum.audioYawn] = love.audio.newSource("assets/audio/272030__aldenroth2__male-yawn.wav", "static")
     AUDIO[enum.audioWork] = love.audio.newSource("assets/audio/working.wav", "static")
     AUDIO[enum.audioEat] = love.audio.newSource("assets/audio/543386__chomp.wav", "static")
+    AUDIO[enum.audioNewVillager] = love.audio.newSource("assets/audio/387232__steaq__badge-coin-win.wav", "static")
 end
 
 function functions.getXYfromRowCol(row, col)

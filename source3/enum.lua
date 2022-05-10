@@ -6,6 +6,7 @@ imagesGrassGreen = 2
 imagesGrassTeal = 3
 imagesWell = 4
 imagesFarm = 5
+imagesMud = 99
 
 -- terrain types
 terrainGrassDry = 1
@@ -42,3 +43,4 @@ tileWalkable = 0    -- should be a constant
 audioYawn = 1
 audioWork = 2
 audioEat = 3
+audioNewVillager = 4
