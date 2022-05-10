@@ -28,7 +28,7 @@ function comp.init()
     end)
 
     concord.component("position", function(c, row, col)         -- exists on the map/grid
-        c.row = row or love.math.random(1, NUMBER_OF_ROWS)
+        c.row = row or love.math.random(1, NUMBER_OF_ROWS)  -- this is updated in "applyMovement"
         c.col = col or love.math.random(1, NUMBER_OF_COLS)
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
     end)

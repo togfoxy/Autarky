@@ -33,11 +33,6 @@ function ecsfunctions.init()
 				love.graphics.setColor(1,1,1,1)
                 love.graphics.draw(img, drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
 
-                -- debugging
-                -- love.graphics.circle("line", drawx, drawy, 3)
-                -- love.graphics.print(e.isTile.tileType, drawx, drawy)
-                -- love.graphics.print(e.isTile.tileHeight, drawx, drawy)
-
                 -- draw the mud
                 local mudalpha = cf.round((e.isTile.mudLevel / 255),3)
                 love.graphics.setColor(1,1,1,mudalpha)
@@ -334,6 +329,11 @@ function ecsfunctions.init()
 	WELLS[1] = {}
 	WELLS[1].row = love.math.random(3, NUMBER_OF_ROWS - 4)  -- The 3 and -2 keeps the well off the screen edge
 	WELLS[1].col = love.math.random(3, NUMBER_OF_COLS - 2)
+
+    -- debugging
+    -- WELLS[1].row = 4
+	-- WELLS[1].col = 4
+
 
     -- create tiles
     local terrainheightperlinseed
