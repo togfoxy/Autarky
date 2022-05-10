@@ -39,7 +39,7 @@ function ecsfunctions.init()
                 -- love.graphics.print(e.isTile.tileHeight, drawx, drawy)
 
                 -- draw the mud
-                local mudalpha = cf.round((e.isTile.mudLevel / 255),0)
+                local mudalpha = cf.round((e.isTile.mudLevel / 255),3)
                 love.graphics.setColor(1,1,1,mudalpha)
                 love.graphics.draw(IMAGES[enum.imagesMud], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
 
