@@ -115,7 +115,8 @@ function ecsfunctions.init()
                 end
                 local drawwidth = PERSON_DRAW_WIDTH
                 local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
-                love.graphics.circle("fill", drawx, drawy, drawwidth)
+                --love.graphics.circle("fill", drawx, drawy, drawwidth)
+                love.graphics.draw(spritesheetBlueMan,quads[1],drawx,drawy, 0, 1, 1, 10, 25)
 
                 -- draw the occupation
                 if e:has("occupation") then

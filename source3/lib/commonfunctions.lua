@@ -211,17 +211,17 @@ end
 function fromImageToQuads(spritesheet, spritewidth, spriteheight)
 	-- Where spritesheet is an image and spritewidth is the width
 	-- and height of your textures
-  local quadtiles = {} -- A table containing the quads to return
-  local imageWidth = spritesheet:getWidth()
-  local imageHeight = spritesheet:getHeight()
-  -- Loop trough the image and extract the quads
-  for i = 0, imageHeight - 1, spriteheight do
-    for j = 0, imageWidth - 1, spritewidth do
-      table.insert(quadtiles,love.graphics.newQuad(j, i, spritewidth, spriteheight, imageWidth, imageHeight))
-    end
-  end
-  -- Return the table of quads
-  return quadtiles
+	local quadtiles = {} -- A table containing the quads to return
+	local imageWidth = spritesheet:getWidth()
+	local imageHeight = spritesheet:getHeight()
+	-- Loop trough the image and extract the quads
+	for i = 0, imageHeight - 1, spriteheight do
+	for j = 0, imageWidth - 1, spritewidth do
+	  table.insert(quadtiles,love.graphics.newQuad(j, i, spritewidth, spriteheight, imageWidth, imageHeight))
+	end
+	end
+	-- Return the table of quads
+	return quadtiles
 end
 
 function AddScreen(newScreen, screenStack)

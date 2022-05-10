@@ -35,6 +35,11 @@ function functions.loadImages()
     IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/appletree_37x50.png")
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
 
+    -- quads
+    spritesheetBlueMan = love.graphics.newImage("assets/images/Civilian Male Walk Blue.png")      -- used by anim8
+    quads = cf.fromImageToQuads(spritesheetBlueMan, 15, 32)
+
+
 	-- buildings
 	-- IMAGES[enum.buildingFarm] = love.graphics.newImage("assets/images/house1.png")
 end

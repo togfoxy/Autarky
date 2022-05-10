@@ -1,12 +1,15 @@
 module(...,package.seeall)
 
-
+-- images (not quads)
 imagesGrassDry = 1
 imagesGrassGreen = 2
 imagesGrassTeal = 3
 imagesWell = 4
 imagesFarm = 5
 imagesMud = 99
+
+-- quads
+quadManBlue = 1
 
 -- terrain types
 terrainGrassDry = 1
