@@ -12,7 +12,7 @@ function comp.init()
     concord.component("isPerson", function(c)
         c.queue = {}
         c.stamina = 100         -- fully rested
-        c.wealth = 999            -- starting amount. 3 days worth of food.
+        c.wealth = 3            -- starting amount. 3 days worth of food.
         c.fullness = 125        -- hunger. Start a little topped up so they have a chance to establish themselves.
     end)
 

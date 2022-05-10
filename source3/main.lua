@@ -22,6 +22,7 @@ SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
 SCREEN_STACK = {}
 IMAGES = {}
+AUDIO = {}
 
 TILE_SIZE = 50
 NUMBER_OF_ROWS = (cf.round(SCREEN_HEIGHT / TILE_SIZE)) - 2
@@ -109,6 +110,8 @@ function love.load()
 
     fun.loadImages()
     fun.initialiseMap()     -- initialises 2d map with nils
+	fun.loadAudio()
+
     ecsfunctions.init()	    -- loads all the components etc
     WORLD:emit("init")      -- triggers the init functions which load arrays and tables
 

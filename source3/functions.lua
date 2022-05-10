@@ -37,6 +37,12 @@ function functions.loadImages()
 	-- IMAGES[enum.buildingFarm] = love.graphics.newImage("assets/images/house1.png")
 end
 
+function functions.loadAudio()
+    AUDIO[enum.audioYawn] = love.audio.newSource("assets/audio/272030__aldenroth2__male-yawn.wav", "static")
+    AUDIO[enum.audioWork] = love.audio.newSource("assets/audio/working.wav", "static")
+    AUDIO[enum.audioEat] = love.audio.newSource("assets/audio/543386__chomp.wav", "static")
+end
+
 function functions.getXYfromRowCol(row, col)
     -- determine the drawing x based on column
     -- input row and col

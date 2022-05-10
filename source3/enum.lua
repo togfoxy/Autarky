@@ -35,4 +35,10 @@ stockFruit = 5
 
 
 -- jumper stuff
-tileWalkable = 0
+tileWalkable = 0    -- should be a constant
+
+
+-- audio
+audioYawn = 1
+audioWork = 2
+audioEat = 3
