@@ -32,6 +32,7 @@ function functions.loadImages()
 	IMAGES[enum.imagesGrassTeal] = love.graphics.newImage("assets/images/grass_teal_block_256x.png")
     IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_256.png")
     IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/house1.png")
+    IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
 
 	-- buildings
 	-- IMAGES[enum.buildingFarm] = love.graphics.newImage("assets/images/house1.png")

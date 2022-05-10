@@ -43,6 +43,7 @@ function comp.init()
         c.stockType = nil
         c.stockLevel = 0
         c.stockSellPrice = 1.2
+        c.mudLevel = 0              -- holds the alpha value for the mud (0 -> 255)
     end)
 
 

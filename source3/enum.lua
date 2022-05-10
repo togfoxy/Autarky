@@ -6,6 +6,7 @@ imagesGrassGreen = 2
 imagesGrassTeal = 3
 imagesWell = 4
 imagesFarm = 5
+imagesMud = 99
 
 -- terrain types
 terrainGrassDry = 1
