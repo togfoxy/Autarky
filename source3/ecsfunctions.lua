@@ -115,18 +115,19 @@ function ecsfunctions.init()
                 end
                 local drawwidth = PERSON_DRAW_WIDTH
                 local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
-                --love.graphics.circle("fill", drawx, drawy, drawwidth)
-                love.graphics.draw(spritesheetBlueMan,quads[1],drawx,drawy, 0, 1, 1, 10, 25)
 
                 -- draw the occupation
                 if e:has("occupation") then
+                    love.graphics.draw(SPRITES[enum.spriteBlueMan], QUADS[enum.spriteBlueMan][1], drawx, drawy, 0, 1, 1, 10, 25)
                     love.graphics.setColor(0,0,1,1)
-                    local offsetx = 5
-                    local offsety = 30
-                    local occupation = e.occupation.value
-                    if occupation == enum.jobFarmer then
-                        love.graphics.print("F", drawx, drawy, 0, 1, 1, offsetx, offsety)
-                    end
+                    -- local offsetx = 5
+                    -- local offsety = 30
+                    -- local occupation = e.occupation.value
+                    -- if occupation == enum.jobFarmer then
+                    --     love.graphics.print("F", drawx, drawy, 0, 1, 1, offsetx, offsety)
+                    -- end
+                else
+                    love.graphics.draw(SPRITES[enum.spriteRedMan], QUADS[enum.spriteRedMan][1], drawx, drawy, 0, 1, 1, 10, 25)
                 end
 
                 local txt = ""
@@ -252,7 +253,7 @@ function ecsfunctions.init()
                 if imptype ~= nil then
                     if imptype == action.stockType then
                         local amtbought = fun.buyStock(e, action.stockType, action.purchaseAmount)
-                        -- print("Bought " .. amtbought .. " food")
+    print("Bought " .. amtbought .. " food")
                         if action.stockType == enum.stockFruit then
                             e.isPerson.fullness = e.isPerson.fullness + (amtbought * 100)   -- each food restores 100 fullness
                             if amtbought > 0 and love.math.random(1, 5000) == 1 then
@@ -269,7 +270,7 @@ function ecsfunctions.init()
             local col = e.position.col
 
             -- add mud
-            MAP[row][col].entity.isTile.mudLevel = MAP[row][col].entity.isTile.mudLevel + dt
+            MAP[row][col].entity.isTile.mudLevel = MAP[row][col].entity.isTile.mudLevel + (dt * 3)
             if MAP[row][col].entity.isTile.mudLevel > 255 then MAP[row][col].entity.isTile.mudLevel = 255 end
 
             e.isPerson.stamina = e.isPerson.stamina - (0.5 * dt)

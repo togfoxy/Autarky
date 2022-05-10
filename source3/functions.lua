@@ -36,12 +36,14 @@ function functions.loadImages()
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
 
     -- quads
-    spritesheetBlueMan = love.graphics.newImage("assets/images/Civilian Male Walk Blue.png")      -- used by anim8
-    quads = cf.fromImageToQuads(spritesheetBlueMan, 15, 32)
+    SPRITES[enum.spriteBlueMan] = love.graphics.newImage("assets/images/Civilian Male Walk Blue.png")
+    QUADS[enum.spriteBlueMan] = cf.fromImageToQuads(SPRITES[enum.spriteBlueMan], 15, 32)
+
+    SPRITES[enum.spriteRedMan] = love.graphics.newImage("assets/images/Civilian Male Walk Red.png")
+    QUADS[enum.spriteRedMan] = cf.fromImageToQuads(SPRITES[enum.spriteRedMan], 15, 32)
+    
 
 
-	-- buildings
-	-- IMAGES[enum.buildingFarm] = love.graphics.newImage("assets/images/house1.png")
 end
 
 function functions.loadAudio()

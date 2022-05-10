@@ -8,8 +8,9 @@ imagesWell = 4
 imagesFarm = 5
 imagesMud = 99
 
--- quads
-quadManBlue = 1
+-- quads/sprites
+spriteBlueMan = 1
+spriteRedMan = 2
 
 -- terrain types
 terrainGrassDry = 1
