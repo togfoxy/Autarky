@@ -122,7 +122,7 @@ function ecsfunctions.init()
                 if e:has("occupation") then
                     love.graphics.setColor(0,0,1,1)
                     local offsetx = 5
-                    local offsety = 8
+                    local offsety = 30
                     local occupation = e.occupation.value
                     if occupation == enum.jobFarmer then
                         love.graphics.print("F", drawx, drawy, 0, 1, 1, offsetx, offsety)
