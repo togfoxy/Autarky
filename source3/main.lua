@@ -144,5 +144,7 @@ function love.update(dt)
 		table.insert(VILLAGERS, villager)
 		AUDIO[enum.audioNewVillager]:play()
 	end
+
+	fun.PlayAmbientMusic()
 	--! res.update()
 end

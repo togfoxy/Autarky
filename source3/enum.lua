@@ -44,3 +44,14 @@ audioYawn = 1
 audioWork = 2
 audioEat = 3
 audioNewVillager = 4
+
+musicCityofMagic = 1
+musicOvertheHills = 2
+musicSpring = 3
+musicMedievalFiesta = 4
+musicFuji = 5
+musicHiddenPond = 6
+musicDistantMountains = 7
+
+musicBirds = 21
+musicBirdsinForest = 22

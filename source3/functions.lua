@@ -40,10 +40,36 @@ function functions.loadImages()
 end
 
 function functions.loadAudio()
+
+    AUDIO[enum.musicCityofMagic] = love.audio.newSource("assets/audio/City of magic.wav", "stream")
+	AUDIO[enum.musicOvertheHills] = love.audio.newSource("assets/audio/Over the hills.wav", "stream")
+	AUDIO[enum.musicSpring] = love.audio.newSource("assets/audio/Spring.wav", "stream")
+    AUDIO[enum.musicMedievalFiesta] = love.audio.newSource("assets/audio/Medieval fiesta.wav", "stream")
+    AUDIO[enum.musicFuji] = love.audio.newSource("assets/audio/Fuji.mp3", "stream")
+    AUDIO[enum.musicHiddenPond] = love.audio.newSource("assets/audio/Hidden-Pond.mp3", "stream")
+    AUDIO[enum.musicDistantMountains] = love.audio.newSource("assets/audio/Distant-Mountains.mp3", "stream")
+
+    AUDIO[enum.musicBirdsinForest] = love.audio.newSource("assets/audio/Distant-Mountains.mp3", "stream")
+    AUDIO[enum.musicBirds] = love.audio.newSource("assets/audio/Distant-Mountains.mp3", "stream")
+
     AUDIO[enum.audioYawn] = love.audio.newSource("assets/audio/272030__aldenroth2__male-yawn.wav", "static")
     AUDIO[enum.audioWork] = love.audio.newSource("assets/audio/working.wav", "static")
     AUDIO[enum.audioEat] = love.audio.newSource("assets/audio/543386__chomp.wav", "static")
     AUDIO[enum.audioNewVillager] = love.audio.newSource("assets/audio/387232__steaq__badge-coin-win.wav", "static")
+end
+
+function functions.PlayAmbientMusic()
+	local intCount = love.audio.getActiveSourceCount()
+	if intCount == 0 then
+		if love.math.random(1,2000) == 1 then		-- allow for some silence between ambient music
+			if love.math.random(1,2) == 1 then
+                -- music
+                AUDIO[love.math.random(1,7)]:play()
+			else
+				AUDIO[love.math.random(21,22)]:play()
+			end
+		end
+	end
 end
 
 function functions.getXYfromRowCol(row, col)
