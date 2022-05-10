@@ -121,18 +121,20 @@ function ecsfunctions.init()
                     end
                 end
 
-                -- display some debugging information
-                if e.isPerson.queue[1] ~= nil then
-                    local txt = "action: " .. e.isPerson.queue[1].action .. "\n"
-                    if e.isPerson.queue[1].timeleft ~= nil then
-                        txt = txt .. "timer: " .. cf.round(e.isPerson.queue[1].timeleft) .. "\n"
-                    end
-                    txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina) .. "\n"
-                    txt = txt .. "fullness: " .. cf.round(e.isPerson.fullness) .. "\n"
-                    txt = txt .. "wealth: " .. cf.round(e.isPerson.wealth,1) .. "\n"
+                if love.keyboard.isDown("lctrl") or love.keyboard.isDown("rctrl") then
+                    -- display some debugging information
+                    if e.isPerson.queue[1] ~= nil then
+                        local txt = "action: " .. e.isPerson.queue[1].action .. "\n"
+                        if e.isPerson.queue[1].timeleft ~= nil then
+                            txt = txt .. "timer: " .. cf.round(e.isPerson.queue[1].timeleft) .. "\n"
+                        end
+                        txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina) .. "\n"
+                        txt = txt .. "fullness: " .. cf.round(e.isPerson.fullness) .. "\n"
+                        txt = txt .. "wealth: " .. cf.round(e.isPerson.wealth,1) .. "\n"
 
-                    love.graphics.setColor(1,1,1,1)
-                    love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 10)
+                        love.graphics.setColor(1,1,1,1)
+                        love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 25)
+                    end
                 end
             end
         end
