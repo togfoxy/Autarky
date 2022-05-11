@@ -34,6 +34,7 @@ function functions.loadImages()
     IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_alpha.png")
     IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/appletree_37x50.png")
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
+    IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
 
     -- quads
     SPRITES[enum.spriteBlueMan] = love.graphics.newImage("assets/images/Civilian Male Walk Blue.png")
@@ -65,7 +66,14 @@ function functions.loadAudio()
     AUDIO[enum.audioNewVillager] = love.audio.newSource("assets/audio/387232__steaq__badge-coin-win.wav", "static")
 
 
-    AUDIO[enum.audioWork]:setVolume(0.2) -- 50% volume
+    AUDIO[enum.audioWork]:setVolume(0.2)
+    AUDIO[enum.musicMedievalFiesta]:setVolume(0.2)
+    AUDIO[enum.musicOvertheHills]:setVolume(0.2)
+    AUDIO[enum.audioNewVillager]:setVolume(0.2)
+    AUDIO[enum.musicCityofMagic]:setVolume(0.2)
+    AUDIO[enum.musicSpring]:setVolume(0.1)
+
+
 end
 
 function functions.PlayAmbientMusic()
@@ -74,11 +82,14 @@ function functions.PlayAmbientMusic()
 		if love.math.random(1,2000) == 1 then		-- allow for some silence between ambient music
 			if love.math.random(1,2) == 1 then
                 -- music
-                local random = love.math.random(1, 7)
+                local random = love.math.random(11, 17)
                 AUDIO[random]:play()
     print("Playing music #" .. random)
 			else
-				AUDIO[love.math.random(21,22)]:play()
+
+                local random = love.math.random(21, 22)
+    print("Playing ambient " .. random)
+    			AUDIO[random]:play()
 			end
 		end
 	end
@@ -195,6 +206,9 @@ local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
 
     -- get path to destination
     local cmap = convertToCollisionMap(MAP)
+
+    -- print(inspect(cmap))
+
     -- need to 'blank' out the destination so jumper can find a path.
     cmap[stoprow][stopcol] = enum.tileWalkable
 
@@ -300,6 +314,13 @@ function functions.createActions(goal, agent)
             MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
             MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stocktype
             MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
+
+            if agent.occupation.stocktype == enum.stockFruit then
+                MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = 1
+            elseif agent.occupation.stocktype == enum.stockWood then
+                MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = 3
+            end
+
             print("Owner assigned to " .. workplacerow, workplacecol)
         end
         if agent:has("workplace") then
@@ -334,13 +355,35 @@ function functions.createActions(goal, agent)
             end
         end
         -- buy food
-        action = {}
+        action = {}     --! this perhaps should be inside one of the IF statements
         action.action = "buy"
         action.stockType = enum.stockFruit
         action.purchaseAmount = qtyneeded
         -- print("Added 'buy' goal")
         table.insert(queue, action)
     end
+    if goal == enum.goalBuyWood then
+
+    print("Goal = buy wood")
+
+        local qtyneeded = 1
+        local shoprow, shopcol = getClosestBuilding(enum.improvementWoodsman, qtyneeded, agentrow, agentcol)
+        if shoprow ~= nil then
+            addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+
+            -- buy wood
+            action = {}
+            action.action = "buy"
+            action.stockType = enum.stockWood
+            action.purchaseAmount = qtyneeded
+            -- print("Added 'buy' goal")
+            table.insert(queue, action)
+    print("move and buy action added")
+        else
+    print("No woodsman found")
+        end
+    end
+
     return queue
 end
 

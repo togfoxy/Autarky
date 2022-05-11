@@ -159,11 +159,11 @@ function findPath(map, walkable, startx, starty, endx, endy, debug)
 	-- Library setup
 	local Grid = require ("lib.jumper.grid") -- The grid class
 	local Pathfinder = require ("lib.jumper.pathfinder") -- The pathfinder class
-	-- Creates a grid object
+	-- Create a grid object
 	local grid = Grid(map)
-	-- Creates a pathfinder object using Jump Point Search
+	-- Create a pathfinder object using Jump Point Search
 	local myFinder = Pathfinder(grid, 'JPS', walkable)
-	-- Calculates the path, and its length
+	-- Calculate the path, and its length
 	local path, length = myFinder:getPath(startx, starty, endx, endy)
 
 	-- printing code for debugging

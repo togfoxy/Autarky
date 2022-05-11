@@ -45,12 +45,12 @@ function draw.HUD()
     txt.value = nil
     table.insert(HUDText, txt)
 
-    -- determine average stocklevels
+    -- determine average stocklevels for food
     local count = 0
     local totalstocklevel, avgstocklevel = 0, 0
     for col = 1, NUMBER_OF_COLS do
         for row = 1, NUMBER_OF_ROWS do
-            if MAP[row][col].entity.isTile.stockLevel > 0 then
+            if MAP[row][col].entity.isTile.stockLevel > 0 and MAP[row][col].entity.isTile.stockType == enum.stockFruit then
                 count = count + 1
                 totalstocklevel = totalstocklevel + MAP[row][col].entity.isTile.stockLevel
             end

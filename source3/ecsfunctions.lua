@@ -96,7 +96,7 @@ function ecsfunctions.init()
                 -- draw stocklevels for each tile
                 if MAP[row][col].entity.isTile.stockLevel > 0 then
                     love.graphics.setColor(0/255,0/255,115/255,1)
-                    love.graphics.print(cf.round(MAP[row][col].entity.isTile.stockLevel,1), drawx, drawy, 0, 1, 1, 20, -20)
+                    love.graphics.print(cf.round(MAP[row][col].entity.isTile.stockLevel,1), drawx, drawy, 0, 1, 1, 20, -10)
                 end
 
                 -- debugging
@@ -120,12 +120,6 @@ function ecsfunctions.init()
                 if e:has("occupation") then
                     love.graphics.draw(SPRITES[enum.spriteBlueMan], QUADS[enum.spriteBlueMan][1], drawx, drawy, 0, 1, 1, 10, 25)
                     love.graphics.setColor(0,0,1,1)
-                    -- local offsetx = 5
-                    -- local offsety = 30
-                    -- local occupation = e.occupation.value
-                    -- if occupation == enum.jobFarmer then
-                    --     love.graphics.print("F", drawx, drawy, 0, 1, 1, offsetx, offsety)
-                    -- end
                 else
                     love.graphics.draw(SPRITES[enum.spriteRedMan], QUADS[enum.spriteRedMan][1], drawx, drawy, 0, 1, 1, 10, 25)
                 end
@@ -142,6 +136,7 @@ function ecsfunctions.init()
                     txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina) .. "\n"
                     txt = txt .. "fullness: " .. cf.round(e.isPerson.fullness) .. "\n"
                     txt = txt .. "wealth: " .. cf.round(e.isPerson.wealth,1) .. "\n"
+                    txt = txt .. "wood: " .. cf.round(e.isPerson.stockInv[enum.stockWood]) .. "\n"
 
                     love.graphics.setColor(1,1,1,1)
                     love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 25)
@@ -192,6 +187,10 @@ function ecsfunctions.init()
             local currentaction = {}
             currentaction = e.isPerson.queue[1]      -- a table
 
+            if currentaction.action ~= "idle" and currentaction.action ~= "move" and currentaction.action ~= "work" then
+                print("Current action: " .. currentaction.action)
+            end
+
             if currentaction.action == "idle" then
                 currentaction.timeleft = currentaction.timeleft - dt
                 if currentaction.timeleft > 3 and love.math.random(1, 10000) == 1 then
@@ -226,6 +225,7 @@ function ecsfunctions.init()
                 if currentaction.timeleft > 3 and love.math.random(1, 5000) == 1 then
                     -- play audio
                     AUDIO[enum.audioWork]:play()
+                    print("Play 'work'")
                 end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
@@ -234,12 +234,20 @@ function ecsfunctions.init()
                     -- accumulate stock
                     local row = e.position.row
                     local col = e.position.col
-                    if MAP[row][col].stockLevel == nil then MAP[row][col].stockLevel = 0 end
+                    if MAP[row][col].stockLevel == nil then MAP[row][col].stockLevel = 0 end        --! this is probably redundant
                     local stockgained
-                    if e.isPerson.stamina > 0 then
-                        stockgained = (0.0267 * dt)
-                    else
-                        stockgained = (0.0267 * dt) / 2        -- less productive when tired
+                    if e.occupation.stocktype == enum.stockFruit then
+                        if e.isPerson.stamina > 0 then
+                            stockgained = (0.0267 * dt)
+                        else
+                            stockgained = (0.0267 * dt) / 2        -- less productive when tired
+                        end
+                    elseif e.occupation.stocktype == enum.stockWood then
+                        if e.isPerson.stamina > 0 then
+                            stockgained = (0.0089 * dt)
+                        else
+                            stockgained = (0.0089 * dt) / 2        -- less productive when tired
+                        end
                     end
                     stockgained = cf.round(stockgained, 4)
                     MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + stockgained
@@ -249,23 +257,29 @@ function ecsfunctions.init()
                 local agentrow = e.position.row
                 local agentcol = e.position.col
                 local imptype = MAP[agentrow][agentcol].entity.isTile.improvementType
+                print("Buying stock type " .. imptype)
                 -- check if agent is at the right shop
                 if imptype ~= nil then
                     if imptype == action.stockType then
                         local amtbought = fun.buyStock(e, action.stockType, action.purchaseAmount)
-    print("Bought " .. amtbought .. " food")
+                        print("Bought " .. amtbought .. " of stock type " .. action.stockType)
                         if action.stockType == enum.stockFruit then
                             e.isPerson.fullness = e.isPerson.fullness + (amtbought * 100)   -- each food restores 100 fullness
-                            if amtbought > 0 and love.math.random(1, 5000) == 1 then
+                            if amtbought > 0 and love.math.random(1, 2000) == 1 then
                                     AUDIO[enum.audioEat]:play()
+                                    print("Play 'eat'")
                             end
+                        else
+                            e.isPerson.stockInv[action.stockType] = e.isPerson.stockInv[action.stockType] + amtbought
                         end
                     end
                 end
                 table.remove(e.isPerson.queue, 1)
             end
 
+            -- ******************* --
             -- do things that don't depend on an action
+            -- ******************* --
             local row = e.position.row  --! try to refact this so all the good stuff is only at the top
             local col = e.position.col
 

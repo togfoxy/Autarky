@@ -1,4 +1,4 @@
-GAME_VERSION = "0.01"
+GAME_VERSION = "0.05"
 
 inspect = require 'lib.inspect'
 -- https://github.com/kikito/inspect.lua
@@ -62,6 +62,16 @@ function love.keyreleased( key, scancode )
 				-- print("occup granted")
 				v:ensure("occupation", enum.jobFarmer, enum.stockFruit)		-- a farmer that farms fruit
 				v:remove("isSelected")
+			end
+			v:remove("isSelected")
+		end
+	end
+	-- turn selected agent into woodsman
+	if key == "w" then
+		for k,v in pairs(VILLAGERS) do
+			if v:has("isSelected") and (not v:has("occupation")) then
+				-- print("occup granted")
+				v:ensure("occupation", enum.jobWoodsman, enum.stockWood)		-- a farmer that farms fruit
 			end
 			v:remove("isSelected")
 		end
@@ -145,6 +155,7 @@ function love.update(dt)
 		:give("isPerson")
 		table.insert(VILLAGERS, villager)
 		AUDIO[enum.audioNewVillager]:play()
+	print("Play 'ding'")
 	end
 
 	fun.PlayAmbientMusic()
