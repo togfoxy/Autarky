@@ -75,6 +75,28 @@ function behaviortree.EstablishTree()
 								end
 							end
 
+	TREE.child[4] = {}
+	TREE.child[4].goal = enum.goalBuy
+	TREE.child[4].priority = function(agent)
+								return 3
+							end
+	TREE.child[4].activate = function (agent)
+								if agent.isPerson.wealth >= 3 then
+									return true
+								else
+									return false
+								end
+							end
+
+	TREE.child[4].child = {}
+	TREE.child[4].child[1] = {}
+	TREE.child[4].child[1].goal = enum.goalBuyWood
+	TREE.child[4].child[1].priority = function(agent)
+										return 5
+									end
+	TREE.child[4].child[1].activate = function(agent)
+										return true		--! needs to be false if there is no need for wood
+									end
 
 
 

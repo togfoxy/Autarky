@@ -14,6 +14,10 @@ function comp.init()
         c.stamina = 100         -- fully rested
         c.wealth = 3            -- starting amount. 3 days worth of food.
         c.fullness = 125        -- hunger. Start a little topped up so they have a chance to establish themselves.
+        c.stockInv = {}         -- track how much of each stock is owned
+        for i = 1, 99 do
+            c.stockInv[i] = 0
+        end
     end)
 
     concord.component("occupation", function(c, number, stocktype)
@@ -42,7 +46,7 @@ function comp.init()
         c.improvementType = improvementtype or nil     -- an improvement = a building or structure
         c.stockType = nil
         c.stockLevel = 0
-        c.stockSellPrice = 1.2
+        c.stockSellPrice = 0
         c.mudLevel = 0              -- holds the alpha value for the mud (0 -> 255)
     end)
 
