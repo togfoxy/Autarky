@@ -166,11 +166,15 @@ function ecsfunctions.init()
 
             -- determine new action for queue (or none)
             if #e.isPerson.queue == 0 then
-                -- if DEBUG then print("***") end
-                local goal = ft.DetermineAction(TREE, e)
-                -- if DEBUG then print("***") end
+                local goal
+                if e.isPerson.fullness < 30 then
+                    -- force agent to eat
+                    --! if agent has no wealth then this may not be the best option 
+                    goal = enum.goalEat
+                else
+                    goal = ft.DetermineAction(TREE, e)
+                end
                 local actionlist = {}
-                --local actionlist = fun.createActions(goal, e.isPerson.queue)  -- turns a simple decision from the tree into a complex sequence of actions
                 local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
             end
 
