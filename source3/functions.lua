@@ -45,9 +45,6 @@ function functions.loadImages()
 
     SPRITES[enum.spriteRedMan] = love.graphics.newImage("assets/images/Civilian Male Walk Red.png")
     QUADS[enum.spriteRedMan] = cf.fromImageToQuads(SPRITES[enum.spriteRedMan], 15, 32)
-
-
-
 end
 
 function functions.loadAudio()
@@ -76,6 +73,7 @@ function functions.loadAudio()
     AUDIO[enum.musicCityofMagic]:setVolume(0.2)
     AUDIO[enum.musicSpring]:setVolume(0.1)
     AUDIO[enum.audioEat]:setVolume(0.2)
+    AUDIO[enum.musicBirdsinForest]:setVolume(1)
 
 end
 
@@ -310,7 +308,7 @@ function functions.createActions(goal, agent)
     if goal == enum.goalWork then
         -- time to earn a paycheck
 
-    print("alpha:" .. tostring(agent.occupation.isConverter))
+        -- print("alpha:" .. tostring(agent.occupation.isConverter))
         if agent.occupation.isProducer then
             if not agent:has("workplace") then
 
@@ -347,21 +345,21 @@ function functions.createActions(goal, agent)
 
         end
         if agent.occupation.isConverter then
-            print("Delta")
+            -- print("Delta")
             -- time to convert things
             if agent.occupation.value == enum.jobCarpenter then
-                print("echo")
+                -- print("echo")
                 -- look for a house frame
                 local framerow, framecol = getClosestBuilding(enum.improvementHouseFrame, 1, agentrow, agentcol)
                 if framerow ~= nil then
-                    print("Foxtrot")
+                    -- print("Foxtrot")
                     addMoveAction(queue, agentrow, agentcol, framerow, framecol)   -- will add as many 'move' actions as necessary
                     local action = {}
                     action.action = "work"
                     action.timeleft = love.math.random(30, 60)
                     table.insert(queue, action)
                 else
-                    print("Carpenter has nothing to build")
+                    -- print("Carpenter has nothing to build")
                 end
             end
         end
@@ -425,9 +423,11 @@ function functions.createActions(goal, agent)
         MAP[houserow][housecol].entity.isTile.stockType = enum.stockHouseFrame
         MAP[houserow][housecol].entity.isTile.stockLevel = 1
         MAP[houserow][housecol].entity.isTile.tileOwner = agent
+        MAP[houserow][housecol].entity.isTile.timeToBuild = 60          -- seconds
 
         -- subtract wood
         agent.isPerson.stockInv[enum.stockWood] = agent.isPerson.stockInv[enum.stockWood] - 5
+        agent.isPerson.wealth = agent.isPerson.wealth - 8               -- this is forward payment for the carpenter
     end
 
     return queue

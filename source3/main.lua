@@ -40,7 +40,7 @@ UPPER_TERRAIN_HEIGHT = 6
 
 print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
 
-NUMBER_OF_VILLAGERS = 80
+NUMBER_OF_VILLAGERS = 8
 PERSON_DRAW_WIDTH = 10
 
 MAP = {}			-- a 2d table of tiles

@@ -179,8 +179,6 @@ function ecsfunctions.init()
                 local actionlist = {}
                 local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
 
-    print(inspect(actionlist))
-
             end
 
             -- add 'idle' action if queue is still empty
@@ -271,17 +269,33 @@ function ecsfunctions.init()
                     stockgained = cf.round(stockgained, 4)
                     MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + stockgained
                 end
-                if e.occupation.value == enum.jobCarpenter and currentaction.timeleft <= 0 then
-                    -- complete the house
+                if e.occupation.value == enum.jobCarpenter then
                     local row = e.position.row
                     local col = e.position.col
-                    MAP[row][col].entity.isTile.improvementType = enum.improvementHouse
-                    MAP[row][col].entity.isTile.stockType = nil
-                    MAP[row][col].entity.isTile.stockLevel = 0      -- stockLevel must never be nil
-                    local houseOwner = MAP[row][col].entity.isTile.tileOwner
+                    if MAP[row][col].entity.isTile.timeToBuild == nil then
+                        -- house is already built. So sad. Nothing to do
+                        table.remove(e.isPerson.queue, 1)
+                    else
+                        if MAP[row][col].entity.isTile.timeToBuild > 0  then
+                            -- keep building the structure
+                            MAP[row][col].entity.isTile.timeToBuild = MAP[row][col].entity.isTile.timeToBuild - dt
+                            e.isPerson.wealth = e.isPerson.wealth + dt * 0.13
+                        else
+                            -- complete the house
+                            local row = e.position.row
+                            local col = e.position.col
+                            MAP[row][col].entity.isTile.improvementType = enum.improvementHouse
+                            MAP[row][col].entity.isTile.stockType = nil
+                            MAP[row][col].entity.isTile.stockLevel = 0      -- stockLevel must never be nil
+                            MAP[row][col].entity.isTile.timeToBuild = nil
+                            local houseOwner = MAP[row][col].entity.isTile.tileOwner
 
-                    houseOwner:remove("residenceFrame")
-                    houseOwner:ensure("residence", row, col)
+                            houseOwner:remove("residenceFrame")
+                            houseOwner:ensure("residence", row, col)
+
+                            table.remove(e.isPerson.queue, 1)
+                        end
+                    end
                 end
             end
             if currentaction.action == "buy" then
