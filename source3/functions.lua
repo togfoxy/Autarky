@@ -35,6 +35,8 @@ function functions.loadImages()
     IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/appletree_37x50.png")
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
     IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
+    IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
+
 
     -- quads
     SPRITES[enum.spriteBlueMan] = love.graphics.newImage("assets/images/Civilian Male Walk Blue.png")
@@ -72,7 +74,7 @@ function functions.loadAudio()
     AUDIO[enum.audioNewVillager]:setVolume(0.2)
     AUDIO[enum.musicCityofMagic]:setVolume(0.2)
     AUDIO[enum.musicSpring]:setVolume(0.1)
-
+    AUDIO[enum.audioEat]:setVolume(0.2)
 
 end
 
@@ -320,7 +322,6 @@ function functions.createActions(goal, agent)
             elseif agent.occupation.stocktype == enum.stockWood then
                 MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = 3
             end
-
             print("Owner assigned to " .. workplacerow, workplacecol)
         end
         if agent:has("workplace") then
@@ -361,16 +362,15 @@ function functions.createActions(goal, agent)
         action.purchaseAmount = qtyneeded
         -- print("Added 'buy' goal")
         table.insert(queue, action)
+        assert(action.stockType ~= nil)
+        print("move and buy fruit action added")
     end
     if goal == enum.goalBuyWood then
-
-    print("Goal = buy wood")
-
+        -- print("Goal = buy wood")
         local qtyneeded = 1
         local shoprow, shopcol = getClosestBuilding(enum.improvementWoodsman, qtyneeded, agentrow, agentcol)
         if shoprow ~= nil then
             addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
-
             -- buy wood
             action = {}
             action.action = "buy"
@@ -378,10 +378,23 @@ function functions.createActions(goal, agent)
             action.purchaseAmount = qtyneeded
             -- print("Added 'buy' goal")
             table.insert(queue, action)
-    print("move and buy action added")
+            print("move and buy wood action added")
+            assert(action.stockType ~= nil)
         else
-    print("No woodsman found")
+            print("No woodsman found")
         end
+    end
+    if goal == enum.goalStartHouse then
+        -- pick an empty tile
+        local houserow, housecol = getBlankTile()
+        agent:give("residenceFrame", houserow, housecol)
+
+        -- place a frame
+        MAP[houserow][housecol].entity.isTile.improvementType = enum.improvementHouseFrame
+        MAP[houserow][housecol].entity.isTile.tileOwner = agent
+
+        -- subtract wood
+        agent.isPerson.stockInv[enum.stockWood] = agent.isPerson.stockInv[enum.stockWood] - 5
     end
 
     return queue

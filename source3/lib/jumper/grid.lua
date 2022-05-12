@@ -42,18 +42,18 @@ if (...) then
 
   ---------------------------------------------------------------------
   -- Private utilities
-	
+
 	-- Is i and integer ?
 	local isInt = function(i)
 		return otype(i) =='number' and floor(i)==i
 	end
-	
+
 	-- Override type to report integers
 	local type = function(v)
 		if isInt(v) then return 'int' end
 		return otype(v)
 	end
-	
+
 	-- Real count of for values in an array
 	local size = function(t)
 		local count = 0
@@ -64,15 +64,24 @@ if (...) then
 	-- Checks array contents
 	local check_contents = function(t,...)
 		local n_count = size(t)
-		if n_count < 1 then return false end
+		if n_count < 1 then
+			print("Jumper failed! Delta")
+			-- return false
+		end
 		local init_count = t[0] and 0 or 1
 		local n_count = (t[0] and n_count-1 or n_count)
 		local types = {...}
 		if types then types = table.concat(types) end
 		for i=init_count,n_count,1 do
-			if not t[i] then return false end
+			if not t[i] then
+				-- return false
+				print("Jumper failed! Echo")
+			end
 			if types then
-				if not types:match(type(t[i])) then return false end
+				if not types:match(type(t[i])) then
+					-- return false
+					print("Jumper failed! Foxtrot")
+				end
 			end
 		end
 		return true
@@ -80,11 +89,20 @@ if (...) then
 
 	-- Checks if m is a regular map
   local function isMap(m)
-		if not check_contents(m, 'table') then return false end
+		if not check_contents(m, 'table') then
+			-- return false
+			00 print("Jumper failed! Charlie")
+		end
 		local lsize = size(m[next(m)])
 		for k,v in pairs(m) do
-			if not check_contents(m[k], 'string', 'int') then return false end
-			if size(v)~=lsize then return false end
+			if not check_contents(m[k], 'string', 'int') then
+				return false
+				-- print("Jumper failed! Beta")
+			end
+			if size(v)~=lsize then
+				return false
+				-- print("Jumper failed! Alpha")
+			end
 		end
 		return true
   end
@@ -111,8 +129,8 @@ if (...) then
         assert(#line == w, 'Error parsing map, rows must have the same size!')
         h = (h or 0) + 1
         map[h] = {}
-        for char in line:gmatch('.') do 
-					map[h][#map[h]+1] = char 
+        for char in line:gmatch('.') do
+					map[h][#map[h]+1] = char
 				end
       end
     end
@@ -205,7 +223,8 @@ if (...) then
   -- @treturn grid a new `grid` object
   function Grid:new(map, processOnDemand)
 		map = type(map)=='string' and parseStringMap(map) or map
-    assert(isMap(map) or isStringMap(map),('Bad argument #1. Not a valid map'))
+    -- assert(isMap(map) or isStringMap(map),('Bad argument #1. Not a valid map'))
+	assert(isMap(map) or isStringMap(map),(inspect(map)))	--!
     assert(type(processOnDemand) == 'boolean' or not processOnDemand,
       ('Bad argument #2. Expected \'boolean\', got %s.'):format(type(processOnDemand)))
 
@@ -229,7 +248,7 @@ if (...) then
     local nodeValue = self.map[y] and self.map[y][x]
     if nodeValue then
       if not walkable then return true end
-    else 
+    else
 			return false
     end
     if self.__eval then return walkable(nodeValue) end
@@ -291,7 +310,7 @@ if (...) then
     end
 
     if not allowDiagonal then return neighbours end
-		
+
 		tunnel = not not tunnel
     for i = 1,#diagonalOffsets do
       local n = self:getNodeAt(

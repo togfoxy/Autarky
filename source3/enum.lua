@@ -7,7 +7,8 @@ imagesGrassTeal = 3
 imagesWell = 4
 imagesFarm = 5
 imagesWoodsman = 6
-imagesMud = 99
+imagesMud = 101
+imagesHouseFrame = 102
 
 -- quads/sprites
 spriteBlueMan = 1
@@ -23,6 +24,7 @@ terrainTeal = 3
 improvementWell = 4
 improvementFarm = 5 -- job, improvement and image should be the same integer value
 improvementWoodsman = 6
+improvementHouseFrame = 102
 
 
 -- goals/activities/queue items/actions
@@ -30,7 +32,9 @@ goalRest = 1
 goalWork = 2
 goalEat = 3
 goalBuy = 4     -- parent goal
-goalBuyWood = 5
+goalBuyWood = 5 -- child goal
+goalStartHouse = 6  -- build the frame only
+
 
 -- jobs/occupations
 -- NOTE: ensure these occupations align ti the improvement type (which aligns to the image!)
