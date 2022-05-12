@@ -91,7 +91,7 @@ if (...) then
   local function isMap(m)
 		if not check_contents(m, 'table') then
 			-- return false
-			00 print("Jumper failed! Charlie")
+			-- print("Jumper failed! Charlie")
 		end
 		local lsize = size(m[next(m)])
 		for k,v in pairs(m) do
