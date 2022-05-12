@@ -21,9 +21,12 @@ function comp.init()
         c.stockInv[enum.stockWood] = 0
     end)
 
-    concord.component("occupation", function(c, number, stocktype)
-        c.value = number or 0       -- see enum.job
+    concord.component("occupation", function(c, jobtype, stocktype, bolProducer, bolService, bolConverter)
+        c.value = jobtype or 0       -- see enum.job
         c.stocktype = stocktype or nil             -- see enum.stocktype
+        c.isProducer = bolProducer
+        c.isService = bolService
+        c.isConverter = bolConverter                -- converts one item into another
     end)
 
     concord.component("workplace", function(c,row,col)
@@ -56,9 +59,10 @@ function comp.init()
         c.tileOwner = {}
         c.improvementType = improvementtype or nil     -- an improvement = a building or structure
         c.stockType = nil
-        c.stockLevel = 0
+        c.stockLevel = 0            -- must never be nil
         c.stockSellPrice = 0
         c.mudLevel = 0              -- holds the alpha value for the mud (0 -> 255)
+        c.timeToBuild = nil        -- how long to build this tile
     end)
 
 

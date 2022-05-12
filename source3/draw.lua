@@ -65,6 +65,35 @@ function draw.HUD()
         table.insert(HUDText, txt)
     end
 
+    txt = {}
+    txt.label = "\n"
+    txt.value = nil
+    table.insert(HUDText, txt)
+
+    txt = {}
+    txt.label = "Key commands"
+    txt.value = nil
+    table.insert(HUDText, txt)
+    txt = {}
+    txt.label = "\n"
+    txt.value = nil
+    table.insert(HUDText, txt)
+    txt = {}
+    txt.label = "f = farmer"
+    txt.value = nil
+    table.insert(HUDText, txt)
+    txt = {}
+    txt.label = "w = woodsman"
+    txt.value = nil
+    table.insert(HUDText, txt)
+    txt = {}
+    txt.label = "c = carpenter"
+    txt.value = nil
+    table.insert(HUDText, txt)
+
+
+
+
     -- print to screen
     local yvalue = 35
     for _, str in ipairs(HUDText) do

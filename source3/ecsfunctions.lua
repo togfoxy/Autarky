@@ -173,9 +173,12 @@ function ecsfunctions.init()
                     goal = enum.goalEat
                 else
                     goal = ft.DetermineAction(TREE, e)
+                    if e:has("occupation") then print("Occupation: " .. e.occupation.value) end
+                    if goal ~= nil then print("Goal is number " .. goal) end
                 end
                 local actionlist = {}
                 local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
+
             end
 
             -- add 'idle' action if queue is still empty
@@ -191,11 +194,12 @@ function ecsfunctions.init()
             local currentaction = {}
             currentaction = e.isPerson.queue[1]      -- a table
 
-            if currentaction.action ~= "idle" and currentaction.action ~= "move" and currentaction.action ~= "work" then
-                print("Current action: " .. currentaction.action)
+            -- if currentaction.action ~= "idle" and currentaction.action ~= "move" and currentaction.action ~= "work" then
+            if currentaction.action ~= "idle" and currentaction.action ~= "move" then
+                -- print("Current action: " .. currentaction.action)
                 local agentrow = e.position.row
                 local agentcol = e.position.col
-                print(MAP[agentrow][agentcol].entity.isTile.improvementType)
+                -- print(MAP[agentrow][agentcol].entity.isTile.improvementType)
             end
 
             if currentaction.action == "idle" then
@@ -227,17 +231,23 @@ function ecsfunctions.init()
 
                 end
             end
+
             if currentaction.action == "work" then
                 currentaction.timeleft = currentaction.timeleft - dt
                 if currentaction.timeleft > 3 and love.math.random(1, 5000) == 1 then
                     -- play audio
                     AUDIO[enum.audioWork]:play()
-                    print("Play 'work'")
+                    -- print("Play 'work'")
                 end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
                 end
-                if e.occupation.stocktype ~= nil then
+
+                -- print("+++")
+                -- print(e.occupation.stocktype)
+                -- print(e.occupation.value)
+                -- print("+++")
+                if e.occupation.stocktype ~= nil and e.occupation.value ~= enum.jobCarpenter then
                     -- accumulate stock
                     local row = e.position.row
                     local col = e.position.col
@@ -258,6 +268,34 @@ function ecsfunctions.init()
                     end
                     stockgained = cf.round(stockgained, 4)
                     MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + stockgained
+                end
+                if e.occupation.value == enum.jobCarpenter then
+                    local row = e.position.row
+                    local col = e.position.col
+                    if MAP[row][col].entity.isTile.timeToBuild == nil then
+                        -- house is already built. So sad. Nothing to do
+                        table.remove(e.isPerson.queue, 1)
+                    else
+                        if MAP[row][col].entity.isTile.timeToBuild > 0  then
+                            -- keep building the structure
+                            MAP[row][col].entity.isTile.timeToBuild = MAP[row][col].entity.isTile.timeToBuild - dt
+                            e.isPerson.wealth = e.isPerson.wealth + dt * 0.13
+                        else
+                            -- complete the house
+                            local row = e.position.row
+                            local col = e.position.col
+                            MAP[row][col].entity.isTile.improvementType = enum.improvementHouse
+                            MAP[row][col].entity.isTile.stockType = nil
+                            MAP[row][col].entity.isTile.stockLevel = 0      -- stockLevel must never be nil
+                            MAP[row][col].entity.isTile.timeToBuild = nil
+                            local houseOwner = MAP[row][col].entity.isTile.tileOwner
+
+                            houseOwner:remove("residenceFrame")
+                            houseOwner:ensure("residence", row, col)
+
+                            table.remove(e.isPerson.queue, 1)
+                        end
+                    end
                 end
             end
             if currentaction.action == "buy" then
@@ -286,7 +324,9 @@ function ecsfunctions.init()
             local col = e.position.col
 
             -- add mud
-            MAP[row][col].entity.isTile.mudLevel = MAP[row][col].entity.isTile.mudLevel + (dt * 3)
+            if MAP[row][col].entity.isTile.improvementType == nil then
+                MAP[row][col].entity.isTile.mudLevel = MAP[row][col].entity.isTile.mudLevel + (dt * 1.5)
+            end
             if MAP[row][col].entity.isTile.mudLevel > 255 then MAP[row][col].entity.isTile.mudLevel = 255 end
 
             e.isPerson.stamina = e.isPerson.stamina - (0.5 * dt)

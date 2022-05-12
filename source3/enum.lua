@@ -5,10 +5,11 @@ imagesGrassDry = 1
 imagesGrassGreen = 2
 imagesGrassTeal = 3
 imagesWell = 4
-imagesFarm = 5
-imagesWoodsman = 6
+imagesFarm = 5          -- tree
+imagesWoodsman = 6      -- logs
 imagesMud = 101
-imagesHouseFrame = 102
+imagesHouseFrame = 7
+imagesHouse = 103
 
 -- quads/sprites
 spriteBlueMan = 1
@@ -24,29 +25,32 @@ terrainTeal = 3
 improvementWell = 4
 improvementFarm = 5 -- job, improvement and image should be the same integer value
 improvementWoodsman = 6
-improvementHouseFrame = 102
-
-
--- goals/activities/queue items/actions
-goalRest = 1
-goalWork = 2
-goalEat = 3
-goalBuy = 4     -- parent goal
-goalBuyWood = 5 -- child goal
-goalStartHouse = 6  -- build the frame only
-
+improvementHouseFrame = 7
+improvementHouse = 103
 
 -- jobs/occupations
--- NOTE: ensure these occupations align ti the improvement type (which aligns to the image!)
+-- NOTE: ensure these occupations align to the improvement type (which aligns to the image!)
 jobFarmer = 5
 jobWoodsman = 6
-
+jobCarpenter = 201      -- this is a service - not a primary producer
 
 
 -- stock types
 -- NOTE: ensure this lines up with the improvement type that sells this stock
 stockFruit = 5
 stockWood = 6
+stockHouseFrame = 7
+
+
+
+-- goals/activities/queue items/actions
+goalRest = 1
+goalWork = 2    -- producers produce, service ppl service
+goalEat = 3
+goalBuy = 4     -- parent goal
+goalBuyWood = 5 -- child goal
+goalStartHouse = 6  -- build the frame only
+
 
 
 -- jumper stuff

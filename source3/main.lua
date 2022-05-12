@@ -40,7 +40,7 @@ UPPER_TERRAIN_HEIGHT = 6
 
 print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
 
-NUMBER_OF_VILLAGERS = 10
+NUMBER_OF_VILLAGERS = 8
 PERSON_DRAW_WIDTH = 10
 
 MAP = {}			-- a 2d table of tiles
@@ -60,7 +60,7 @@ function love.keyreleased( key, scancode )
 		for k,v in pairs(VILLAGERS) do
 			if v:has("isSelected") and (not v:has("occupation")) then
 				-- print("occup granted")
-				v:ensure("occupation", enum.jobFarmer, enum.stockFruit)		-- a farmer that farms fruit
+				v:ensure("occupation", enum.jobFarmer, enum.stockFruit, true, false, false)		-- a farmer that farms fruit
 				v:remove("isSelected")
 			end
 			v:remove("isSelected")
@@ -71,13 +71,21 @@ function love.keyreleased( key, scancode )
 		for k,v in pairs(VILLAGERS) do
 			if v:has("isSelected") and (not v:has("occupation")) then
 				-- print("occup granted")
-				v:ensure("occupation", enum.jobWoodsman, enum.stockWood)		-- a farmer that farms fruit
+				v:ensure("occupation", enum.jobWoodsman, enum.stockWood, true, false, false)
+			end
+			v:remove("isSelected")
+		end
+	end
+	if key == "c" then
+		for k,v in pairs(VILLAGERS) do
+			if v:has("isSelected") and (not v:has("occupation")) then
+				-- print("occup granted")
+				v:ensure("occupation", enum.jobCarpenter, enum.stockHouseFrame, false, false, true)
 			end
 			v:remove("isSelected")
 		end
 	end
 end
-
 
 function love.mousepressed( x, y, button, istouch, presses )
 
@@ -155,7 +163,6 @@ function love.update(dt)
 		:give("isPerson")
 		table.insert(VILLAGERS, villager)
 		AUDIO[enum.audioNewVillager]:play()
-	print("Play 'ding'")
 	end
 
 	fun.PlayAmbientMusic()
