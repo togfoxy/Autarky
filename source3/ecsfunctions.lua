@@ -169,7 +169,7 @@ function ecsfunctions.init()
                 local goal
                 if e.isPerson.fullness < 30 then
                     -- force agent to eat
-                    --! if agent has no wealth then this may not be the best option 
+                    --! if agent has no wealth then this may not be the best option
                     goal = enum.goalEat
                 else
                     goal = ft.DetermineAction(TREE, e)
@@ -193,6 +193,9 @@ function ecsfunctions.init()
 
             if currentaction.action ~= "idle" and currentaction.action ~= "move" and currentaction.action ~= "work" then
                 print("Current action: " .. currentaction.action)
+                local agentrow = e.position.row
+                local agentcol = e.position.col
+                print(MAP[agentrow][agentcol].entity.isTile.improvementType)
             end
 
             if currentaction.action == "idle" then
@@ -260,23 +263,18 @@ function ecsfunctions.init()
             if currentaction.action == "buy" then
                 local agentrow = e.position.row
                 local agentcol = e.position.col
-                local imptype = MAP[agentrow][agentcol].entity.isTile.improvementType
-                print("Buying stock type " .. imptype)
-                -- check if agent is at the right shop
-                if imptype ~= nil then
-                    if imptype == action.stockType then
-                        local amtbought = fun.buyStock(e, action.stockType, action.purchaseAmount)
-                        print("Bought " .. amtbought .. " of stock type " .. action.stockType)
-                        if action.stockType == enum.stockFruit then
-                            e.isPerson.fullness = e.isPerson.fullness + (amtbought * 100)   -- each food restores 100 fullness
-                            if amtbought > 0 and love.math.random(1, 2000) == 1 then
-                                    AUDIO[enum.audioEat]:play()
-                                    print("Play 'eat'")
-                            end
-                        else
-                            e.isPerson.stockInv[action.stockType] = e.isPerson.stockInv[action.stockType] + amtbought
-                        end
+                print("Buying stock type " .. currentaction.stockType)     --! should the line above be 'stockType'?
+
+                local amtbought = fun.buyStock(e, currentaction.stockType, currentaction.purchaseAmount)
+                print("Bought " .. amtbought .. " of stock type " .. currentaction.stockType)
+                if currentaction.stockType == enum.stockFruit then
+                    e.isPerson.fullness = e.isPerson.fullness + (amtbought * 100)   -- each food restores 100 fullness
+                    if amtbought > 0 and love.math.random(1, 1000) == 1 then
+                            AUDIO[enum.audioEat]:play()
+                            print("Play 'eat'")
                     end
+                else
+                    e.isPerson.stockInv[currentaction.stockType] = e.isPerson.stockInv[currentaction.stockType] + amtbought
                 end
                 table.remove(e.isPerson.queue, 1)
             end

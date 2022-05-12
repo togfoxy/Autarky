@@ -18,6 +18,7 @@ function comp.init()
         for i = 1, 99 do
             c.stockInv[i] = 0
         end
+        c.stockInv[enum.stockWood] = 0
     end)
 
     concord.component("occupation", function(c, number, stocktype)
@@ -31,12 +32,22 @@ function comp.init()
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
     end)
 
+    concord.component("residenceFrame", function(c,row,col)
+        c.row = row
+        c.col = col
+        c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
+    end)
+    concord.component("residence", function(c,row,col)
+        c.row = row
+        c.col = col
+        c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
+    end)
+
     concord.component("position", function(c, row, col)         -- exists on the map/grid
         c.row = row or love.math.random(1, NUMBER_OF_ROWS)  -- this is updated in "applyMovement"
         c.col = col or love.math.random(1, NUMBER_OF_COLS)
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
     end)
-
 
     concord.component("isTile", function(c, tiletype, tileheight, improvementtype)
         -- c.imageNumber = imagenumber or love.math.random(1, Enum.terrainNumberOfTypes)
