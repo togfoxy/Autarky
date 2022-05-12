@@ -95,7 +95,7 @@ function behaviortree.EstablishTree()
 										return 5
 									end
 	TREE.child[4].child[1].activate = function(agent)
-										if not agent:has("residenceFrame") and not agent:has("residence") then
+										if not agent:has("residenceFrame") and not agent:has("residence") and agent.isPerson.stockInv[enum.stockWood] < 5 then
 											return true
 										else
 											return false

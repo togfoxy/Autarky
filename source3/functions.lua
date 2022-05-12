@@ -36,6 +36,7 @@ function functions.loadImages()
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
     IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
     IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
+    IMAGES[enum.imagesHouse] = love.graphics.newImage("assets/images/house4.png")
 
 
     -- quads
@@ -308,34 +309,64 @@ function functions.createActions(goal, agent)
     end
     if goal == enum.goalWork then
         -- time to earn a paycheck
-        if not agent:has("workplace") then
-            -- create a workplace
-            workplacerow, workplacecol = getBlankTile()
-            assert(workplacerow ~= nil)
-            agent:give("workplace", workplacerow, workplacecol)
-            MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
-            MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stocktype
-            MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
 
-            if agent.occupation.stocktype == enum.stockFruit then
-                MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = 1
-            elseif agent.occupation.stocktype == enum.stockWood then
-                MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = 3
+    print("alpha:" .. tostring(agent.occupation.isConverter))
+        if agent.occupation.isProducer then
+            if not agent:has("workplace") then
+
+                print("beta")
+                -- create a workplace
+                workplacerow, workplacecol = getBlankTile()
+                assert(workplacerow ~= nil)
+                agent:give("workplace", workplacerow, workplacecol)
+                MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
+                MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stocktype
+                MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
+
+                if agent.occupation.stocktype == enum.stockFruit then
+                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = 1
+                elseif agent.occupation.stocktype == enum.stockWood then
+                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = 3
+                end
+                print("Owner assigned to " .. workplacerow, workplacecol)
             end
-            print("Owner assigned to " .. workplacerow, workplacecol)
+            if agent:has("workplace") then
+
+                print("charlie")
+                -- move to workplace
+                -- add a 'move' action
+                addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+                -- do work
+                local action = {}
+                action.action = "work"
+                action.timeleft = love.math.random(30, 60)
+                table.insert(queue, action)
+            else
+                error()     -- should never happen
+            end
+
         end
-        if agent:has("workplace") then
-            -- move to workplace
-            -- add a 'move' action
-            addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
-            -- do work
-            local action = {}
-            action.action = "work"
-            action.timeleft = love.math.random(30, 60)
-            table.insert(queue, action)
-        else
-            error()     -- should never happen
+        if agent.occupation.isConverter then
+            print("Delta")
+            -- time to convert things
+            if agent.occupation.value == enum.jobCarpenter then
+                print("echo")
+                -- look for a house frame
+                local framerow, framecol = getClosestBuilding(enum.improvementHouseFrame, 1, agentrow, agentcol)
+                if framerow ~= nil then
+                    print("Foxtrot")
+                    addMoveAction(queue, agentrow, agentcol, framerow, framecol)   -- will add as many 'move' actions as necessary
+                    local action = {}
+                    action.action = "work"
+                    action.timeleft = love.math.random(30, 60)
+                    table.insert(queue, action)
+                else
+                    print("Carpenter has nothing to build")
+                end
+            end
         end
+
+
     end
     if goal == enum.goalEat then
         local qtyneeded = 1
@@ -381,7 +412,7 @@ function functions.createActions(goal, agent)
             print("move and buy wood action added")
             assert(action.stockType ~= nil)
         else
-            print("No woodsman found")
+            -- print("No woodsman found")
         end
     end
     if goal == enum.goalStartHouse then
@@ -391,6 +422,8 @@ function functions.createActions(goal, agent)
 
         -- place a frame
         MAP[houserow][housecol].entity.isTile.improvementType = enum.improvementHouseFrame
+        MAP[houserow][housecol].entity.isTile.stockType = enum.stockHouseFrame
+        MAP[houserow][housecol].entity.isTile.stockLevel = 1
         MAP[houserow][housecol].entity.isTile.tileOwner = agent
 
         -- subtract wood
