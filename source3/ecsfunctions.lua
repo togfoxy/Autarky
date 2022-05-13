@@ -117,7 +117,8 @@ function ecsfunctions.init()
 
                 -- draw occupation icon
                 if e:has("occupation") then
-                    love.graphics.draw(IMAGES[e.occupation.value], drawx, drawy, 0, 0.25, 0.25, 0, 130)
+                    local imgnumber = e.occupation.value + 30       -- there is an offset to avoid clashes. See enum.lua
+                    love.graphics.draw(IMAGES[imgnumber], drawx, drawy, 0, 0.25, 0.25, 0, 130)
                 end
 
                 local imgrotation = 0
