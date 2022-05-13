@@ -122,12 +122,24 @@ function ecsfunctions.init()
                     end
                 end
 
-                if e:has("occupation") then
-                    love.graphics.draw(SPRITES[enum.spriteBlueMan], QUADS[enum.spriteBlueMan][1], drawx, drawy, imgrotation, 1, 1, 10, 25)
-                    love.graphics.setColor(0,0,1,1)
-                else
-                    love.graphics.draw(SPRITES[enum.spriteRedMan], QUADS[enum.spriteRedMan][1], drawx, drawy, imgrotation, 1, 1, 10, 25)
+                local sprite, quad
+                if e.isPerson.gender == enum.genderMale and e:has("occupation") then
+                    sprite = SPRITES[enum.spriteBlueMan]
+                    quad = QUADS[enum.spriteBlueMan][1]
                 end
+                if e.isPerson.gender == enum.genderFemale and e:has("occupation") then
+                    sprite = SPRITES[enum.spriteBlueWoman]
+                    quad = QUADS[enum.spriteBlueWoman][1]
+                end
+                if e.isPerson.gender == enum.genderMale and not e:has("occupation") then
+                    sprite = SPRITES[enum.spriteRedMan]
+                    quad = QUADS[enum.spriteRedMan][1]
+                end
+                if e.isPerson.gender == enum.genderFemale and not e:has("occupation") then
+                    sprite = SPRITES[enum.spriteRedWoman]
+                    quad = QUADS[enum.spriteRedWoman][1]
+                end
+                love.graphics.draw(sprite, quad, drawx, drawy, imgrotation, 1, 1, 10, 25)
 
                 local txt = ""
                 if love.keyboard.isDown("lctrl") or love.keyboard.isDown("rctrl") then

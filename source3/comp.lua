@@ -10,6 +10,7 @@ function comp.init()
     concord.component("isSelected") -- clicked by the mouse
 
     concord.component("isPerson", function(c)
+        c.gender = love.math.random(2)
         c.queue = {}
         c.stamina = 100         -- fully rested
         c.fullness = 125        -- hunger. Start a little topped up so they have a chance to establish themselves.
