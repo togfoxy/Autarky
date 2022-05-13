@@ -111,16 +111,23 @@ function ecsfunctions.init()
                 else
                     love.graphics.setColor(1,1,1,1)
                 end
+
                 local drawwidth = PERSON_DRAW_WIDTH
                 local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
 
-                -- draw the occupation
+                -- draw occupation icon
+                if e:has("occupation") then
+                    love.graphics.draw(IMAGES[e.occupation.value], drawx, drawy, 0, 0.25, 0.25, 0, 130)
+                end
+
                 local imgrotation = 0
                 if e.isPerson.queue[1] ~= nil then
                     if e.isPerson.queue[1].action == "rest" then
                         imgrotation = math.rad(90)
                     end
                 end
+
+
 
                 local sprite, quad
                 if e.isPerson.gender == enum.genderMale and e:has("occupation") then
