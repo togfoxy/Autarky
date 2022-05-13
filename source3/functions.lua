@@ -37,6 +37,13 @@ function functions.loadImages()
     IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
     IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
     IMAGES[enum.imagesHouse] = love.graphics.newImage("assets/images/house4.png")
+
+    IMAGES[enum.iconsApple] = love.graphics.newImage("assets/images/appleicon.png")
+    IMAGES[enum.iconsAxe] = love.graphics.newImage("assets/images/axeicon64x64.png")
+    IMAGES[enum.iconsHammer] = love.graphics.newImage("assets/images/hammericon64x64.png")
+
+
+
     IMAGES[enum.imagesEmoteSleeping] = love.graphics.newImage("assets/images/emote_sleeps.png")
     IMAGES[enum.imagesEmoteTalking] = love.graphics.newImage("assets/images/emote_talking.png")
 

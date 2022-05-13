@@ -111,10 +111,15 @@ function ecsfunctions.init()
                 else
                     love.graphics.setColor(1,1,1,1)
                 end
+
                 local drawwidth = PERSON_DRAW_WIDTH
                 local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
 
-                -- draw the occupation
+                -- draw occupation icon
+                if e:has("occupation") then
+                    love.graphics.draw(IMAGES[e.occupation.value], drawx, drawy, 0, 0.20, 0.20, -80, 160)
+                end
+
                 local imgrotation = 0
                 if e.isPerson.queue[1] ~= nil then
                     if e.isPerson.queue[1].action == "rest" then
@@ -140,6 +145,8 @@ function ecsfunctions.init()
                     quad = QUADS[enum.spriteRedWoman][1]
                 end
                 love.graphics.draw(sprite, quad, drawx, drawy, imgrotation, 1, 1, 10, 25)
+
+
 
                 local txt = ""
                 if love.keyboard.isDown("lctrl") or love.keyboard.isDown("rctrl") then

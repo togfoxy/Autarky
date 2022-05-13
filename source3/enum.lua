@@ -46,6 +46,12 @@ stockFruit = 5
 stockWood = 6
 stockHouseFrame = 7
 
+-- occupation icons
+-- NOTE: ensure this lines up with the job
+iconsApple = 5
+iconsAxe = 6
+iconsHammer = 201
+
 
 
 -- goals/activities/queue items/actions
