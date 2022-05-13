@@ -51,8 +51,8 @@ function ecsfunctions.init()
                         y1 = y1 - (TILE_SIZE / 2) + TOP_MARGIN
                         x2 = x2 - (TILE_SIZE / 2) + LEFT_MARGIN
                         y2 = y2 - (TILE_SIZE / 2) + TOP_MARGIN
-                        love.graphics.setColor(1,1,1,alpha)
-                        love.graphics.line(x1, y1, x2, y2)
+                        -- love.graphics.setColor(1,1,1,alpha)
+                        -- love.graphics.line(x1, y1, x2, y2)
                     end
                 end
                 -- left side
@@ -67,10 +67,8 @@ function ecsfunctions.init()
                         y1 = y1 - (TILE_SIZE / 2) + TOP_MARGIN
                         x2 = x2 - (TILE_SIZE / 2) + LEFT_MARGIN
                         y2 = y2 - (TILE_SIZE / 2) + TOP_MARGIN
-
-
-                        love.graphics.setColor(1,1,1,alpha)
-                        love.graphics.line(x1, y1, x2, y2)
+                        -- love.graphics.setColor(1,1,1,alpha)
+                        -- love.graphics.line(x1, y1, x2, y2)
                     end
                 end
 
@@ -194,13 +192,14 @@ function ecsfunctions.init()
             local currentaction = {}
             currentaction = e.isPerson.queue[1]      -- a table
 
+            -- ** debugging ** --
             -- if currentaction.action ~= "idle" and currentaction.action ~= "move" and currentaction.action ~= "work" then
-            if currentaction.action ~= "idle" and currentaction.action ~= "move" then
-                -- print("Current action: " .. currentaction.action)
-                local agentrow = e.position.row
-                local agentcol = e.position.col
-                -- print(MAP[agentrow][agentcol].entity.isTile.improvementType)
-            end
+            -- if currentaction.action ~= "idle" and currentaction.action ~= "move" then
+            --     -- print("Current action: " .. currentaction.action)
+            --     local agentrow = e.position.row
+            --     local agentcol = e.position.col
+            --     -- print(MAP[agentrow][agentcol].entity.isTile.improvementType)
+            -- end
 
             if currentaction.action == "idle" then
                 currentaction.timeleft = currentaction.timeleft - dt
@@ -209,8 +208,15 @@ function ecsfunctions.init()
                     AUDIO[enum.audioYawn]:play()
                 end
 
+                if e:has("residence") then
+                    -- recover stamina faster
+                    print("Hello there!")
+                    e.isPerson.stamina = e.isPerson.stamina + (2 * dt)
+                else
+                    e.isPerson.stamina = e.isPerson.stamina + (1.5 * dt)        -- gain 1 per second + recover the 0.5 applied above
+                end
+
                 e.isPerson.stamina = e.isPerson.stamina + (1.5 * dt)        -- gain 1 per second + recover the 0.5 applied above
-                -- if e.isPerson.stamina > 100 then e.isPerson.stamina = 100 end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
                 end

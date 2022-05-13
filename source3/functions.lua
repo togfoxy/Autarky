@@ -288,16 +288,23 @@ function functions.createActions(goal, agent)
         -- get a destination to rest
         -- add a 'move' action to that location
         -- add an 'idle' action at that location
-
-        -- choose a random location near the well
-        local random1 = love.math.random(-3, 3)
-        local random2 = love.math.random(-3, 3)
-        local destrow = WELLS[1].row + random1
-        local destcol = WELLS[1].col + random2
-        if destrow < 1 then destrow = 1 end
-        if destrow > NUMBER_OF_ROWS then destrow = NUMBER_OF_ROWS end
-        if destcol < 1 then destcol = 1 end
-        if destcol > NUMBER_OF_COLS then destcol = NUMBER_OF_COLS end
+        local destrow
+        local destcol
+        if agent:has("residence") then
+            -- rest at house
+            destrow = agent.residence.row
+            destcol = agent.residence.col
+        else
+            -- choose a random location near the well
+            local random1 = love.math.random(-3, 3)
+            local random2 = love.math.random(-3, 3)
+            destrow = WELLS[1].row + random1
+            destcol = WELLS[1].col + random2
+            if destrow < 1 then destrow = 1 end
+            if destrow > NUMBER_OF_ROWS then destrow = NUMBER_OF_ROWS end
+            if destcol < 1 then destcol = 1 end
+            if destcol > NUMBER_OF_COLS then destcol = NUMBER_OF_COLS end
+        end
 
         -- add a 'move' action
         addMoveAction(queue, agentrow, agentcol, destrow, destcol)   -- will add as many 'move' actions as necessary

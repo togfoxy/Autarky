@@ -12,13 +12,13 @@ function comp.init()
     concord.component("isPerson", function(c)
         c.queue = {}
         c.stamina = 100         -- fully rested
-        c.wealth = 3            -- starting amount. 3 days worth of food.
         c.fullness = 125        -- hunger. Start a little topped up so they have a chance to establish themselves.
         c.stockInv = {}         -- track how much of each stock is owned
         for i = 1, 99 do
             c.stockInv[i] = 0
         end
-        c.stockInv[enum.stockWood] = 0
+        c.wealth = 30            -- starting amount. 3 days worth of food.
+        c.stockInv[enum.stockWood] = 5
     end)
 
     concord.component("occupation", function(c, jobtype, stocktype, bolProducer, bolService, bolConverter)
