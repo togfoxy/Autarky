@@ -17,8 +17,8 @@ function comp.init()
         for i = 1, 99 do
             c.stockInv[i] = 0
         end
-        c.wealth = 30            -- starting amount. 3 days worth of food.
-        c.stockInv[enum.stockWood] = 5
+        c.wealth = 3            -- starting amount. 3 days worth of food.
+        c.stockInv[enum.stockWood] = 0
     end)
 
     concord.component("occupation", function(c, jobtype, stocktype, bolProducer, bolService, bolConverter)

@@ -171,8 +171,8 @@ function ecsfunctions.init()
                     goal = enum.goalEat
                 else
                     goal = ft.DetermineAction(TREE, e)
-                    if e:has("occupation") then print("Occupation: " .. e.occupation.value) end
-                    if goal ~= nil then print("Goal is number " .. goal) end
+                    -- if e:has("occupation") then print("Occupation: " .. e.occupation.value) end
+                    -- if goal ~= nil then print("Goal is number " .. goal) end
                 end
                 local actionlist = {}
                 local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
@@ -183,8 +183,8 @@ function ecsfunctions.init()
             if #e.isPerson.queue < 1 then
                 -- add an 'idle' action
                 action = {}
-                action.action = "idle"
-                action.timeleft = love.math.random(10, 30)
+                action.action = "idle"      -- idle is same as rest but idle means "nothing else to do" but rest was chosen from btree
+                action.timeleft = love.math.random(10, 20)
                 table.insert(e.isPerson.queue, action)
             end
 
@@ -201,22 +201,19 @@ function ecsfunctions.init()
             --     -- print(MAP[agentrow][agentcol].entity.isTile.improvementType)
             -- end
 
-            if currentaction.action == "idle" then
+            if currentaction.action == "idle" or currentaction.action == "rest" then
                 currentaction.timeleft = currentaction.timeleft - dt
                 if currentaction.timeleft > 3 and love.math.random(1, 10000) == 1 then
                     -- play audio
                     AUDIO[enum.audioYawn]:play()
                 end
 
-                if e:has("residence") then
+                if currentaction.action == "rest" and e:has("residence") then
                     -- recover stamina faster
-                    print("Hello there!")
                     e.isPerson.stamina = e.isPerson.stamina + (2 * dt)
                 else
                     e.isPerson.stamina = e.isPerson.stamina + (1.5 * dt)        -- gain 1 per second + recover the 0.5 applied above
                 end
-
-                e.isPerson.stamina = e.isPerson.stamina + (1.5 * dt)        -- gain 1 per second + recover the 0.5 applied above
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
                 end

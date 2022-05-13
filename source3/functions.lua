@@ -311,7 +311,7 @@ function functions.createActions(goal, agent)
 
         -- add an 'idle' action
         action = {}
-        action.action = "idle"
+        action.action = "rest"
         action.timeleft = ((100 - agent.isPerson.stamina) / 2) + love.math.random(5, 30)      -- some random formula. Please tweak!
         table.insert(queue, action)
     end
