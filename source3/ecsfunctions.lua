@@ -236,8 +236,13 @@ function ecsfunctions.init()
                 currentaction.timeleft = currentaction.timeleft - dt
                 if currentaction.timeleft > 3 and love.math.random(1, 5000) == 1 then
                     -- play audio
-                    AUDIO[enum.audioWork]:play()
-                    -- print("Play 'work'")
+                    if e.occupation.value == enum.jobFarmer then
+                        AUDIO[enum.audioRustle]:play()
+                    end
+                    if e.occupation.value == enum.jobWoodsman then
+                        AUDIO[enum.audioSawWood]:play()
+                    end
+
                 end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)

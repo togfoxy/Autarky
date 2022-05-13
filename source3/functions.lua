@@ -64,7 +64,8 @@ function functions.loadAudio()
     AUDIO[enum.audioWork] = love.audio.newSource("assets/audio/working.wav", "static")
     AUDIO[enum.audioEat] = love.audio.newSource("assets/audio/543386__chomp.wav", "static")
     AUDIO[enum.audioNewVillager] = love.audio.newSource("assets/audio/387232__steaq__badge-coin-win.wav", "static")
-
+    AUDIO[enum.audioRustle] = love.audio.newSource("assets/audio/437356__giddster__rustling-leaves.wav", "static")
+    AUDIO[enum.audioSawWood] = love.audio.newSource("assets/audio/sawwood.wav", "static")
 
     AUDIO[enum.audioWork]:setVolume(0.2)
     AUDIO[enum.musicMedievalFiesta]:setVolume(0.2)
@@ -74,6 +75,7 @@ function functions.loadAudio()
     AUDIO[enum.musicSpring]:setVolume(0.1)
     AUDIO[enum.audioEat]:setVolume(0.2)
     AUDIO[enum.musicBirdsinForest]:setVolume(1)
+    AUDIO[enum.audioSawWood]:setVolume(0.2)
 
 end
 
