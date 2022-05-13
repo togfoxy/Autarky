@@ -48,9 +48,9 @@ stockHouseFrame = 7
 
 -- occupation icons
 -- NOTE: ensure this lines up with the job
-iconsApple = 5
-iconsAxe = 6
-iconsHammer = 201
+iconsApple = 35
+iconsAxe = 36
+iconsHammer = 231
 
 
 
