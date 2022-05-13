@@ -10,6 +10,7 @@ imagesWoodsman = 6      -- logs
 imagesMud = 101
 imagesHouseFrame = 7
 imagesHouse = 103
+imagesEmoteSleeping = 121
 
 -- quads/sprites
 spriteBlueMan = 1
@@ -64,6 +65,7 @@ audioEat = 3
 audioNewVillager = 4
 audioRustle = 5
 audioSawWood = 6
+
 
 musicCityofMagic = 11
 musicOvertheHills = 12

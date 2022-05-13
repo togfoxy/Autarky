@@ -24,6 +24,7 @@ SCREEN_STACK = {}
 IMAGES = {}
 QUADS = {}
 SPRITES = {}
+DRAWQUEUE = {}			-- a list of things to be drawn during love.draw()
 AUDIO = {}
 
 TILE_SIZE = 50
@@ -146,6 +147,7 @@ function love.draw()
     WORLD:emit("draw")
 
 	draw.HUD()
+	draw.Animations()
 end
 
 
@@ -163,6 +165,14 @@ function love.update(dt)
 		:give("isPerson")
 		table.insert(VILLAGERS, villager)
 		AUDIO[enum.audioNewVillager]:play()
+	end
+
+	for i = #DRAWQUEUE, 1, -1 do
+		DRAWQUEUE[i].start = DRAWQUEUE[i].start - dt
+		DRAWQUEUE[i].stop = DRAWQUEUE[i].stop - dt
+		if DRAWQUEUE[i].stop <= 0 then
+			table.remove(DRAWQUEUE, i)
+		end
 	end
 
 	fun.PlayAmbientMusic()

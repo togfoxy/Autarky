@@ -162,6 +162,8 @@ function ecsfunctions.init()
         for _, e in ipairs(self.pool) do
             -- check if queue is empty and if so then get a new action from the behavior tree
 
+            local agentrow = e.position.row
+            local agentcol = e.position.col
             -- determine new action for queue (or none)
             if #e.isPerson.queue == 0 then
                 local goal
@@ -209,6 +211,15 @@ function ecsfunctions.init()
                 end
 
                 if currentaction.action == "rest" and e:has("residence") then
+                    if currentaction.timeleft > 5 then
+                        -- draw sleep bubble
+                        local item = {}
+                        item.imagenumber = enum.imagesEmoteSleeping
+                        item.start = 0
+                        item.stop = math.min(5, currentaction.timeleft)
+                        item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+                        table.insert(DRAWQUEUE, item)
+                    end
                     -- recover stamina faster
                     e.isPerson.stamina = e.isPerson.stamina + (2 * dt)
                 else
@@ -218,6 +229,7 @@ function ecsfunctions.init()
                     table.remove(e.isPerson.queue, 1)
                 end
             end
+            
             if currentaction.action == "move" then
                 local destx = currentaction.x
                 local desty = currentaction.y
