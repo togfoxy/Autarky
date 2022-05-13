@@ -91,6 +91,23 @@ function draw.HUD()
     txt.value = nil
     table.insert(HUDText, txt)
 
+    txt = {}
+    txt.label = "Camera"
+    txt.value = nil
+    table.insert(HUDText, txt)
+    txt = {}
+    txt.label = "\n"
+    txt.value = nil
+    table.insert(HUDText, txt)
+    txt = {}
+    txt.label = "mouse wheel = zoom"
+    txt.value = nil
+    table.insert(HUDText, txt)
+    txt = {}
+    txt.label = "arrow keys = pan"
+    txt.value = nil
+    table.insert(HUDText, txt)
+
     -- print to screen
     local yvalue = 35
     for _, str in ipairs(HUDText) do
