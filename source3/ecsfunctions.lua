@@ -117,7 +117,7 @@ function ecsfunctions.init()
 
                 -- draw occupation icon
                 if e:has("occupation") then
-                    love.graphics.draw(IMAGES[e.occupation.value], drawx, drawy, 0, 0.20, 0.20, -80, 160)
+                    love.graphics.draw(IMAGES[e.occupation.value], drawx, drawy, 0, 0.25, 0.25, 0, 130)
                 end
 
                 local imgrotation = 0
@@ -126,6 +126,8 @@ function ecsfunctions.init()
                         imgrotation = math.rad(90)
                     end
                 end
+
+
 
                 local sprite, quad
                 if e.isPerson.gender == enum.genderMale and e:has("occupation") then
@@ -145,8 +147,6 @@ function ecsfunctions.init()
                     quad = QUADS[enum.spriteRedWoman][1]
                 end
                 love.graphics.draw(sprite, quad, drawx, drawy, imgrotation, 1, 1, 10, 25)
-
-
 
                 local txt = ""
                 if love.keyboard.isDown("lctrl") or love.keyboard.isDown("rctrl") then
