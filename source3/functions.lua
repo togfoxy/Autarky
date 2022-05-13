@@ -57,7 +57,7 @@ function functions.loadAudio()
     AUDIO[enum.musicHiddenPond] = love.audio.newSource("assets/audio/Hidden-Pond.mp3", "stream")
     AUDIO[enum.musicDistantMountains] = love.audio.newSource("assets/audio/Distant-Mountains.mp3", "stream")
 
-    AUDIO[enum.musicBirdsinForest] = love.audio.newSource("assets/audio/430917__ihitokage__birds-in-forest-5.ogg", "stream")
+    AUDIO[enum.musicBirdsinForest] = love.audio.newSource("assets/audio/430917__ihitokage__birds-in-forest-5.mp3", "stream")
     AUDIO[enum.musicBirds] = love.audio.newSource("assets/audio/532148__patchytherat__birds-1.wav", "stream")
 
     AUDIO[enum.audioYawn] = love.audio.newSource("assets/audio/272030__aldenroth2__male-yawn.wav", "static")
@@ -75,6 +75,7 @@ function functions.loadAudio()
     AUDIO[enum.musicSpring]:setVolume(0.1)
     AUDIO[enum.audioEat]:setVolume(0.2)
     AUDIO[enum.musicBirdsinForest]:setVolume(1)
+    AUDIO[enum.audioSawWood]:setVolume(0.2)
     AUDIO[enum.audioSawWood]:setVolume(0.2)
 
 end
@@ -314,7 +315,7 @@ function functions.createActions(goal, agent)
         if agent.occupation.isProducer then
             if not agent:has("workplace") then
 
-                print("beta")
+                -- print("beta")
                 -- create a workplace
                 workplacerow, workplacecol = getBlankTile()
                 assert(workplacerow ~= nil)
@@ -332,7 +333,7 @@ function functions.createActions(goal, agent)
             end
             if agent:has("workplace") then
 
-                print("charlie")
+                -- print("charlie")
                 -- move to workplace
                 -- add a 'move' action
                 addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
