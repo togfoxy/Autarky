@@ -57,14 +57,15 @@ function functions.loadAudio()
     AUDIO[enum.musicHiddenPond] = love.audio.newSource("assets/audio/Hidden-Pond.mp3", "stream")
     AUDIO[enum.musicDistantMountains] = love.audio.newSource("assets/audio/Distant-Mountains.mp3", "stream")
 
-    AUDIO[enum.musicBirdsinForest] = love.audio.newSource("assets/audio/430917__ihitokage__birds-in-forest-5.ogg", "stream")
+    AUDIO[enum.musicBirdsinForest] = love.audio.newSource("assets/audio/430917__ihitokage__birds-in-forest-5.mp3", "stream")
     AUDIO[enum.musicBirds] = love.audio.newSource("assets/audio/532148__patchytherat__birds-1.wav", "stream")
 
     AUDIO[enum.audioYawn] = love.audio.newSource("assets/audio/272030__aldenroth2__male-yawn.wav", "static")
     AUDIO[enum.audioWork] = love.audio.newSource("assets/audio/working.wav", "static")
     AUDIO[enum.audioEat] = love.audio.newSource("assets/audio/543386__chomp.wav", "static")
     AUDIO[enum.audioNewVillager] = love.audio.newSource("assets/audio/387232__steaq__badge-coin-win.wav", "static")
-
+    AUDIO[enum.audioRustle] = love.audio.newSource("assets/audio/437356__giddster__rustling-leaves.wav", "static")
+    AUDIO[enum.audioSawWood] = love.audio.newSource("assets/audio/sawwood.wav", "static")
 
     AUDIO[enum.audioWork]:setVolume(0.2)
     AUDIO[enum.musicMedievalFiesta]:setVolume(0.2)
@@ -74,6 +75,8 @@ function functions.loadAudio()
     AUDIO[enum.musicSpring]:setVolume(0.1)
     AUDIO[enum.audioEat]:setVolume(0.2)
     AUDIO[enum.musicBirdsinForest]:setVolume(1)
+    AUDIO[enum.audioSawWood]:setVolume(0.2)
+    AUDIO[enum.audioSawWood]:setVolume(0.2)
 
 end
 
@@ -285,23 +288,30 @@ function functions.createActions(goal, agent)
         -- get a destination to rest
         -- add a 'move' action to that location
         -- add an 'idle' action at that location
-
-        -- choose a random location near the well
-        local random1 = love.math.random(-3, 3)
-        local random2 = love.math.random(-3, 3)
-        local destrow = WELLS[1].row + random1
-        local destcol = WELLS[1].col + random2
-        if destrow < 1 then destrow = 1 end
-        if destrow > NUMBER_OF_ROWS then destrow = NUMBER_OF_ROWS end
-        if destcol < 1 then destcol = 1 end
-        if destcol > NUMBER_OF_COLS then destcol = NUMBER_OF_COLS end
+        local destrow
+        local destcol
+        if agent:has("residence") then
+            -- rest at house
+            destrow = agent.residence.row
+            destcol = agent.residence.col
+        else
+            -- choose a random location near the well
+            local random1 = love.math.random(-3, 3)
+            local random2 = love.math.random(-3, 3)
+            destrow = WELLS[1].row + random1
+            destcol = WELLS[1].col + random2
+            if destrow < 1 then destrow = 1 end
+            if destrow > NUMBER_OF_ROWS then destrow = NUMBER_OF_ROWS end
+            if destcol < 1 then destcol = 1 end
+            if destcol > NUMBER_OF_COLS then destcol = NUMBER_OF_COLS end
+        end
 
         -- add a 'move' action
         addMoveAction(queue, agentrow, agentcol, destrow, destcol)   -- will add as many 'move' actions as necessary
 
         -- add an 'idle' action
         action = {}
-        action.action = "idle"
+        action.action = "rest"
         action.timeleft = ((100 - agent.isPerson.stamina) / 2) + love.math.random(5, 30)      -- some random formula. Please tweak!
         table.insert(queue, action)
     end
@@ -312,7 +322,7 @@ function functions.createActions(goal, agent)
         if agent.occupation.isProducer then
             if not agent:has("workplace") then
 
-                print("beta")
+                -- print("beta")
                 -- create a workplace
                 workplacerow, workplacecol = getBlankTile()
                 assert(workplacerow ~= nil)
@@ -330,7 +340,7 @@ function functions.createActions(goal, agent)
             end
             if agent:has("workplace") then
 
-                print("charlie")
+                -- print("charlie")
                 -- move to workplace
                 -- add a 'move' action
                 addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary

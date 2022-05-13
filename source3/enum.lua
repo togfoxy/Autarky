@@ -62,6 +62,8 @@ audioYawn = 1
 audioWork = 2
 audioEat = 3
 audioNewVillager = 4
+audioRustle = 5
+audioSawWood = 6
 
 musicCityofMagic = 11
 musicOvertheHills = 12

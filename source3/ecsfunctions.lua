@@ -51,8 +51,8 @@ function ecsfunctions.init()
                         y1 = y1 - (TILE_SIZE / 2) + TOP_MARGIN
                         x2 = x2 - (TILE_SIZE / 2) + LEFT_MARGIN
                         y2 = y2 - (TILE_SIZE / 2) + TOP_MARGIN
-                        love.graphics.setColor(1,1,1,alpha)
-                        love.graphics.line(x1, y1, x2, y2)
+                        -- love.graphics.setColor(1,1,1,alpha)
+                        -- love.graphics.line(x1, y1, x2, y2)
                     end
                 end
                 -- left side
@@ -67,10 +67,8 @@ function ecsfunctions.init()
                         y1 = y1 - (TILE_SIZE / 2) + TOP_MARGIN
                         x2 = x2 - (TILE_SIZE / 2) + LEFT_MARGIN
                         y2 = y2 - (TILE_SIZE / 2) + TOP_MARGIN
-
-
-                        love.graphics.setColor(1,1,1,alpha)
-                        love.graphics.line(x1, y1, x2, y2)
+                        -- love.graphics.setColor(1,1,1,alpha)
+                        -- love.graphics.line(x1, y1, x2, y2)
                     end
                 end
 
@@ -173,8 +171,8 @@ function ecsfunctions.init()
                     goal = enum.goalEat
                 else
                     goal = ft.DetermineAction(TREE, e)
-                    if e:has("occupation") then print("Occupation: " .. e.occupation.value) end
-                    if goal ~= nil then print("Goal is number " .. goal) end
+                    -- if e:has("occupation") then print("Occupation: " .. e.occupation.value) end
+                    -- if goal ~= nil then print("Goal is number " .. goal) end
                 end
                 local actionlist = {}
                 local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
@@ -185,8 +183,8 @@ function ecsfunctions.init()
             if #e.isPerson.queue < 1 then
                 -- add an 'idle' action
                 action = {}
-                action.action = "idle"
-                action.timeleft = love.math.random(10, 30)
+                action.action = "idle"      -- idle is same as rest but idle means "nothing else to do" but rest was chosen from btree
+                action.timeleft = love.math.random(10, 20)
                 table.insert(e.isPerson.queue, action)
             end
 
@@ -194,23 +192,28 @@ function ecsfunctions.init()
             local currentaction = {}
             currentaction = e.isPerson.queue[1]      -- a table
 
+            -- ** debugging ** --
             -- if currentaction.action ~= "idle" and currentaction.action ~= "move" and currentaction.action ~= "work" then
-            if currentaction.action ~= "idle" and currentaction.action ~= "move" then
-                -- print("Current action: " .. currentaction.action)
-                local agentrow = e.position.row
-                local agentcol = e.position.col
-                -- print(MAP[agentrow][agentcol].entity.isTile.improvementType)
-            end
+            -- if currentaction.action ~= "idle" and currentaction.action ~= "move" then
+            --     -- print("Current action: " .. currentaction.action)
+            --     local agentrow = e.position.row
+            --     local agentcol = e.position.col
+            --     -- print(MAP[agentrow][agentcol].entity.isTile.improvementType)
+            -- end
 
-            if currentaction.action == "idle" then
+            if currentaction.action == "idle" or currentaction.action == "rest" then
                 currentaction.timeleft = currentaction.timeleft - dt
                 if currentaction.timeleft > 3 and love.math.random(1, 10000) == 1 then
                     -- play audio
                     AUDIO[enum.audioYawn]:play()
                 end
 
-                e.isPerson.stamina = e.isPerson.stamina + (1.5 * dt)        -- gain 1 per second + recover the 0.5 applied above
-                -- if e.isPerson.stamina > 100 then e.isPerson.stamina = 100 end
+                if currentaction.action == "rest" and e:has("residence") then
+                    -- recover stamina faster
+                    e.isPerson.stamina = e.isPerson.stamina + (2 * dt)
+                else
+                    e.isPerson.stamina = e.isPerson.stamina + (1.5 * dt)        -- gain 1 per second + recover the 0.5 applied above
+                end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
                 end
@@ -236,8 +239,13 @@ function ecsfunctions.init()
                 currentaction.timeleft = currentaction.timeleft - dt
                 if currentaction.timeleft > 3 and love.math.random(1, 5000) == 1 then
                     -- play audio
-                    AUDIO[enum.audioWork]:play()
-                    -- print("Play 'work'")
+                    if e.occupation.value == enum.jobFarmer then
+                        AUDIO[enum.audioRustle]:play()
+                    end
+                    if e.occupation.value == enum.jobWoodsman then
+                        AUDIO[enum.audioSawWood]:play()
+                    end
+
                 end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
