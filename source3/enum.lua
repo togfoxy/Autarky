@@ -11,6 +11,7 @@ imagesMud = 101
 imagesHouseFrame = 7
 imagesHouse = 103
 imagesEmoteSleeping = 121
+imagesEmoteTalking = 122
 
 -- quads/sprites
 spriteBlueMan = 1

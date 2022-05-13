@@ -115,11 +115,18 @@ function ecsfunctions.init()
                 local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
 
                 -- draw the occupation
+                local imgrotation = 0
+                if e.isPerson.queue[1] ~= nil then
+                    if e.isPerson.queue[1].action == "rest" then
+                        imgrotation = math.rad(90)
+                    end
+                end
+
                 if e:has("occupation") then
-                    love.graphics.draw(SPRITES[enum.spriteBlueMan], QUADS[enum.spriteBlueMan][1], drawx, drawy, 0, 1, 1, 10, 25)
+                    love.graphics.draw(SPRITES[enum.spriteBlueMan], QUADS[enum.spriteBlueMan][1], drawx, drawy, imgrotation, 1, 1, 10, 25)
                     love.graphics.setColor(0,0,1,1)
                 else
-                    love.graphics.draw(SPRITES[enum.spriteRedMan], QUADS[enum.spriteRedMan][1], drawx, drawy, 0, 1, 1, 10, 25)
+                    love.graphics.draw(SPRITES[enum.spriteRedMan], QUADS[enum.spriteRedMan][1], drawx, drawy, imgrotation, 1, 1, 10, 25)
                 end
 
                 local txt = ""
@@ -188,6 +195,14 @@ function ecsfunctions.init()
                 action.action = "idle"      -- idle is same as rest but idle means "nothing else to do" but rest was chosen from btree
                 action.timeleft = love.math.random(10, 20)
                 table.insert(e.isPerson.queue, action)
+
+                -- add a talking bubble
+                local item = {}
+                item.imagenumber = enum.imagesEmoteTalking
+                item.start = love.math.random(0, 7)
+                item.stop = love.math.random(item.start, action.timeleft)
+                item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+                table.insert(DRAWQUEUE, item)
             end
 
             -- process head of queue
@@ -229,7 +244,7 @@ function ecsfunctions.init()
                     table.remove(e.isPerson.queue, 1)
                 end
             end
-            
+
             if currentaction.action == "move" then
                 local destx = currentaction.x
                 local desty = currentaction.y
