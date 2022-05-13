@@ -7,13 +7,18 @@ imagesGrassTeal = 3
 imagesWell = 4
 imagesFarm = 5          -- tree
 imagesWoodsman = 6      -- logs
-imagesMud = 101
 imagesHouseFrame = 7
+
+imagesMud = 101
 imagesHouse = 103
+imagesEmoteSleeping = 121
+imagesEmoteTalking = 122
 
 -- quads/sprites
 spriteBlueMan = 1
 spriteRedMan = 2
+spriteBlueWoman = 3
+spriteRedWoman = 4
 
 -- terrain types
 terrainGrassDry = 1
@@ -65,6 +70,7 @@ audioNewVillager = 4
 audioRustle = 5
 audioSawWood = 6
 
+
 musicCityofMagic = 11
 musicOvertheHills = 12
 musicSpring = 13
@@ -75,3 +81,7 @@ musicDistantMountains = 17
 
 musicBirds = 21
 musicBirdsinForest = 22
+
+-- gender
+genderMale = 1
+genderFemale = 2

@@ -115,12 +115,31 @@ function ecsfunctions.init()
                 local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
 
                 -- draw the occupation
-                if e:has("occupation") then
-                    love.graphics.draw(SPRITES[enum.spriteBlueMan], QUADS[enum.spriteBlueMan][1], drawx, drawy, 0, 1, 1, 10, 25)
-                    love.graphics.setColor(0,0,1,1)
-                else
-                    love.graphics.draw(SPRITES[enum.spriteRedMan], QUADS[enum.spriteRedMan][1], drawx, drawy, 0, 1, 1, 10, 25)
+                local imgrotation = 0
+                if e.isPerson.queue[1] ~= nil then
+                    if e.isPerson.queue[1].action == "rest" then
+                        imgrotation = math.rad(90)
+                    end
                 end
+
+                local sprite, quad
+                if e.isPerson.gender == enum.genderMale and e:has("occupation") then
+                    sprite = SPRITES[enum.spriteBlueMan]
+                    quad = QUADS[enum.spriteBlueMan][1]
+                end
+                if e.isPerson.gender == enum.genderFemale and e:has("occupation") then
+                    sprite = SPRITES[enum.spriteBlueWoman]
+                    quad = QUADS[enum.spriteBlueWoman][1]
+                end
+                if e.isPerson.gender == enum.genderMale and not e:has("occupation") then
+                    sprite = SPRITES[enum.spriteRedMan]
+                    quad = QUADS[enum.spriteRedMan][1]
+                end
+                if e.isPerson.gender == enum.genderFemale and not e:has("occupation") then
+                    sprite = SPRITES[enum.spriteRedWoman]
+                    quad = QUADS[enum.spriteRedWoman][1]
+                end
+                love.graphics.draw(sprite, quad, drawx, drawy, imgrotation, 1, 1, 10, 25)
 
                 local txt = ""
                 if love.keyboard.isDown("lctrl") or love.keyboard.isDown("rctrl") then
@@ -162,6 +181,8 @@ function ecsfunctions.init()
         for _, e in ipairs(self.pool) do
             -- check if queue is empty and if so then get a new action from the behavior tree
 
+            local agentrow = e.position.row
+            local agentcol = e.position.col
             -- determine new action for queue (or none)
             if #e.isPerson.queue == 0 then
                 local goal
@@ -186,6 +207,14 @@ function ecsfunctions.init()
                 action.action = "idle"      -- idle is same as rest but idle means "nothing else to do" but rest was chosen from btree
                 action.timeleft = love.math.random(10, 20)
                 table.insert(e.isPerson.queue, action)
+
+                -- add a talking bubble
+                local item = {}
+                item.imagenumber = enum.imagesEmoteTalking
+                item.start = love.math.random(0, 7)
+                item.stop = love.math.random(item.start, action.timeleft)
+                item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+                table.insert(DRAWQUEUE, item)
             end
 
             -- process head of queue
@@ -209,6 +238,15 @@ function ecsfunctions.init()
                 end
 
                 if currentaction.action == "rest" and e:has("residence") then
+                    if currentaction.timeleft > 5 then
+                        -- draw sleep bubble
+                        local item = {}
+                        item.imagenumber = enum.imagesEmoteSleeping
+                        item.start = 0
+                        item.stop = math.min(5, currentaction.timeleft)
+                        item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+                        table.insert(DRAWQUEUE, item)
+                    end
                     -- recover stamina faster
                     e.isPerson.stamina = e.isPerson.stamina + (2 * dt)
                 else
@@ -218,6 +256,7 @@ function ecsfunctions.init()
                     table.remove(e.isPerson.queue, 1)
                 end
             end
+
             if currentaction.action == "move" then
                 local destx = currentaction.x
                 local desty = currentaction.y

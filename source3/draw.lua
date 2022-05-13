@@ -59,7 +59,7 @@ function draw.HUD()
     if count > 0 then
         avgstocklevel = cf.round(totalstocklevel / count, 1)
         txt = {}
-        txt.label = "Stock: "
+        txt.label = "Food: "
         txt.value = avgstocklevel
         if avgstocklevel < 1 then txt.red = true else txt.red = false end
         table.insert(HUDText, txt)
@@ -91,8 +91,22 @@ function draw.HUD()
     txt.value = nil
     table.insert(HUDText, txt)
 
-
-
+    txt = {}
+    txt.label = "Camera"
+    txt.value = nil
+    table.insert(HUDText, txt)
+    txt = {}
+    txt.label = "\n"
+    txt.value = nil
+    table.insert(HUDText, txt)
+    txt = {}
+    txt.label = "mouse wheel = zoom"
+    txt.value = nil
+    table.insert(HUDText, txt)
+    txt = {}
+    txt.label = "arrow keys = pan"
+    txt.value = nil
+    table.insert(HUDText, txt)
 
     -- print to screen
     local yvalue = 35
@@ -110,29 +124,16 @@ function draw.HUD()
         end
         yvalue = yvalue + 20
     end
-
-
-
-    -- local txt = ""
-    -- txt = txt .. "Fullness: " .. avgfullness .. "\n"
-    -- txt = txt .. "Wealth: " .. avgwealth .. "\n"
-    -- txt = txt .. "Stamina: " .. avgstamina .. "\n"
-    -- txt = txt .. "---" .. "\n"
-    -- txt = txt .. "Stock: " .. avgstocklevel .. "\n"
-    --
-    -- love.graphics.setColor(1,1,1,1)
-    -- love.graphics.print(txt, 30, 35)
-
-
 end
 
-
-
-
-
-
-
-
+function draw.Animations()
+    for k, imgitem in pairs(DRAWQUEUE) do
+        if imgitem.start <= 0 and imgitem.stop > 0 then
+            -- draw item
+            love.graphics.draw(IMAGES[imgitem.imagenumber], imgitem.x, imgitem.y)
+        end
+    end
+end
 
 
 return draw

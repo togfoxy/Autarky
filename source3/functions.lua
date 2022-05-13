@@ -37,14 +37,21 @@ function functions.loadImages()
     IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
     IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
     IMAGES[enum.imagesHouse] = love.graphics.newImage("assets/images/house4.png")
-
+    IMAGES[enum.imagesEmoteSleeping] = love.graphics.newImage("assets/images/emote_sleeps.png")
+    IMAGES[enum.imagesEmoteTalking] = love.graphics.newImage("assets/images/emote_talking.png")
 
     -- quads
     SPRITES[enum.spriteBlueMan] = love.graphics.newImage("assets/images/Civilian Male Walk Blue.png")
     QUADS[enum.spriteBlueMan] = cf.fromImageToQuads(SPRITES[enum.spriteBlueMan], 15, 32)
 
+    SPRITES[enum.spriteBlueWoman] = love.graphics.newImage("assets/images/Civilian Female Blue.png")
+    QUADS[enum.spriteBlueWoman] = cf.fromImageToQuads(SPRITES[enum.spriteBlueMan], 15, 32)
+
     SPRITES[enum.spriteRedMan] = love.graphics.newImage("assets/images/Civilian Male Walk Red.png")
     QUADS[enum.spriteRedMan] = cf.fromImageToQuads(SPRITES[enum.spriteRedMan], 15, 32)
+
+    SPRITES[enum.spriteRedWoman] = love.graphics.newImage("assets/images/Civilian Female Red.png")
+    QUADS[enum.spriteRedWoman] = cf.fromImageToQuads(SPRITES[enum.spriteRedWoman], 15, 32)
 end
 
 function functions.loadAudio()
@@ -257,16 +264,22 @@ function functions.buyStock(agent, stocktype, maxqty)
         MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
     else
         -- normal purchase transaction
-        sellprice = MAP[agentrow][agentcol].entity.isTile.stockSellPrice
-        local canafford = math.floor(agent.isPerson.wealth / sellprice)     -- rounds down
-        purchaseamt = math.min(stockavail, canafford)
-        purchaseamt = math.min(purchaseamt, maxqty)       -- limit purchase to the requested amount
-        purchaseamt = math.floor(purchaseamt)
-        local funds = purchaseamt * sellprice
+        if MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson ~= nil then
+            sellprice = MAP[agentrow][agentcol].entity.isTile.stockSellPrice
+            local canafford = math.floor(agent.isPerson.wealth / sellprice)     -- rounds down
+            purchaseamt = math.min(stockavail, canafford)
+            purchaseamt = math.min(purchaseamt, maxqty)       -- limit purchase to the requested amount
+            purchaseamt = math.floor(purchaseamt)
+            local funds = purchaseamt * sellprice
 
-        MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
-        MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + funds
-        agent.isPerson.wealth = agent.isPerson.wealth - funds
+            MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
+            MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + funds
+            agent.isPerson.wealth = agent.isPerson.wealth - funds
+        else
+            print(inspect(MAP[agentrow][agentcol].entity.isTile.tileOwner))
+            print(agentrow, agentcol, stocktype, stockavail)
+            error("Agent tried to buy stock from tile that has no owner.")
+        end
     end
     return purchaseamt
 end

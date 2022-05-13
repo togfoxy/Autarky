@@ -1,4 +1,4 @@
-GAME_VERSION = "0.05"
+GAME_VERSION = "0.06"
 
 inspect = require 'lib.inspect'
 -- https://github.com/kikito/inspect.lua
@@ -8,6 +8,9 @@ concord = require 'lib.concord'
 
 res = require 'lib.resolution_solution'
 -- https://github.com/Vovkiv/resolution_solution
+
+Camera = require 'lib.cam11.cam11'	-- Returns the Camera class.
+-- https://notabug.org/pgimeno/cam11
 
 ft = require 'lib.foxtree'		-- foxtree
 
@@ -20,10 +23,16 @@ draw = require 'draw'
 
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
+ZOOMFACTOR = 1
+TRANSLATEX = cf.round(SCREEN_WIDTH / 2)		-- starts the camera in the middle of the ocean
+TRANSLATEY = cf.round(SCREEN_HEIGHT / 2)	-- need to round because this is working with pixels
 SCREEN_STACK = {}
+
+
 IMAGES = {}
 QUADS = {}
 SPRITES = {}
+DRAWQUEUE = {}			-- a list of things to be drawn during love.draw()
 AUDIO = {}
 
 TILE_SIZE = 50
@@ -89,16 +98,14 @@ end
 
 function love.mousepressed( x, y, button, istouch, presses )
 
-	--! local mousex,mousey = res.toScreen(x, y)
-    local mousex = x
-    local mousey = y
+	local wx, wy = cam:toWorld(x, y)	-- converts screen x/y to world x/y
 
 	if button == 1 then
 		-- select the villager if clicked, else select the tile (further down)
 		for k, v in pairs(VILLAGERS) do
 			x2 = v.position.x
 			y2 = v.position.y
-			local dist = cf.GetDistance(mousex - LEFT_MARGIN, mousey - TOP_MARGIN, x2, y2)
+			local dist = cf.GetDistance(wx - LEFT_MARGIN, wy - TOP_MARGIN, x2, y2)
 			if dist <= PERSON_DRAW_WIDTH then
 				if v.isSelected then
 					v:remove("isSelected")
@@ -108,6 +115,36 @@ function love.mousepressed( x, y, button, istouch, presses )
 			end
 		end
 	end
+end
+
+function love.keypressed( key, scancode, isrepeat )
+
+	local translatefactor = 5 * (ZOOMFACTOR * 2)		-- screen moves faster when zoomed in
+
+	local leftpressed = love.keyboard.isDown("left")
+	local rightpressed = love.keyboard.isDown("right")
+	local uppressed = love.keyboard.isDown("up")
+	local downpressed = love.keyboard.isDown("down")
+	local shiftpressed = love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift")	-- either shift key will work
+
+	-- adjust translatex/y based on keypress combinations
+	if shiftpressed then translatefactor = translatefactor * 2 end	-- ensure this line is above the lines below
+	if leftpressed then TRANSLATEX = TRANSLATEX - translatefactor end
+	if rightpressed then TRANSLATEX = TRANSLATEX + translatefactor end
+	if uppressed then TRANSLATEY = TRANSLATEY - translatefactor end
+	if downpressed then TRANSLATEY = TRANSLATEY + translatefactor end
+end
+
+function love.wheelmoved(x, y)
+	if y > 0 then
+		-- wheel moved up. Zoom in
+		ZOOMFACTOR = ZOOMFACTOR + 0.05
+	end
+	if y < 0 then
+		ZOOMFACTOR = ZOOMFACTOR - 0.05
+	end
+	if ZOOMFACTOR < 0.8 then ZOOMFACTOR = 0.8 end
+	if ZOOMFACTOR > 3 then ZOOMFACTOR = 3 end
 end
 
 function love.load()
@@ -124,8 +161,11 @@ function love.load()
     end
 
     love.window.setTitle("Autarky " .. GAME_VERSION)
+	love.keyboard.setKeyRepeat(true)
 
 	cf.AddScreen("World", SCREEN_STACK)
+
+	cam = Camera.new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 1)
 
 	bt.EstablishTree(TREE)
 
@@ -143,9 +183,13 @@ function love.draw()
     --! res.start()
     --! res.stop()
 
+	cam:attach()
     WORLD:emit("draw")
+	draw.Animations()
+	cam:detach()
 
 	draw.HUD()
+
 end
 
 
@@ -165,6 +209,17 @@ function love.update(dt)
 		AUDIO[enum.audioNewVillager]:play()
 	end
 
+	for i = #DRAWQUEUE, 1, -1 do
+		DRAWQUEUE[i].start = DRAWQUEUE[i].start - dt
+		DRAWQUEUE[i].stop = DRAWQUEUE[i].stop - dt
+		if DRAWQUEUE[i].stop <= 0 then
+			table.remove(DRAWQUEUE, i)
+		end
+	end
+
 	fun.PlayAmbientMusic()
+
+	cam:setPos(TRANSLATEX,	TRANSLATEY)
+	cam:setZoom(ZOOMFACTOR)
 	--! res.update()
 end
