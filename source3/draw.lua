@@ -104,6 +104,11 @@ function draw.HUD()
     txt.value = nil
     table.insert(HUDText, txt)
     txt = {}
+    txt.label = "middle mouse button = pan"
+    txt.value = nil
+    table.insert(HUDText, txt)
+
+    txt = {}
     txt.label = "arrow keys = pan"
     txt.value = nil
     table.insert(HUDText, txt)

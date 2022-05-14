@@ -117,6 +117,13 @@ function love.mousepressed( x, y, button, istouch, presses )
 	end
 end
 
+function love.mousemoved( x, y, dx, dy, istouch )
+	if love.mouse.isDown(3) then
+		TRANSLATEX = TRANSLATEX - dx
+		TRANSLATEY = TRANSLATEY - dy
+	end
+end
+
 function love.keypressed( key, scancode, isrepeat )
 
 	local translatefactor = 5 * (ZOOMFACTOR * 2)		-- screen moves faster when zoomed in
