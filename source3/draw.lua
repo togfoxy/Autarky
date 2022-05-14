@@ -65,34 +65,68 @@ function draw.HUD()
         table.insert(HUDText, txt)
     end
 
+    -- determine average stocklevels for wood
+    local count = 0
+    local totalstocklevel, avgstocklevel = 0, 0
+    for col = 1, NUMBER_OF_COLS do
+        for row = 1, NUMBER_OF_ROWS do
+            if MAP[row][col].entity.isTile.stockLevel > 0 and MAP[row][col].entity.isTile.stockType == enum.stockWood then
+                count = count + 1
+                totalstocklevel = totalstocklevel + MAP[row][col].entity.isTile.stockLevel
+            end
+        end
+    end
+    if count > 0 then
+        avgstocklevel = cf.round(totalstocklevel / count, 1)
+        txt = {}
+        txt.label = "Wood: "
+        txt.value = avgstocklevel
+        if avgstocklevel < 1 then txt.red = true else txt.red = false end
+        table.insert(HUDText, txt)
+    end
+
     txt = {}
     txt.label = "\n"
     txt.value = nil
     table.insert(HUDText, txt)
 
     txt = {}
-    txt.label = "Key commands"
+    txt.label = "Key commands:"
     txt.value = nil
     table.insert(HUDText, txt)
+    txt = {}
+    txt.label = "(select red man first)"
+    txt.value = nil
+    table.insert(HUDText, txt)
+    if VILLAGERS_SELECTED > 0 then
+        txt = {}
+        txt.label = "\n"
+        txt.value = nil
+        table.insert(HUDText, txt)
+        txt = {}
+        txt.label = "f = farmer"
+        txt.value = nil
+        table.insert(HUDText, txt)
+        txt = {}
+        txt.label = "w = woodsman"
+        txt.value = nil
+        table.insert(HUDText, txt)
+        txt = {}
+        txt.label = "c = carpenter"
+        txt.value = nil
+        table.insert(HUDText, txt)
+        txt = {}
+        txt.label = "h = healer"
+        txt.value = nil
+        table.insert(HUDText, txt)
+    end
+
     txt = {}
     txt.label = "\n"
     txt.value = nil
     table.insert(HUDText, txt)
     txt = {}
-    txt.label = "f = farmer"
-    txt.value = nil
-    table.insert(HUDText, txt)
-    txt = {}
-    txt.label = "w = woodsman"
-    txt.value = nil
-    table.insert(HUDText, txt)
-    txt = {}
-    txt.label = "c = carpenter"
-    txt.value = nil
-    table.insert(HUDText, txt)
-
-    txt = {}
-    txt.label = "Camera"
+    txt.label = "Camera:"
     txt.value = nil
     table.insert(HUDText, txt)
     txt = {}
@@ -104,7 +138,17 @@ function draw.HUD()
     txt.value = nil
     table.insert(HUDText, txt)
     txt = {}
+    txt.label = "middle mouse button = pan"
+    txt.value = nil
+    table.insert(HUDText, txt)
+
+    txt = {}
     txt.label = "arrow keys = pan"
+    txt.value = nil
+    table.insert(HUDText, txt)
+
+    txt = {}
+    txt.label = "keypad 5 = reset camera"
     txt.value = nil
     table.insert(HUDText, txt)
 

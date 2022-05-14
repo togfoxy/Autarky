@@ -11,6 +11,7 @@ function comp.init()
 
     concord.component("isPerson", function(c)
         c.gender = love.math.random(2)
+        c.health = 100
         c.queue = {}
         c.stamina = 100         -- fully rested
         c.fullness = 125        -- hunger. Start a little topped up so they have a chance to establish themselves.
@@ -20,11 +21,12 @@ function comp.init()
         end
         c.wealth = 3            -- starting amount. 3 days worth of food.
         c.stockInv[enum.stockWood] = 0
+        c.log = {}
     end)
 
     concord.component("occupation", function(c, jobtype, stocktype, bolProducer, bolService, bolConverter)
         c.value = jobtype or 0       -- see enum.job
-        c.stocktype = stocktype or nil             -- see enum.stocktype
+        c.stockType = stocktype or nil             -- see enum.stockType
         c.isProducer = bolProducer
         c.isService = bolService
         c.isConverter = bolConverter                -- converts one item into another
@@ -40,11 +42,13 @@ function comp.init()
         c.row = row
         c.col = col
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
+        c.health = 0
     end)
     concord.component("residence", function(c,row,col)
         c.row = row
         c.col = col
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
+        c.health = 100
     end)
 
     concord.component("position", function(c, row, col)         -- exists on the map/grid

@@ -20,45 +20,10 @@ ecs = require 'ecsfunctions'
 enum = require 'enum'
 bt = require 'behaviortree'
 draw = require 'draw'
+con = require 'constants'
 
-SCREEN_WIDTH = 1920
-SCREEN_HEIGHT = 1080
-ZOOMFACTOR = 1
-TRANSLATEX = cf.round(SCREEN_WIDTH / 2)		-- starts the camera in the middle of the ocean
-TRANSLATEY = cf.round(SCREEN_HEIGHT / 2)	-- need to round because this is working with pixels
-SCREEN_STACK = {}
-
-
-IMAGES = {}
-QUADS = {}
-SPRITES = {}
-DRAWQUEUE = {}			-- a list of things to be drawn during love.draw()
-AUDIO = {}
-
-TILE_SIZE = 50
-NUMBER_OF_ROWS = (cf.round(SCREEN_HEIGHT / TILE_SIZE)) - 2
-NUMBER_OF_COLS = (cf.round(SCREEN_WIDTH / TILE_SIZE)) - 1
-LEFT_MARGIN = TILE_SIZE / 2
-TOP_MARGIN = TILE_SIZE / 2
-
--- debugging
--- NUMBER_OF_ROWS = 4
--- NUMBER_OF_COLS = 5
-
-UPPER_TERRAIN_HEIGHT = 6
-
+con.load()
 print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
-
-NUMBER_OF_VILLAGERS = 8
-PERSON_DRAW_WIDTH = 10
-
-MAP = {}			-- a 2d table of tiles
-VILLAGERS = {}
-TREE = {}			-- a tree that holds all possible behaviours for a person
-WALKING_SPEED = 50
-
-DEBUG = false
-NEW_VILLAGER_TIMER = 0
 
 function love.keyreleased( key, scancode )
 	if key == "escape" then
@@ -74,6 +39,7 @@ function love.keyreleased( key, scancode )
 			end
 			v:remove("isSelected")
 		end
+		VILLAGERS_SELECTED = 0
 	end
 	-- turn selected agent into woodsman
 	if key == "w" then
@@ -84,6 +50,7 @@ function love.keyreleased( key, scancode )
 			end
 			v:remove("isSelected")
 		end
+		VILLAGERS_SELECTED = 0
 	end
 	if key == "c" then
 		for k,v in pairs(VILLAGERS) do
@@ -93,11 +60,26 @@ function love.keyreleased( key, scancode )
 			end
 			v:remove("isSelected")
 		end
+		VILLAGERS_SELECTED = 0
+	end
+	if key == "h" then
+		for k,v in pairs(VILLAGERS) do
+			if v:has("isSelected") and (not v:has("occupation")) then
+				-- print("occup granted")
+				v:ensure("occupation", enum.jobHealer, enum.stockHealingHerbs, true, false, true)
+			end
+			v:remove("isSelected")
+		end
+		VILLAGERS_SELECTED = 0
+	end
+	if key == "kp5" then
+		ZOOMFACTOR = 1
+		TRANSLATEX = 960
+		TRANSLATEY = 540
 	end
 end
 
 function love.mousepressed( x, y, button, istouch, presses )
-
 	local wx, wy = cam:toWorld(x, y)	-- converts screen x/y to world x/y
 
 	if button == 1 then
@@ -108,12 +90,21 @@ function love.mousepressed( x, y, button, istouch, presses )
 			local dist = cf.GetDistance(wx - LEFT_MARGIN, wy - TOP_MARGIN, x2, y2)
 			if dist <= PERSON_DRAW_WIDTH then
 				if v.isSelected then
-					v:remove("isSelected")
+					v:remove("isSelected")		--! small bug - need to check if this is the last selected and then remove it
+					VILLAGERS_SELECTED = VILLAGERS_SELECTED - 1
 				else
 					v:ensure("isSelected")
+					VILLAGERS_SELECTED = VILLAGERS_SELECTED + 1
 				end
 			end
 		end
+	end
+end
+
+function love.mousemoved( x, y, dx, dy, istouch )
+	if love.mouse.isDown(3) then
+		TRANSLATEX = TRANSLATEX - dx
+		TRANSLATEY = TRANSLATEY - dy
 	end
 end
 
@@ -175,7 +166,6 @@ function love.load()
 
     ecsfunctions.init()	    -- loads all the components etc
     WORLD:emit("init")      -- triggers the init functions which load arrays and tables
-
 end
 
 function love.draw()

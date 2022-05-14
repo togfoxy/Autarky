@@ -37,15 +37,18 @@ function functions.loadImages()
     IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
     IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
     IMAGES[enum.imagesHouse] = love.graphics.newImage("assets/images/house4.png")
+    IMAGES[enum.imagesHealingHouse] = love.graphics.newImage("assets/images/healerhouse.png")
+    IMAGES[enum.imagesVillagerLog] = love.graphics.newImage("assets/images/villagerlog.png")
 
     IMAGES[enum.iconsApple] = love.graphics.newImage("assets/images/appleicon.png")
     IMAGES[enum.iconsAxe] = love.graphics.newImage("assets/images/axeicon64x64.png")
-    IMAGES[enum.iconsHammer] = love.graphics.newImage("assets/images/hammericon64x64.png")
-
+    IMAGES[enum.iconsHammer] = love.graphics.newImage("assets/images/hammericon164x64.png")
+    IMAGES[enum.iconsHealer] = love.graphics.newImage("assets/images/healericon64x64.png")
 
 
     IMAGES[enum.imagesEmoteSleeping] = love.graphics.newImage("assets/images/emote_sleeps.png")
     IMAGES[enum.imagesEmoteTalking] = love.graphics.newImage("assets/images/emote_talking.png")
+    IMAGES[enum.imagesEmoteCash] = love.graphics.newImage("assets/images/emote_cash.png")
 
     -- quads
     SPRITES[enum.spriteBlueMan] = love.graphics.newImage("assets/images/Civilian Male Walk Blue.png")
@@ -80,6 +83,8 @@ function functions.loadAudio()
     AUDIO[enum.audioNewVillager] = love.audio.newSource("assets/audio/387232__steaq__badge-coin-win.wav", "static")
     AUDIO[enum.audioRustle] = love.audio.newSource("assets/audio/437356__giddster__rustling-leaves.wav", "static")
     AUDIO[enum.audioSawWood] = love.audio.newSource("assets/audio/sawwood.wav", "static")
+    AUDIO[enum.audioBandage] = love.audio.newSource("assets/audio/174627__altfuture__ripping-clothes.mp3", "static")
+
 
     AUDIO[enum.audioWork]:setVolume(0.2)
     AUDIO[enum.musicMedievalFiesta]:setVolume(0.2)
@@ -150,6 +155,7 @@ local function convertToCollisionMap(map)
 end
 
 local function getBlankTile()
+    -- ensure the result is checked for nil - meaning - a blank tile was not found
 
     local row, col
 
@@ -188,7 +194,7 @@ local function getBlankTile()
 
     if count > 10000 then
         print("Can't find a blank tile. Giving up after 1000 tries." .. count)
-        return nil, nil     --! need to check if nil is returned (no blank tiles available)
+        return nil, nil
     else
         return row, col
     end
@@ -196,6 +202,7 @@ end
 
 local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, startcol)
     -- returns the closest building of required type
+    -- ensure the return value is checked for nil - meaning - building not found
     local closestvalue = -1
     local closestrow, closestcol
 
@@ -203,8 +210,8 @@ local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, st
         for row = 1, NUMBER_OF_ROWS do
             if MAP[row][col].entity.isTile.improvementType == buildingtype and MAP[row][col].entity.isTile.stockLevel >= requiredstocklevel then
                 local cmap = convertToCollisionMap(MAP)
-                cmap[row][col] = enum.tileWalkable
-                local _, dist = cf.findPath(cmap, enum.tileWalkable, startcol, startrow, col, row, false)
+                cmap[row][col] = TILEWALKABLE
+                local _, dist = cf.findPath(cmap, TILEWALKABLE, startcol, startrow, col, row, false)
                 if closestvalue < 0 or dist < closestvalue then
                     closestvalue = dist
                     closestrow = row
@@ -216,7 +223,7 @@ local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, st
     if closestrow == nil then
         -- print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
     end
-    return closestrow, closestcol       --! need to manage nils
+    return closestrow, closestcol
 end
 
 local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
@@ -228,16 +235,16 @@ local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
     -- print(inspect(cmap))
 
     -- need to 'blank' out the destination so jumper can find a path.
-    cmap[stoprow][stopcol] = enum.tileWalkable
+    cmap[stoprow][stopcol] = TILEWALKABLE
 
     -- jumper uses x and y which is really col and row
     local startx = startcol
     local starty = startrow
     local endx = stopcol
     local endy = stoprow
-    local path = cf.findPath(cmap, enum.tileWalkable, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
+    local path = cf.findPath(cmap, TILEWALKABLE, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
 
-    assert(path ~= nil) --! not sure how this is possible
+    assert(path ~= nil) -- not sure how this is possible
 
     for index, node in ipairs(path) do
         if index > 1 then   -- don't apply the first waypoint as it is too close to the agent
@@ -261,7 +268,7 @@ function functions.buyStock(agent, stocktype, maxqty)
     local agentrow = agent.position.row
     local agentcol = agent.position.col
     local sellprice
-    local purchaseamt
+    local purchaseamt = 0
     local stockavail = math.floor(MAP[agentrow][agentcol].entity.isTile.stockLevel)
 
     if MAP[agentrow][agentcol].entity.isTile.tileOwner == agent then
@@ -285,7 +292,7 @@ function functions.buyStock(agent, stocktype, maxqty)
         else
             print(inspect(MAP[agentrow][agentcol].entity.isTile.tileOwner))
             print(agentrow, agentcol, stocktype, stockavail)
-            error("Agent tried to buy stock from tile that has no owner.")
+            -- error("Agent tried to buy stock from tile that has no owner.")
         end
     end
     return purchaseamt
@@ -348,13 +355,15 @@ function functions.createActions(goal, agent)
                 assert(workplacerow ~= nil)
                 agent:give("workplace", workplacerow, workplacecol)
                 MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
-                MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stocktype
+                MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stockType
                 MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
 
-                if agent.occupation.stocktype == enum.stockFruit then
-                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = 1
-                elseif agent.occupation.stocktype == enum.stockWood then
-                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = 3
+                if agent.occupation.stockType == enum.stockFruit then
+                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = PRICE_FRUIT
+                elseif agent.occupation.stockType == enum.stockWood then
+                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = PRICE_WOOD
+                elseif agent.occupation.stockType == enum.stockHealingHerbs then
+                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = PRICE_HERBS
                 end
                 print("Owner assigned to " .. workplacerow, workplacecol)
             end
@@ -393,13 +402,11 @@ function functions.createActions(goal, agent)
                 end
             end
         end
-
-
     end
     if goal == enum.goalEat then
         local qtyneeded = 1
         local ownsFruitshop = false
-        if agent:has("workplace") and agent.isPerson.wealth <= 1.5 then
+        if agent:has("workplace") and agent.isPerson.wealth < (qtyneeded * PRICE_FRUIT) then
             if MAP[workplacerow][workplacecol].entity.isTile.stockLevel >= qtyneeded and
                 MAP[workplacerow][workplacecol].entity.isTile.stockType == enum.stockFruit then
                     ownsFruitshop = true
@@ -415,7 +422,7 @@ function functions.createActions(goal, agent)
             end
         end
         -- buy food
-        action = {}     --! this perhaps should be inside one of the IF statements
+        action = {}
         action.action = "buy"
         action.stockType = enum.stockFruit
         action.purchaseAmount = qtyneeded
@@ -426,7 +433,7 @@ function functions.createActions(goal, agent)
     end
     if goal == enum.goalBuyWood then
         -- print("Goal = buy wood")
-        local qtyneeded = 1
+        local qtyneeded = WOOD_HOUSEFRAME
         local shoprow, shopcol = getClosestBuilding(enum.improvementWoodsman, qtyneeded, agentrow, agentcol)
         if shoprow ~= nil then
             addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
@@ -446,18 +453,48 @@ function functions.createActions(goal, agent)
     if goal == enum.goalStartHouse then
         -- pick an empty tile
         local houserow, housecol = getBlankTile()
-        agent:give("residenceFrame", houserow, housecol)
+        if houserow ~= nil then
+            agent:give("residenceFrame", houserow, housecol)
 
-        -- place a frame
-        MAP[houserow][housecol].entity.isTile.improvementType = enum.improvementHouseFrame
-        MAP[houserow][housecol].entity.isTile.stockType = enum.stockHouseFrame
-        MAP[houserow][housecol].entity.isTile.stockLevel = 1
-        MAP[houserow][housecol].entity.isTile.tileOwner = agent
-        MAP[houserow][housecol].entity.isTile.timeToBuild = 60          -- seconds
+            -- place a frame
+            MAP[houserow][housecol].entity.isTile.improvementType = enum.improvementHouseFrame
+            MAP[houserow][housecol].entity.isTile.stockType = enum.stockHouseFrame
+            MAP[houserow][housecol].entity.isTile.stockLevel = 1
+            MAP[houserow][housecol].entity.isTile.tileOwner = agent
+            MAP[houserow][housecol].entity.isTile.timeToBuild = BUILD_HOUSE_TIMER          -- seconds
 
-        -- subtract wood
-        agent.isPerson.stockInv[enum.stockWood] = agent.isPerson.stockInv[enum.stockWood] - 5
-        agent.isPerson.wealth = agent.isPerson.wealth - 8               -- this is forward payment for the carpenter
+            -- subtract wood
+            agent.isPerson.stockInv[enum.stockWood] = agent.isPerson.stockInv[enum.stockWood] - WOOD_HOUSEFRAME
+            agent.isPerson.wealth = agent.isPerson.wealth - CARPENTER_HOUSEFRAME    -- this is forward payment for the carpenter
+        end
+    end
+    if goal == enum.goalHeal then
+        local qtyneeded = (cf.round((100 - agent.isPerson.health) / 10)) + 1
+        local ownsHealershop = false
+        -- see if healer owns a healing shop
+        if agent:has("workplace") and agent.isPerson.wealth <= 4 then
+            if MAP[workplacerow][workplacecol].entity.isTile.stockLevel >= qtyneeded and
+                MAP[workplacerow][workplacecol].entity.isTile.stockType == enum.stockHealingHerbs then
+                    ownsHealershop = true
+            end
+        end
+        if ownsHealershop then
+            addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+        else
+            -- not a farmer or rich or own farm has no stock
+            local shoprow, shopcol = getClosestBuilding(enum.improvementHealer, qtyneeded, agentrow, agentcol)
+            if shoprow ~= nil then
+                addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+            end
+        end
+        -- buy herbs
+        action = {}
+        action.action = "buy"
+        action.stockType = enum.stockHealingHerbs
+        action.purchaseAmount = qtyneeded
+        table.insert(queue, action)
+        assert(action.stockType ~= nil)
+        print("move and buy herbs action added")
     end
 
     return queue
@@ -517,6 +554,12 @@ function functions.killAgent(uniqueid)
     assert(deadID ~= nil)
     table.remove(VILLAGERS, deadID)
     print("There are now " .. #VILLAGERS .. " villagers.")
+end
+
+function functions.addLog(person, txtitem)
+    local logitem = {}
+    logitem.text = txtitem
+    table.insert(person.isPerson.log, logitem)
 end
 
 return functions

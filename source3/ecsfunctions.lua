@@ -128,8 +128,6 @@ function ecsfunctions.init()
                     end
                 end
 
-
-
                 local sprite, quad
                 if e.isPerson.gender == enum.genderMale and e:has("occupation") then
                     sprite = SPRITES[enum.spriteBlueMan]
@@ -149,6 +147,25 @@ function ecsfunctions.init()
                 end
                 love.graphics.draw(sprite, quad, drawx, drawy, imgrotation, 1, 1, 10, 25)
 
+                -- display the log
+                local maxindex = #e.isPerson.log
+                if e:has("isSelected") and VILLAGERS_SELECTED == 1 then
+                    img = IMAGES[enum.imagesVillagerLog]
+                    local imageheight = img:getHeight()
+                    local drawboxy = SCREEN_HEIGHT - imageheight - 100
+
+                    love.graphics.setColor(1,1,1,1)
+                    love.graphics.draw(img, 50, drawboxy)
+                    local texty = drawboxy + 7
+
+                    for i = maxindex, maxindex - 4, -1 do
+                        if i < 1 then break end
+                        love.graphics.setColor(47/255,11/255,50/255,1)
+                        love.graphics.print(e.isPerson.log[i].text, 57, texty)
+                        texty = texty + 12
+                    end
+                end
+
                 local txt = ""
                 if love.keyboard.isDown("lctrl") or love.keyboard.isDown("rctrl") then
                     -- display some debugging information
@@ -158,14 +175,18 @@ function ecsfunctions.init()
                             txt = txt .. "timer: " .. cf.round(e.isPerson.queue[1].timeleft) .. "\n"
                         end
                     end
+                    txt = txt .. "health: " .. cf.round(e.isPerson.health) .. "\n"
                     txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina) .. "\n"
                     txt = txt .. "fullness: " .. cf.round(e.isPerson.fullness) .. "\n"
                     txt = txt .. "wealth: " .. cf.round(e.isPerson.wealth,1) .. "\n"
                     txt = txt .. "wood: " .. cf.round(e.isPerson.stockInv[enum.stockWood]) .. "\n"
 
                     love.graphics.setColor(1,1,1,1)
-                    love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 25)
+                    love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 60)
                 else
+                    if e.isPerson.health < 25 then
+                        txt = txt .. "health: " .. cf.round(e.isPerson.health) .. "\n"
+                    end
                     if e.isPerson.stamina < 25 then
                         txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina) .. "\n"
                     end
@@ -196,8 +217,9 @@ function ecsfunctions.init()
                 local goal
                 if e.isPerson.fullness < 30 then
                     -- force agent to eat
-                    --! if agent has no wealth then this may not be the best option
                     goal = enum.goalEat
+                elseif e.isPerson.health < 30 then
+                    goal = enum.goalHeal
                 else
                     goal = ft.DetermineAction(TREE, e)
                     -- if e:has("occupation") then print("Occupation: " .. e.occupation.value) end
@@ -205,7 +227,6 @@ function ecsfunctions.init()
                 end
                 local actionlist = {}
                 local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
-
             end
 
             -- add 'idle' action if queue is still empty
@@ -262,6 +283,7 @@ function ecsfunctions.init()
                 end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
+                    fun.addLog(e, "Rested")
                 end
             end
 
@@ -271,6 +293,7 @@ function ecsfunctions.init()
                 if e.position.x == destx and e.position.y == desty then
                     -- arrived at destination
                     table.remove(e.isPerson.queue, 1)
+                    fun.addLog(e, "Moved")
                 else
                     -- move towards destination
                     if e.isPerson.stamina > 0 then
@@ -292,35 +315,42 @@ function ecsfunctions.init()
                     if e.occupation.value == enum.jobWoodsman then
                         AUDIO[enum.audioSawWood]:play()
                     end
-
                 end
+                -- see if they hurt themselves at work
+                if love.math.random(1, 100) == 1 then
+                    local dmg = cf.round(love.math.random(1,10) * dt, 4)
+                    e.isPerson.health = e.isPerson.health - dmg
+                end
+
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
+                    fun.addLog(e, "Worked")
                 end
 
                 -- print("+++")
-                -- print(e.occupation.stocktype)
                 -- print(e.occupation.value)
+                -- print(e.occupation.stockType)
                 -- print("+++")
-                if e.occupation.stocktype ~= nil and e.occupation.value ~= enum.jobCarpenter then
+                if e.occupation.stockType ~= nil and e.occupation.value ~= enum.jobCarpenter then
                     -- accumulate stock
                     local row = e.position.row
                     local col = e.position.col
-                    if MAP[row][col].stockLevel == nil then MAP[row][col].stockLevel = 0 end        --! this is probably redundant
+                    if MAP[row][col].stockLevel == nil then MAP[row][col].stockLevel = 0 end
+
                     local stockgained
-                    if e.occupation.stocktype == enum.stockFruit then
-                        if e.isPerson.stamina > 0 then
-                            stockgained = (0.0267 * dt)
-                        else
-                            stockgained = (0.0267 * dt) / 2        -- less productive when tired
-                        end
-                    elseif e.occupation.stocktype == enum.stockWood then
-                        if e.isPerson.stamina > 0 then
-                            stockgained = (0.0089 * dt)
-                        else
-                            stockgained = (0.0089 * dt) / 2        -- less productive when tired
-                        end
+                    if e.occupation.stockType == enum.stockFruit then
+                        stockgained = (RATE_FRUIT * dt)
+                    elseif e.occupation.stockType == enum.stockWood then
+                        stockgained = (RATE_WOOD * dt)
+                    elseif e.occupation.stockType == enum.stockHealingHerbs then
+                        stockgained = (RATE_HERBS * dt)
                     end
+                    assert(stockgained ~= nil)
+
+                    if e.isPerson.stamina <= 0 then
+                        stockgained = stockgained / 2   -- less productive when tired
+                    end
+
                     stockgained = cf.round(stockgained, 4)
                     MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + stockgained
                 end
@@ -349,6 +379,7 @@ function ecsfunctions.init()
                             houseOwner:ensure("residence", row, col)
 
                             table.remove(e.isPerson.queue, 1)
+                            fun.addLog(e, "Built a house")
                         end
                     end
                 end
@@ -356,7 +387,7 @@ function ecsfunctions.init()
             if currentaction.action == "buy" then
                 local agentrow = e.position.row
                 local agentcol = e.position.col
-                print("Buying stock type " .. currentaction.stockType)     --! should the line above be 'stockType'?
+                print("Buying stock type " .. currentaction.stockType)
 
                 local amtbought = fun.buyStock(e, currentaction.stockType, currentaction.purchaseAmount)
                 print("Bought " .. amtbought .. " of stock type " .. currentaction.stockType)
@@ -366,16 +397,34 @@ function ecsfunctions.init()
                             AUDIO[enum.audioEat]:play()
                             print("Play 'eat'")
                     end
+                elseif currentaction.stockType == enum.stockHealingHerbs then
+                    e.isPerson.health = e.isPerson.health + (amtbought * 10)
+                    if amtbought > 0 and love.math.random(1, 1000) == 1 then
+                            AUDIO[enum.audioBandage]:play()
+                            print("Play 'heal'")
+                    end
                 else
                     e.isPerson.stockInv[currentaction.stockType] = e.isPerson.stockInv[currentaction.stockType] + amtbought
                 end
+
+                if amtbought > 0 then
+                    -- add a money bubble
+                    local item = {}
+                    item.imagenumber = enum.imagesEmoteCash
+                    item.start = 0
+                    item.stop = 3
+                    item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+                    table.insert(DRAWQUEUE, item)
+                end
+
                 table.remove(e.isPerson.queue, 1)
+                fun.addLog(e, "Bought something")
             end
 
             -- ******************* --
             -- do things that don't depend on an action
             -- ******************* --
-            local row = e.position.row  --! try to refact this so all the good stuff is only at the top
+            local row = e.position.row
             local col = e.position.col
 
             -- add mud
@@ -384,13 +433,15 @@ function ecsfunctions.init()
             end
             if MAP[row][col].entity.isTile.mudLevel > 255 then MAP[row][col].entity.isTile.mudLevel = 255 end
 
+            -- reduce stamina
             e.isPerson.stamina = e.isPerson.stamina - (0.5 * dt)
             if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
 
-            -- do this last as it may nullify the entity
+            -- reduce fullness
             e.isPerson.fullness = e.isPerson.fullness - (0.33 * dt)
-            -- if e.isPerson.fullness < 0 then e.isPerson.fullness = 0 end
-            if e.isPerson.fullness < 0 then
+
+            -- do this last as it may nullify the entity
+            if e.isPerson.fullness < 0 or e.isPerson.health <= 0 then
                 -- destroy any improvement belonging to starving agent
                 if e:has("workplace") then
                     -- destroy workplace
@@ -401,6 +452,25 @@ function ecsfunctions.init()
                     MAP[wprow][wpcol].entity.isTile.tileOwner = nil
                     MAP[wprow][wpcol].entity.isTile.stockLevel = 0
                 end
+                if e:has("residenceFrame") then
+                    -- destroy house
+                    local wprow = e.residenceFrame.row
+                    local wpcol = e.residenceFrame.col
+                    MAP[wprow][wpcol].entity.isTile.improvementType = nil
+                    MAP[wprow][wpcol].entity.isTile.stockType = nil
+                    MAP[wprow][wpcol].entity.isTile.tileOwner = nil
+                    MAP[wprow][wpcol].entity.isTile.stockLevel = 0
+                end
+                if e:has("residence") then
+                    -- destroy house
+                    local wprow = e.residence.row
+                    local wpcol = e.residence.col
+                    MAP[wprow][wpcol].entity.isTile.improvementType = nil
+                    MAP[wprow][wpcol].entity.isTile.stockType = nil
+                    MAP[wprow][wpcol].entity.isTile.tileOwner = nil
+                    MAP[wprow][wpcol].entity.isTile.stockLevel = 0
+                end
+
                 fun.killAgent(e.uid.value)  -- removes the agent from the VILLAGERS table
                 e:destroy()                 -- destroys the entity from the world
                 --! add a graveyard somewhere
