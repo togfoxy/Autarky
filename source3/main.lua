@@ -72,6 +72,11 @@ function love.keyreleased( key, scancode )
 		end
 		VILLAGERS_SELECTED = 0
 	end
+	if key == "kp5" then
+		ZOOMFACTOR = 1
+		TRANSLATEX = 960
+		TRANSLATEY = 540
+	end
 end
 
 function love.mousepressed( x, y, button, istouch, presses )
@@ -163,7 +168,6 @@ function love.load()
 
     ecsfunctions.init()	    -- loads all the components etc
     WORLD:emit("init")      -- triggers the init functions which load arrays and tables
-
 end
 
 function love.draw()

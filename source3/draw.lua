@@ -147,6 +147,11 @@ function draw.HUD()
     txt.value = nil
     table.insert(HUDText, txt)
 
+    txt = {}
+    txt.label = "keypad 5 = reset camera"
+    txt.value = nil
+    table.insert(HUDText, txt)
+
     -- print to screen
     local yvalue = 35
     for _, str in ipairs(HUDText) do
