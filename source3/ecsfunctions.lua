@@ -200,7 +200,6 @@ function ecsfunctions.init()
                 local goal
                 if e.isPerson.fullness < 30 then
                     -- force agent to eat
-                    --! if agent has no wealth then this may not be the best option
                     goal = enum.goalEat
                 elseif e.isPerson.health < 30 then
                     goal = enum.goalHeal
@@ -211,7 +210,6 @@ function ecsfunctions.init()
                 end
                 local actionlist = {}
                 local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
-
             end
 
             -- add 'idle' action if queue is still empty
@@ -317,17 +315,16 @@ function ecsfunctions.init()
                     -- accumulate stock
                     local row = e.position.row
                     local col = e.position.col
-                    if MAP[row][col].stockLevel == nil then MAP[row][col].stockLevel = 0 end        --! this is probably redundant
+                    if MAP[row][col].stockLevel == nil then MAP[row][col].stockLevel = 0 end
 
                     local stockgained
                     if e.occupation.stockType == enum.stockFruit then
-                        stockgained = (0.0267 * dt)     --! make these constants
+                        stockgained = (RATE_FRUIT * dt)
                     elseif e.occupation.stockType == enum.stockWood then
-                        stockgained = (0.0089 * dt)
+                        stockgained = (RATE_WOOD * dt)
                     elseif e.occupation.stockType == enum.stockHealingHerbs then
-                        stockgained = (0.0267 * dt)
+                        stockgained = (RATE_HERBS * dt)
                     end
-
                     assert(stockgained ~= nil)
 
                     if e.isPerson.stamina <= 0 then
@@ -369,7 +366,7 @@ function ecsfunctions.init()
             if currentaction.action == "buy" then
                 local agentrow = e.position.row
                 local agentcol = e.position.col
-                print("Buying stock type " .. currentaction.stockType)     --! should the line above be 'stockType'?
+                print("Buying stock type " .. currentaction.stockType)
 
                 local amtbought = fun.buyStock(e, currentaction.stockType, currentaction.purchaseAmount)
                 print("Bought " .. amtbought .. " of stock type " .. currentaction.stockType)
@@ -394,7 +391,7 @@ function ecsfunctions.init()
             -- ******************* --
             -- do things that don't depend on an action
             -- ******************* --
-            local row = e.position.row  --! try to refact this so all the good stuff is only at the top
+            local row = e.position.row
             local col = e.position.col
 
             -- add mud

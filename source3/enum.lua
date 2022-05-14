@@ -1,5 +1,11 @@
 module(...,package.seeall)
 
+-- CONSTANTS
+
+
+
+
+
 -- images (not quads)
 imagesGrassDry = 1
 imagesGrassGreen = 2
@@ -67,11 +73,6 @@ goalBuy = 4     -- parent goal
 goalBuyWood = 5 -- child goal
 goalStartHouse = 6  -- build the frame only
 goalHeal = 7
-
-
-
--- jumper stuff
-tileWalkable = 0    --! should be a constant
 
 
 -- audio/music  ## ensure they have their own sequence without overlaps

@@ -153,6 +153,7 @@ local function convertToCollisionMap(map)
 end
 
 local function getBlankTile()
+    -- ensure the result is checked for nil - meaning - a blank tile was not found
 
     local row, col
 
@@ -191,7 +192,7 @@ local function getBlankTile()
 
     if count > 10000 then
         print("Can't find a blank tile. Giving up after 1000 tries." .. count)
-        return nil, nil     --! need to check if nil is returned (no blank tiles available)
+        return nil, nil
     else
         return row, col
     end
@@ -199,6 +200,7 @@ end
 
 local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, startcol)
     -- returns the closest building of required type
+    -- ensure the return value is checked for nil - meaning - building not found
     local closestvalue = -1
     local closestrow, closestcol
 
@@ -206,8 +208,8 @@ local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, st
         for row = 1, NUMBER_OF_ROWS do
             if MAP[row][col].entity.isTile.improvementType == buildingtype and MAP[row][col].entity.isTile.stockLevel >= requiredstocklevel then
                 local cmap = convertToCollisionMap(MAP)
-                cmap[row][col] = enum.tileWalkable
-                local _, dist = cf.findPath(cmap, enum.tileWalkable, startcol, startrow, col, row, false)
+                cmap[row][col] = TILEWALKABLE
+                local _, dist = cf.findPath(cmap, TILEWALKABLE, startcol, startrow, col, row, false)
                 if closestvalue < 0 or dist < closestvalue then
                     closestvalue = dist
                     closestrow = row
@@ -219,7 +221,7 @@ local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, st
     if closestrow == nil then
         -- print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
     end
-    return closestrow, closestcol       --! need to manage nils
+    return closestrow, closestcol
 end
 
 local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
@@ -231,16 +233,16 @@ local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
     -- print(inspect(cmap))
 
     -- need to 'blank' out the destination so jumper can find a path.
-    cmap[stoprow][stopcol] = enum.tileWalkable
+    cmap[stoprow][stopcol] = TILEWALKABLE
 
     -- jumper uses x and y which is really col and row
     local startx = startcol
     local starty = startrow
     local endx = stopcol
     local endy = stoprow
-    local path = cf.findPath(cmap, enum.tileWalkable, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
+    local path = cf.findPath(cmap, TILEWALKABLE, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
 
-    assert(path ~= nil) --! not sure how this is possible
+    assert(path ~= nil) -- not sure how this is possible
 
     for index, node in ipairs(path) do
         if index > 1 then   -- don't apply the first waypoint as it is too close to the agent
@@ -355,11 +357,11 @@ function functions.createActions(goal, agent)
                 MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
 
                 if agent.occupation.stockType == enum.stockFruit then
-                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = 1
+                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = PRICE_FRUIT
                 elseif agent.occupation.stockType == enum.stockWood then
-                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = 3
+                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = PRICE_WOOD
                 elseif agent.occupation.stockType == enum.stockHealingHerbs then
-                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = 1
+                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = PRICE_HERBS
                 end
                 print("Owner assigned to " .. workplacerow, workplacecol)
             end
@@ -398,13 +400,11 @@ function functions.createActions(goal, agent)
                 end
             end
         end
-
-
     end
     if goal == enum.goalEat then
         local qtyneeded = 1
         local ownsFruitshop = false
-        if agent:has("workplace") and agent.isPerson.wealth <= 1.5 then
+        if agent:has("workplace") and agent.isPerson.wealth < (qtyneeded * PRICE_FRUIT) then
             if MAP[workplacerow][workplacecol].entity.isTile.stockLevel >= qtyneeded and
                 MAP[workplacerow][workplacecol].entity.isTile.stockType == enum.stockFruit then
                     ownsFruitshop = true
@@ -420,7 +420,7 @@ function functions.createActions(goal, agent)
             end
         end
         -- buy food
-        action = {}     --! this perhaps should be inside one of the IF statements
+        action = {}
         action.action = "buy"
         action.stockType = enum.stockFruit
         action.purchaseAmount = qtyneeded
@@ -431,7 +431,7 @@ function functions.createActions(goal, agent)
     end
     if goal == enum.goalBuyWood then
         -- print("Goal = buy wood")
-        local qtyneeded = 1
+        local qtyneeded = WOOD_HOUSEFRAME
         local shoprow, shopcol = getClosestBuilding(enum.improvementWoodsman, qtyneeded, agentrow, agentcol)
         if shoprow ~= nil then
             addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
@@ -451,18 +451,20 @@ function functions.createActions(goal, agent)
     if goal == enum.goalStartHouse then
         -- pick an empty tile
         local houserow, housecol = getBlankTile()
-        agent:give("residenceFrame", houserow, housecol)
+        if houserow ~= nil then
+            agent:give("residenceFrame", houserow, housecol)
 
-        -- place a frame
-        MAP[houserow][housecol].entity.isTile.improvementType = enum.improvementHouseFrame
-        MAP[houserow][housecol].entity.isTile.stockType = enum.stockHouseFrame
-        MAP[houserow][housecol].entity.isTile.stockLevel = 1
-        MAP[houserow][housecol].entity.isTile.tileOwner = agent
-        MAP[houserow][housecol].entity.isTile.timeToBuild = 60          -- seconds
+            -- place a frame
+            MAP[houserow][housecol].entity.isTile.improvementType = enum.improvementHouseFrame
+            MAP[houserow][housecol].entity.isTile.stockType = enum.stockHouseFrame
+            MAP[houserow][housecol].entity.isTile.stockLevel = 1
+            MAP[houserow][housecol].entity.isTile.tileOwner = agent
+            MAP[houserow][housecol].entity.isTile.timeToBuild = BUILD_HOUSE_TIMER          -- seconds
 
-        -- subtract wood
-        agent.isPerson.stockInv[enum.stockWood] = agent.isPerson.stockInv[enum.stockWood] - 5
-        agent.isPerson.wealth = agent.isPerson.wealth - 8               -- this is forward payment for the carpenter
+            -- subtract wood
+            agent.isPerson.stockInv[enum.stockWood] = agent.isPerson.stockInv[enum.stockWood] - WOOD_HOUSEFRAME
+            agent.isPerson.wealth = agent.isPerson.wealth - CARPENTER_HOUSEFRAME    -- this is forward payment for the carpenter
+        end
     end
     if goal == enum.goalHeal then
         local qtyneeded = (cf.round((100 - agent.isPerson.health) / 10)) + 1
@@ -484,7 +486,7 @@ function functions.createActions(goal, agent)
             end
         end
         -- buy herbs
-        action = {}     --! this perhaps should be inside one of the IF statements
+        action = {}
         action.action = "buy"
         action.stockType = enum.stockHealingHerbs
         action.purchaseAmount = qtyneeded
