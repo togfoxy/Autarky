@@ -47,6 +47,7 @@ function functions.loadImages()
 
     IMAGES[enum.imagesEmoteSleeping] = love.graphics.newImage("assets/images/emote_sleeps.png")
     IMAGES[enum.imagesEmoteTalking] = love.graphics.newImage("assets/images/emote_talking.png")
+    IMAGES[enum.imagesEmoteCash] = love.graphics.newImage("assets/images/emote_cash.png")
 
     -- quads
     SPRITES[enum.spriteBlueMan] = love.graphics.newImage("assets/images/Civilian Male Walk Blue.png")

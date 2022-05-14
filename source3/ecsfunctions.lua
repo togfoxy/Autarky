@@ -385,6 +385,17 @@ function ecsfunctions.init()
                 else
                     e.isPerson.stockInv[currentaction.stockType] = e.isPerson.stockInv[currentaction.stockType] + amtbought
                 end
+
+                if amtbought > 0 then
+                    -- add a money bubble
+                    local item = {}
+                    item.imagenumber = enum.imagesEmoteCash
+                    item.start = 0
+                    item.stop = 3
+                    item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+                    table.insert(DRAWQUEUE, item)
+                end
+
                 table.remove(e.isPerson.queue, 1)
             end
 

@@ -1,11 +1,5 @@
 module(...,package.seeall)
 
--- CONSTANTS
-
-
-
-
-
 -- images (not quads)
 imagesGrassDry = 1
 imagesGrassGreen = 2
@@ -20,6 +14,7 @@ imagesMud = 101
 imagesHouse = 103
 imagesEmoteSleeping = 121
 imagesEmoteTalking = 122
+imagesEmoteCash = 123
 
 -- quads/sprites
 spriteBlueMan = 1

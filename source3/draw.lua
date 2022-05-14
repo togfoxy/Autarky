@@ -91,36 +91,42 @@ function draw.HUD()
     table.insert(HUDText, txt)
 
     txt = {}
-    txt.label = "Key commands"
+    txt.label = "Key commands:"
     txt.value = nil
     table.insert(HUDText, txt)
     txt = {}
-    txt.label = "\n"
+    txt.label = "(select red man first)"
     txt.value = nil
     table.insert(HUDText, txt)
-    txt = {}
-    txt.label = "f = farmer"
-    txt.value = nil
-    table.insert(HUDText, txt)
-    txt = {}
-    txt.label = "w = woodsman"
-    txt.value = nil
-    table.insert(HUDText, txt)
-    txt = {}
-    txt.label = "c = carpenter"
-    txt.value = nil
-    table.insert(HUDText, txt)
-    txt = {}
-    txt.label = "h = healer"
-    txt.value = nil
-    table.insert(HUDText, txt)
+    if VILLAGERS_SELECTED > 0 then
+        txt = {}
+        txt.label = "\n"
+        txt.value = nil
+        table.insert(HUDText, txt)
+        txt = {}
+        txt.label = "f = farmer"
+        txt.value = nil
+        table.insert(HUDText, txt)
+        txt = {}
+        txt.label = "w = woodsman"
+        txt.value = nil
+        table.insert(HUDText, txt)
+        txt = {}
+        txt.label = "c = carpenter"
+        txt.value = nil
+        table.insert(HUDText, txt)
+        txt = {}
+        txt.label = "h = healer"
+        txt.value = nil
+        table.insert(HUDText, txt)
+    end
 
     txt = {}
     txt.label = "\n"
     txt.value = nil
     table.insert(HUDText, txt)
     txt = {}
-    txt.label = "Camera"
+    txt.label = "Camera:"
     txt.value = nil
     table.insert(HUDText, txt)
     txt = {}

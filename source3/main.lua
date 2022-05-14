@@ -39,6 +39,7 @@ function love.keyreleased( key, scancode )
 			end
 			v:remove("isSelected")
 		end
+		VILLAGERS_SELECTED = 0
 	end
 	-- turn selected agent into woodsman
 	if key == "w" then
@@ -49,6 +50,7 @@ function love.keyreleased( key, scancode )
 			end
 			v:remove("isSelected")
 		end
+		VILLAGERS_SELECTED = 0
 	end
 	if key == "c" then
 		for k,v in pairs(VILLAGERS) do
@@ -58,6 +60,7 @@ function love.keyreleased( key, scancode )
 			end
 			v:remove("isSelected")
 		end
+		VILLAGERS_SELECTED = 0
 	end
 	if key == "h" then
 		for k,v in pairs(VILLAGERS) do
@@ -67,6 +70,7 @@ function love.keyreleased( key, scancode )
 			end
 			v:remove("isSelected")
 		end
+		VILLAGERS_SELECTED = 0
 	end
 end
 
@@ -82,9 +86,12 @@ function love.mousepressed( x, y, button, istouch, presses )
 			local dist = cf.GetDistance(wx - LEFT_MARGIN, wy - TOP_MARGIN, x2, y2)
 			if dist <= PERSON_DRAW_WIDTH then
 				if v.isSelected then
-					v:remove("isSelected")
+					v:remove("isSelected")		--! small bug - need to check if this is the last selected and then remove it
+					VILLAGERS_SELECTED = VILLAGERS_SELECTED - 1
 				else
 					v:ensure("isSelected")
+					VILLAGERS_SELECTED = VILLAGERS_SELECTED + 1
+	print("Hi")
 				end
 			end
 		end

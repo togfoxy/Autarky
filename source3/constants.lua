@@ -35,6 +35,7 @@ function constants.load()
 
     DEBUG = false
     NEW_VILLAGER_TIMER = 0
+    VILLAGERS_SELECTED = 0          -- a count of selected villagers
 
     -- jumper stuff
     TILEWALKABLE = 0
