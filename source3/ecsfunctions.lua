@@ -158,14 +158,18 @@ function ecsfunctions.init()
                             txt = txt .. "timer: " .. cf.round(e.isPerson.queue[1].timeleft) .. "\n"
                         end
                     end
+                    txt = txt .. "health: " .. cf.round(e.isPerson.health) .. "\n"
                     txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina) .. "\n"
                     txt = txt .. "fullness: " .. cf.round(e.isPerson.fullness) .. "\n"
                     txt = txt .. "wealth: " .. cf.round(e.isPerson.wealth,1) .. "\n"
                     txt = txt .. "wood: " .. cf.round(e.isPerson.stockInv[enum.stockWood]) .. "\n"
 
                     love.graphics.setColor(1,1,1,1)
-                    love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 25)
+                    love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 60)
                 else
+                    if e.isPerson.health < 25 then
+                        txt = txt .. "health: " .. cf.round(e.isPerson.health) .. "\n"
+                    end
                     if e.isPerson.stamina < 25 then
                         txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina) .. "\n"
                     end
@@ -198,6 +202,8 @@ function ecsfunctions.init()
                     -- force agent to eat
                     --! if agent has no wealth then this may not be the best option
                     goal = enum.goalEat
+                elseif e.isPerson.health < 30 then
+                    goal = enu.goalHeal
                 else
                     goal = ft.DetermineAction(TREE, e)
                     -- if e:has("occupation") then print("Occupation: " .. e.occupation.value) end
@@ -292,35 +298,42 @@ function ecsfunctions.init()
                     if e.occupation.value == enum.jobWoodsman then
                         AUDIO[enum.audioSawWood]:play()
                     end
-
                 end
+                -- see if they hurt themselves at work
+                if love.math.random(1, 100) == 1 then
+                    local dmg = cf.round(love.math.random(1,10) * dt, 4)
+                    e.isPerson.health = e.isPerson.health - dmg
+                end
+
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
                 end
 
                 -- print("+++")
-                -- print(e.occupation.stocktype)
                 -- print(e.occupation.value)
+                -- print(e.occupation.stockType)
                 -- print("+++")
-                if e.occupation.stocktype ~= nil and e.occupation.value ~= enum.jobCarpenter then
+                if e.occupation.stockType ~= nil and e.occupation.value ~= enum.jobCarpenter then
                     -- accumulate stock
                     local row = e.position.row
                     local col = e.position.col
                     if MAP[row][col].stockLevel == nil then MAP[row][col].stockLevel = 0 end        --! this is probably redundant
+
                     local stockgained
-                    if e.occupation.stocktype == enum.stockFruit then
-                        if e.isPerson.stamina > 0 then
-                            stockgained = (0.0267 * dt)
-                        else
-                            stockgained = (0.0267 * dt) / 2        -- less productive when tired
-                        end
-                    elseif e.occupation.stocktype == enum.stockWood then
-                        if e.isPerson.stamina > 0 then
-                            stockgained = (0.0089 * dt)
-                        else
-                            stockgained = (0.0089 * dt) / 2        -- less productive when tired
-                        end
+                    if e.occupation.stockType == enum.stockFruit then
+                        stockgained = (0.0267 * dt)     --! make these constants
+                    elseif e.occupation.stockType == enum.stockWood then
+                        stockgained = (0.0089 * dt)
+                    elseif e.occupation.stockType == enum.stockHealingHerbs then
+                        stockgained = (0.0267 * dt)
                     end
+
+                    assert(stockgained ~= nil)
+
+                    if e.isPerson.stamina <= 0 then
+                        stockgained = stockgained / 2   -- less productive when tired
+                    end
+
                     stockgained = cf.round(stockgained, 4)
                     MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + stockgained
                 end
@@ -366,6 +379,12 @@ function ecsfunctions.init()
                             AUDIO[enum.audioEat]:play()
                             print("Play 'eat'")
                     end
+                elseif currentaction.stockType == enum.stockHealingHerbs then
+                    e.isPerson.health = e.isPerson.health + (amtbought * 10)
+                    if amtbought > 0 and love.math.random(1, 1000) == 1 then
+                            AUDIO[enum.audioBandage]:play()
+                            print("Play 'heal'")
+                    end
                 else
                     e.isPerson.stockInv[currentaction.stockType] = e.isPerson.stockInv[currentaction.stockType] + amtbought
                 end
@@ -384,13 +403,15 @@ function ecsfunctions.init()
             end
             if MAP[row][col].entity.isTile.mudLevel > 255 then MAP[row][col].entity.isTile.mudLevel = 255 end
 
+            -- reduce stamina
             e.isPerson.stamina = e.isPerson.stamina - (0.5 * dt)
             if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
 
-            -- do this last as it may nullify the entity
+            -- reduce fullness
             e.isPerson.fullness = e.isPerson.fullness - (0.33 * dt)
-            -- if e.isPerson.fullness < 0 then e.isPerson.fullness = 0 end
-            if e.isPerson.fullness < 0 then
+
+            -- do this last as it may nullify the entity
+            if e.isPerson.fullness < 0 or e.isPerson.health <= 0 then
                 -- destroy any improvement belonging to starving agent
                 if e:has("workplace") then
                     -- destroy workplace

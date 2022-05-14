@@ -8,6 +8,7 @@ imagesWell = 4
 imagesFarm = 5          -- tree
 imagesWoodsman = 6      -- logs
 imagesHouseFrame = 7
+imagesHealingHouse = 8
 
 imagesMud = 101
 imagesHouse = 103
@@ -32,12 +33,14 @@ improvementFarm = 5 -- job, improvement and image should be the same integer val
 improvementWoodsman = 6
 improvementHouseFrame = 7
 improvementHouse = 103
+improvementHealer = 8
 
 -- jobs/occupations
 -- NOTE: ensure these occupations align to the improvement type (which aligns to the image!)
 jobFarmer = 5
 jobWoodsman = 6
 jobCarpenter = 201      -- this is a service - not a primary producer
+jobHealer = 8           -- produces healing herbs
 
 
 -- stock types
@@ -45,12 +48,14 @@ jobCarpenter = 201      -- this is a service - not a primary producer
 stockFruit = 5
 stockWood = 6
 stockHouseFrame = 7
+stockHealingHerbs = 8
 
 -- occupation icons
--- NOTE: ensure this lines up with the job
+-- NOTE: ensure this lines up with the job + 30 for offset to avoid clashes
 iconsApple = 35
 iconsAxe = 36
 iconsHammer = 231
+iconsHealer = 38
 
 
 
@@ -61,11 +66,12 @@ goalEat = 3
 goalBuy = 4     -- parent goal
 goalBuyWood = 5 -- child goal
 goalStartHouse = 6  -- build the frame only
+goalHeal = 7
 
 
 
 -- jumper stuff
-tileWalkable = 0    -- should be a constant
+tileWalkable = 0    --! should be a constant
 
 
 -- audio/music  ## ensure they have their own sequence without overlaps
@@ -75,6 +81,7 @@ audioEat = 3
 audioNewVillager = 4
 audioRustle = 5
 audioSawWood = 6
+audioBandage = 7
 
 
 musicCityofMagic = 11

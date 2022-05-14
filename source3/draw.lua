@@ -90,7 +90,15 @@ function draw.HUD()
     txt.label = "c = carpenter"
     txt.value = nil
     table.insert(HUDText, txt)
+    txt = {}
+    txt.label = "h = healer"
+    txt.value = nil
+    table.insert(HUDText, txt)
 
+    txt = {}
+    txt.label = "\n"
+    txt.value = nil
+    table.insert(HUDText, txt)
     txt = {}
     txt.label = "Camera"
     txt.value = nil

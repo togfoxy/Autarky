@@ -94,6 +94,15 @@ function love.keyreleased( key, scancode )
 			v:remove("isSelected")
 		end
 	end
+	if key == "h" then
+		for k,v in pairs(VILLAGERS) do
+			if v:has("isSelected") and (not v:has("occupation")) then
+				-- print("occup granted")
+				v:ensure("occupation", enum.jobHealer, enum.stockHealingHerbs, true, false, true)
+			end
+			v:remove("isSelected")
+		end
+	end
 end
 
 function love.mousepressed( x, y, button, istouch, presses )

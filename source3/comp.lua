@@ -11,6 +11,7 @@ function comp.init()
 
     concord.component("isPerson", function(c)
         c.gender = love.math.random(2)
+        c.health = 100
         c.queue = {}
         c.stamina = 100         -- fully rested
         c.fullness = 125        -- hunger. Start a little topped up so they have a chance to establish themselves.
@@ -24,7 +25,7 @@ function comp.init()
 
     concord.component("occupation", function(c, jobtype, stocktype, bolProducer, bolService, bolConverter)
         c.value = jobtype or 0       -- see enum.job
-        c.stocktype = stocktype or nil             -- see enum.stocktype
+        c.stockType = stocktype or nil             -- see enum.stockType
         c.isProducer = bolProducer
         c.isService = bolService
         c.isConverter = bolConverter                -- converts one item into another

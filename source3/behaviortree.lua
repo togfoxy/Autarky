@@ -47,14 +47,10 @@ function behaviortree.EstablishTree()
 	TREE.child[3] = {}
  	TREE.child[3].goal = enum.goalEat
  	TREE.child[3].priority = function(agent)
-								if agent.isPerson.fullness < 35 then
-									return 50
-								else
-									local priority = cf.round((100 - agent.isPerson.fullness) / 10)
-									if priority < 1 then priority = 1 end
-									-- if DEBUG then print("Eat priority is " .. priority) end
-									return priority
-								end
+								local priority = cf.round((100 - agent.isPerson.fullness) / 10)
+								if priority < 1 then priority = 1 end
+								-- if DEBUG then print("Eat priority is " .. priority) end
+								return priority
  							end
  	TREE.child[3].activate = function(agent)
 								-- deactivate if person is full or broke and not a farmer
@@ -107,7 +103,7 @@ function behaviortree.EstablishTree()
 	TREE.child[5].priority = function(agent)
 								return 3
 							end
-	TREE.child[5].activate = function (agent)
+	TREE.child[5].activate = function(agent)
 								if (agent.isPerson.stockInv[enum.stockWood] >= 5) and (not agent:has("residenceFrame")) and (not agent:has("residence")) and (agent.isPerson.wealth >= 9) then
 									return true
 								else
@@ -115,9 +111,21 @@ function behaviortree.EstablishTree()
 								end
 							end
 
-
-
-
+	TREE.child[6] = {}
+	TREE.child[6].goal = enum.goalHeal
+	TREE.child[6].priority = function(agent)
+								local priority = cf.round((100 - agent.isPerson.health) / 10)
+								if priority < 1 then priority = 1 end
+								-- if DEBUG then print("Eat priority is " .. priority) end
+								return priority
+							end
+	TREE.child[6].activate = function(agent)
+								if agent.isPerson.wealth >= 4 then		--! should turn these values into constants
+									return true
+								else
+									return false
+								end
+							end
 end
 
 return behaviortree

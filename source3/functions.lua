@@ -37,11 +37,12 @@ function functions.loadImages()
     IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
     IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
     IMAGES[enum.imagesHouse] = love.graphics.newImage("assets/images/house4.png")
+    IMAGES[enum.imagesHealingHouse] = love.graphics.newImage("assets/images/healerhouse.png")
 
     IMAGES[enum.iconsApple] = love.graphics.newImage("assets/images/appleicon.png")
     IMAGES[enum.iconsAxe] = love.graphics.newImage("assets/images/axeicon64x64.png")
-    IMAGES[enum.iconsHammer] = love.graphics.newImage("assets/images/hammericon64x64.png")
-
+    IMAGES[enum.iconsHammer] = love.graphics.newImage("assets/images/hammericon164x64.png")
+    IMAGES[enum.iconsHealer] = love.graphics.newImage("assets/images/healericon64x64.png")
 
 
     IMAGES[enum.imagesEmoteSleeping] = love.graphics.newImage("assets/images/emote_sleeps.png")
@@ -80,6 +81,8 @@ function functions.loadAudio()
     AUDIO[enum.audioNewVillager] = love.audio.newSource("assets/audio/387232__steaq__badge-coin-win.wav", "static")
     AUDIO[enum.audioRustle] = love.audio.newSource("assets/audio/437356__giddster__rustling-leaves.wav", "static")
     AUDIO[enum.audioSawWood] = love.audio.newSource("assets/audio/sawwood.wav", "static")
+    AUDIO[enum.audioBandage] = love.audio.newSource("assets/audio/174627__altfuture__ripping-clothes.mp3", "static")
+
 
     AUDIO[enum.audioWork]:setVolume(0.2)
     AUDIO[enum.musicMedievalFiesta]:setVolume(0.2)
@@ -285,7 +288,7 @@ function functions.buyStock(agent, stocktype, maxqty)
         else
             print(inspect(MAP[agentrow][agentcol].entity.isTile.tileOwner))
             print(agentrow, agentcol, stocktype, stockavail)
-            error("Agent tried to buy stock from tile that has no owner.")
+            -- error("Agent tried to buy stock from tile that has no owner.")
         end
     end
     return purchaseamt
@@ -348,13 +351,15 @@ function functions.createActions(goal, agent)
                 assert(workplacerow ~= nil)
                 agent:give("workplace", workplacerow, workplacecol)
                 MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
-                MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stocktype
+                MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stockType
                 MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
 
-                if agent.occupation.stocktype == enum.stockFruit then
+                if agent.occupation.stockType == enum.stockFruit then
                     MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = 1
-                elseif agent.occupation.stocktype == enum.stockWood then
+                elseif agent.occupation.stockType == enum.stockWood then
                     MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = 3
+                elseif agent.occupation.stockType == enum.stockHealingHerbs then
+                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = 1
                 end
                 print("Owner assigned to " .. workplacerow, workplacecol)
             end
@@ -458,6 +463,34 @@ function functions.createActions(goal, agent)
         -- subtract wood
         agent.isPerson.stockInv[enum.stockWood] = agent.isPerson.stockInv[enum.stockWood] - 5
         agent.isPerson.wealth = agent.isPerson.wealth - 8               -- this is forward payment for the carpenter
+    end
+    if goal == enum.goalHeal then
+        local qtyneeded = cf.round((100 - agent.isPerson.health) / 10)
+        local ownsHealershop = false
+        -- see if healer owns a healing shop
+        if agent:has("workplace") and agent.isPerson.wealth <= 4 then
+            if MAP[workplacerow][workplacecol].entity.isTile.stockLevel >= qtyneeded and
+                MAP[workplacerow][workplacecol].entity.isTile.stockType == enum.stockHealingHerbs then
+                    ownsHealershop = true
+            end
+        end
+        if ownsHealershop then
+            addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+        else
+            -- not a farmer or rich or own farm has no stock
+            local shoprow, shopcol = getClosestBuilding(enum.improvementHealer, qtyneeded, agentrow, agentcol)
+            if shoprow ~= nil then
+                addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+            end
+        end
+        -- buy herbs
+        action = {}     --! this perhaps should be inside one of the IF statements
+        action.action = "buy"
+        action.stockType = enum.stockHealingHerbs
+        action.purchaseAmount = qtyneeded
+        table.insert(queue, action)
+        assert(action.stockType ~= nil)
+        print("move and buy herbs action added")
     end
 
     return queue
