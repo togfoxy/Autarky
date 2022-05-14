@@ -42,11 +42,13 @@ function comp.init()
         c.row = row
         c.col = col
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
+        c.health = 0
     end)
     concord.component("residence", function(c,row,col)
         c.row = row
         c.col = col
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
+        c.health = 100
     end)
 
     concord.component("position", function(c, row, col)         -- exists on the map/grid
