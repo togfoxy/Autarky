@@ -65,6 +65,26 @@ function draw.HUD()
         table.insert(HUDText, txt)
     end
 
+    -- determine average stocklevels for wood
+    local count = 0
+    local totalstocklevel, avgstocklevel = 0, 0
+    for col = 1, NUMBER_OF_COLS do
+        for row = 1, NUMBER_OF_ROWS do
+            if MAP[row][col].entity.isTile.stockLevel > 0 and MAP[row][col].entity.isTile.stockType == enum.stockWood then
+                count = count + 1
+                totalstocklevel = totalstocklevel + MAP[row][col].entity.isTile.stockLevel
+            end
+        end
+    end
+    if count > 0 then
+        avgstocklevel = cf.round(totalstocklevel / count, 1)
+        txt = {}
+        txt.label = "Wood: "
+        txt.value = avgstocklevel
+        if avgstocklevel < 1 then txt.red = true else txt.red = false end
+        table.insert(HUDText, txt)
+    end
+
     txt = {}
     txt.label = "\n"
     txt.value = nil

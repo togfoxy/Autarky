@@ -203,7 +203,7 @@ function ecsfunctions.init()
                     --! if agent has no wealth then this may not be the best option
                     goal = enum.goalEat
                 elseif e.isPerson.health < 30 then
-                    goal = enu.goalHeal
+                    goal = enum.goalHeal
                 else
                     goal = ft.DetermineAction(TREE, e)
                     -- if e:has("occupation") then print("Occupation: " .. e.occupation.value) end
@@ -422,6 +422,25 @@ function ecsfunctions.init()
                     MAP[wprow][wpcol].entity.isTile.tileOwner = nil
                     MAP[wprow][wpcol].entity.isTile.stockLevel = 0
                 end
+                if e:has("residenceFrame") then
+                    -- destroy house
+                    local wprow = e.residenceFrame.row
+                    local wpcol = e.residenceFrame.col
+                    MAP[wprow][wpcol].entity.isTile.improvementType = nil
+                    MAP[wprow][wpcol].entity.isTile.stockType = nil
+                    MAP[wprow][wpcol].entity.isTile.tileOwner = nil
+                    MAP[wprow][wpcol].entity.isTile.stockLevel = 0
+                end
+                if e:has("residence") then
+                    -- destroy house
+                    local wprow = e.residence.row
+                    local wpcol = e.residence.col
+                    MAP[wprow][wpcol].entity.isTile.improvementType = nil
+                    MAP[wprow][wpcol].entity.isTile.stockType = nil
+                    MAP[wprow][wpcol].entity.isTile.tileOwner = nil
+                    MAP[wprow][wpcol].entity.isTile.stockLevel = 0
+                end
+
                 fun.killAgent(e.uid.value)  -- removes the agent from the VILLAGERS table
                 e:destroy()                 -- destroys the entity from the world
                 --! add a graveyard somewhere

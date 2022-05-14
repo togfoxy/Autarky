@@ -120,7 +120,7 @@ function behaviortree.EstablishTree()
 								return priority
 							end
 	TREE.child[6].activate = function(agent)
-								if agent.isPerson.wealth >= 4 then		--! should turn these values into constants
+								if agent.isPerson.wealth >= 4 and agent.isPerson.health < 100 then		--! should turn these values into constants
 									return true
 								else
 									return false

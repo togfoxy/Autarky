@@ -264,7 +264,7 @@ function functions.buyStock(agent, stocktype, maxqty)
     local agentrow = agent.position.row
     local agentcol = agent.position.col
     local sellprice
-    local purchaseamt
+    local purchaseamt = 0
     local stockavail = math.floor(MAP[agentrow][agentcol].entity.isTile.stockLevel)
 
     if MAP[agentrow][agentcol].entity.isTile.tileOwner == agent then
@@ -465,7 +465,7 @@ function functions.createActions(goal, agent)
         agent.isPerson.wealth = agent.isPerson.wealth - 8               -- this is forward payment for the carpenter
     end
     if goal == enum.goalHeal then
-        local qtyneeded = cf.round((100 - agent.isPerson.health) / 10)
+        local qtyneeded = (cf.round((100 - agent.isPerson.health) / 10)) + 1
         local ownsHealershop = false
         -- see if healer owns a healing shop
         if agent:has("workplace") and agent.isPerson.wealth <= 4 then
