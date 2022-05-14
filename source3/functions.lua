@@ -38,6 +38,7 @@ function functions.loadImages()
     IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
     IMAGES[enum.imagesHouse] = love.graphics.newImage("assets/images/house4.png")
     IMAGES[enum.imagesHealingHouse] = love.graphics.newImage("assets/images/healerhouse.png")
+    IMAGES[enum.imagesVillagerLog] = love.graphics.newImage("assets/images/villagerlog.png")
 
     IMAGES[enum.iconsApple] = love.graphics.newImage("assets/images/appleicon.png")
     IMAGES[enum.iconsAxe] = love.graphics.newImage("assets/images/axeicon64x64.png")
@@ -553,6 +554,12 @@ function functions.killAgent(uniqueid)
     assert(deadID ~= nil)
     table.remove(VILLAGERS, deadID)
     print("There are now " .. #VILLAGERS .. " villagers.")
+end
+
+function functions.addLog(person, txtitem)
+    local logitem = {}
+    logitem.text = txtitem
+    table.insert(person.isPerson.log, logitem)
 end
 
 return functions

@@ -80,7 +80,6 @@ function love.keyreleased( key, scancode )
 end
 
 function love.mousepressed( x, y, button, istouch, presses )
-
 	local wx, wy = cam:toWorld(x, y)	-- converts screen x/y to world x/y
 
 	if button == 1 then
@@ -96,7 +95,6 @@ function love.mousepressed( x, y, button, istouch, presses )
 				else
 					v:ensure("isSelected")
 					VILLAGERS_SELECTED = VILLAGERS_SELECTED + 1
-	print("Hi")
 				end
 			end
 		end

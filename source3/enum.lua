@@ -12,9 +12,11 @@ imagesHealingHouse = 8
 
 imagesMud = 101
 imagesHouse = 103
+imagesVillagerLog = 104
 imagesEmoteSleeping = 121
 imagesEmoteTalking = 122
 imagesEmoteCash = 123
+
 
 -- quads/sprites
 spriteBlueMan = 1

@@ -128,8 +128,6 @@ function ecsfunctions.init()
                     end
                 end
 
-
-
                 local sprite, quad
                 if e.isPerson.gender == enum.genderMale and e:has("occupation") then
                     sprite = SPRITES[enum.spriteBlueMan]
@@ -148,6 +146,25 @@ function ecsfunctions.init()
                     quad = QUADS[enum.spriteRedWoman][1]
                 end
                 love.graphics.draw(sprite, quad, drawx, drawy, imgrotation, 1, 1, 10, 25)
+
+                -- display the log
+                local maxindex = #e.isPerson.log
+                if e:has("isSelected") and VILLAGERS_SELECTED == 1 then
+                    img = IMAGES[enum.imagesVillagerLog]
+                    local imageheight = img:getHeight()
+                    local drawboxy = SCREEN_HEIGHT - imageheight - 100
+
+                    love.graphics.setColor(1,1,1,1)
+                    love.graphics.draw(img, 50, drawboxy)
+                    local texty = drawboxy + 7
+
+                    for i = maxindex, maxindex - 4, -1 do
+                        if i < 1 then break end
+                        love.graphics.setColor(47/255,11/255,50/255,1)
+                        love.graphics.print(e.isPerson.log[i].text, 57, texty)
+                        texty = texty + 12
+                    end
+                end
 
                 local txt = ""
                 if love.keyboard.isDown("lctrl") or love.keyboard.isDown("rctrl") then
@@ -266,6 +283,7 @@ function ecsfunctions.init()
                 end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
+                    fun.addLog(e, "Rested")
                 end
             end
 
@@ -275,6 +293,7 @@ function ecsfunctions.init()
                 if e.position.x == destx and e.position.y == desty then
                     -- arrived at destination
                     table.remove(e.isPerson.queue, 1)
+                    fun.addLog(e, "Moved")
                 else
                     -- move towards destination
                     if e.isPerson.stamina > 0 then
@@ -305,6 +324,7 @@ function ecsfunctions.init()
 
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
+                    fun.addLog(e, "Worked")
                 end
 
                 -- print("+++")
@@ -359,6 +379,7 @@ function ecsfunctions.init()
                             houseOwner:ensure("residence", row, col)
 
                             table.remove(e.isPerson.queue, 1)
+                            fun.addLog(e, "Built a house")
                         end
                     end
                 end
@@ -397,6 +418,7 @@ function ecsfunctions.init()
                 end
 
                 table.remove(e.isPerson.queue, 1)
+                fun.addLog(e, "Bought something")
             end
 
             -- ******************* --
