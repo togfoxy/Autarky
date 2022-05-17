@@ -1,4 +1,4 @@
-GAME_VERSION = "0.06"
+GAME_VERSION = "0.08"
 
 inspect = require 'lib.inspect'
 -- https://github.com/kikito/inspect.lua
@@ -22,8 +22,8 @@ bt = require 'behaviortree'
 draw = require 'draw'
 con = require 'constants'
 
-con.load()
-print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
+con.load()	-- load the constants
+
 
 function love.keyreleased( key, scancode )
 	if key == "escape" then
@@ -140,16 +140,37 @@ end
 
 function love.load()
 
-    --! res.setGame(SCREEN_WIDTH, SCREEN_HEIGHT)
+	love.window.setMode(800,600,{fullscreen=true, display=1, resizable=true, borderless=false})
+	SCREEN_WIDTH = love.graphics.getWidth()
+	SCREEN_HEIGHT = love.graphics.getHeight()
+	love.window.setMode(SCREEN_WIDTH,SCREEN_HEIGHT,{fullscreen=false, display=1, resizable=true, borderless=false})
 
-    if love.filesystem.isFused( ) then
-		DEBUG = false
-        void = love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT,{fullscreen=false,display=1,resizable=true, borderless=false})	-- display = monitor number (1 or 2)
-        gbolDebug = false
-    else
-		DEBUG = true
-        void = love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT,{fullscreen=false,display=1,resizable=true, borderless=false})	-- display = monitor number (1 or 2)
-    end
+	res.setGame(SCREEN_WIDTH, SCREEN_HEIGHT)
+
+	TRANSLATEX = cf.round(SCREEN_WIDTH / 2)		-- starts the camera in the middle of the ocean
+    TRANSLATEY = cf.round(SCREEN_HEIGHT / 2)	-- need to round because this is working with pixels
+
+	TILE_SIZE = 50
+    NUMBER_OF_ROWS = (cf.round(SCREEN_HEIGHT / TILE_SIZE)) - 2
+    NUMBER_OF_COLS = (cf.round(SCREEN_WIDTH / TILE_SIZE)) - 1
+
+	LEFT_MARGIN = TILE_SIZE / 2
+    TOP_MARGIN = TILE_SIZE / 2
+
+print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
+
+    -- res.setGame(SCREEN_WIDTH, SCREEN_HEIGHT)
+
+
+    -- if love.filesystem.isFused( ) then
+	-- 	DEBUG = false
+    --     void = love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT,{fullscreen=true,display=1,resizable=true, borderless=false})	-- display = monitor number (1 or 2)
+    -- else
+	-- 	DEBUG = true
+    --     void = love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT,{fullscreen=true,display=1,resizable=true, borderless=false})	-- display = monitor number (1 or 2)
+    -- end
+
+
 
     love.window.setTitle("Autarky " .. GAME_VERSION)
 	love.keyboard.setKeyRepeat(true)
@@ -170,8 +191,8 @@ end
 
 function love.draw()
 
-    --! res.start()
-    --! res.stop()
+    res.start()
+
 
 	cam:attach()
     WORLD:emit("draw")
@@ -179,6 +200,10 @@ function love.draw()
 	cam:detach()
 
 	draw.HUD()
+
+
+    res.stop()
+
 
 end
 
@@ -211,5 +236,5 @@ function love.update(dt)
 
 	cam:setPos(TRANSLATEX,	TRANSLATEY)
 	cam:setZoom(ZOOMFACTOR)
-	--! res.update()
+	res.update()
 end
