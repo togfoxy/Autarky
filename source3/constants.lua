@@ -4,25 +4,15 @@ function constants.load()
 
     NUMBER_OF_VILLAGERS = 8
 
-    SCREEN_WIDTH = 1920
-    SCREEN_HEIGHT = 1080
     ZOOMFACTOR = 1
-    TRANSLATEX = cf.round(SCREEN_WIDTH / 2)		-- starts the camera in the middle of the ocean
-    TRANSLATEY = cf.round(SCREEN_HEIGHT / 2)	-- need to round because this is working with pixels
-    SCREEN_STACK = {}
 
+    SCREEN_STACK = {}
 
     IMAGES = {}
     QUADS = {}
     SPRITES = {}
     DRAWQUEUE = {}			-- a list of things to be drawn during love.draw()
     AUDIO = {}
-
-    TILE_SIZE = 50
-    NUMBER_OF_ROWS = (cf.round(SCREEN_HEIGHT / TILE_SIZE)) - 2
-    NUMBER_OF_COLS = (cf.round(SCREEN_WIDTH / TILE_SIZE)) - 1
-    LEFT_MARGIN = TILE_SIZE / 2
-    TOP_MARGIN = TILE_SIZE / 2
 
     UPPER_TERRAIN_HEIGHT = 6
 
