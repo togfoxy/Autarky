@@ -266,21 +266,21 @@ function ecsfunctions.init()
                     AUDIO[enum.audioYawn]:play()
                 end
 
-                if currentaction.action == "rest" and e:has("residence") then
-                    if currentaction.timeleft > 5 then
-                        -- draw sleep bubble
-                        local item = {}
-                        item.imagenumber = enum.imagesEmoteSleeping
-                        item.start = 0
-                        item.stop = math.min(5, currentaction.timeleft)
-                        item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
-                        table.insert(DRAWQUEUE, item)
-                    end
-                    -- recover stamina faster
-                    e.isPerson.stamina = e.isPerson.stamina + (2 * dt)
-                else
+                -- if currentaction.action == "rest" and e:has("residence") then
+                --     if currentaction.timeleft > 5 then
+                --         -- draw sleep bubble
+                --         local item = {}
+                --         item.imagenumber = enum.imagesEmoteSleeping
+                --         item.start = 0
+                --         item.stop = math.min(5, currentaction.timeleft)
+                --         item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+                --         table.insert(DRAWQUEUE, item)
+                --     end
+                --     -- recover stamina faster
+                --     e.isPerson.stamina = e.isPerson.stamina + (2 * dt)
+                -- else
                     e.isPerson.stamina = e.isPerson.stamina + (1.5 * dt)        -- gain 1 per second + recover the 0.5 applied above
-                end
+                -- end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
                     fun.addLog(e, "Rested")
@@ -419,6 +419,16 @@ function ecsfunctions.init()
 
                 table.remove(e.isPerson.queue, 1)
                 fun.addLog(e, "Bought something")
+            end
+
+            if currentaction.action == "stockhouse" then
+                -- transfer wood from agent to house
+                local woodamt = e.isPerson.stockInv[enum.stockWood]
+                e.isPerson.stockInv[enum.stockWood] = 0
+
+                local houserow = e.residence.row
+                local housecol = e.residence.col
+                MAP[houserow][housecol].entity.isTile.stockLevel = MAP[houserow][housecol].entity.isTile.stockLevel + woodamt
             end
 
             -- ******************* --

@@ -19,8 +19,8 @@ function comp.init()
         for i = 1, 99 do
             c.stockInv[i] = 0
         end
-        c.wealth = 3            -- starting amount. 3 days worth of food.
-        c.stockInv[enum.stockWood] = 0
+        c.wealth = 30            -- starting amount. 3 days worth of food.
+        c.stockInv[enum.stockWood] = 8
         c.log = {}
     end)
 
@@ -38,17 +38,17 @@ function comp.init()
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
     end)
 
-    concord.component("residenceFrame", function(c,row,col)
-        c.row = row
-        c.col = col
-        c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
-        c.health = 0
-    end)
+    -- concord.component("residenceFrame", function(c,row,col)
+    --     c.row = row
+    --     c.col = col
+    --     c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
+    --     c.health = 0
+    -- end)
     concord.component("residence", function(c,row,col)
         c.row = row
         c.col = col
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
-        c.health = 100
+        c.health = 0        -- starts off at zero
     end)
 
     concord.component("position", function(c, row, col)         -- exists on the map/grid

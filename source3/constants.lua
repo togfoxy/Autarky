@@ -37,7 +37,7 @@ function constants.load()
 
     -- cost for things like services
     CARPENTER_HOUSEFRAME = 8
-    WOOD_HOUSEFRAME = 5
+    WOOD_FULLHOUSE = 5
     BUILD_HOUSE_TIMER = 60
 
     -- production rates

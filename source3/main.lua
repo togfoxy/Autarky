@@ -157,7 +157,7 @@ function love.load()
 	LEFT_MARGIN = TILE_SIZE / 2
     TOP_MARGIN = TILE_SIZE / 2
 
-print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
+	print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
 
     -- res.setGame(SCREEN_WIDTH, SCREEN_HEIGHT)
 

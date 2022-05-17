@@ -7,11 +7,10 @@ imagesGrassTeal = 3
 imagesWell = 4
 imagesFarm = 5          -- tree
 imagesWoodsman = 6      -- logs
-imagesHouseFrame = 7
+imagesHouse = 7
 imagesHealingHouse = 8
 
 imagesMud = 101
-imagesHouse = 103
 imagesVillagerLog = 104
 imagesEmoteSleeping = 121
 imagesEmoteTalking = 122
@@ -34,8 +33,7 @@ terrainTeal = 3
 improvementWell = 4
 improvementFarm = 5 -- job, improvement and image should be the same integer value
 improvementWoodsman = 6
-improvementHouseFrame = 7
-improvementHouse = 103
+improvementHouse = 7
 improvementHealer = 8
 
 -- jobs/occupations
@@ -50,7 +48,7 @@ jobHealer = 8           -- produces healing herbs
 -- NOTE: ensure this lines up with the improvement type that sells this stock
 stockFruit = 5
 stockWood = 6
-stockHouseFrame = 7
+stockHouse = 7
 stockHealingHerbs = 8
 
 -- occupation icons
@@ -68,7 +66,7 @@ goalWork = 2    -- producers produce, service ppl service
 goalEat = 3
 goalBuy = 4     -- parent goal
 goalBuyWood = 5 -- child goal
-goalStartHouse = 6  -- build the frame only
+goalStockHouse = 6
 goalHeal = 7
 
 

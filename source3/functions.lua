@@ -35,7 +35,7 @@ function functions.loadImages()
     IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/appletree_37x50.png")
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
     IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
-    IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
+    -- IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
     IMAGES[enum.imagesHouse] = love.graphics.newImage("assets/images/house4.png")
     IMAGES[enum.imagesHealingHouse] = love.graphics.newImage("assets/images/healerhouse.png")
     IMAGES[enum.imagesVillagerLog] = love.graphics.newImage("assets/images/villagerlog.png")
@@ -44,7 +44,6 @@ function functions.loadImages()
     IMAGES[enum.iconsAxe] = love.graphics.newImage("assets/images/axeicon64x64.png")
     IMAGES[enum.iconsHammer] = love.graphics.newImage("assets/images/hammericon164x64.png")
     IMAGES[enum.iconsHealer] = love.graphics.newImage("assets/images/healericon64x64.png")
-
 
     IMAGES[enum.imagesEmoteSleeping] = love.graphics.newImage("assets/images/emote_sleeps.png")
     IMAGES[enum.imagesEmoteTalking] = love.graphics.newImage("assets/images/emote_talking.png")
@@ -317,11 +316,11 @@ function functions.createActions(goal, agent)
         -- add an 'idle' action at that location
         local destrow
         local destcol
-        if agent:has("residence") then
-            -- rest at house
-            destrow = agent.residence.row
-            destcol = agent.residence.col
-        else
+        -- if agent:has("residence") then
+        --     -- rest at house
+        --     destrow = agent.residence.row
+        --     destcol = agent.residence.col
+        -- else
             -- choose a random location near the well
             local random1 = love.math.random(-3, 3)
             local random2 = love.math.random(-3, 3)
@@ -331,7 +330,7 @@ function functions.createActions(goal, agent)
             if destrow > NUMBER_OF_ROWS then destrow = NUMBER_OF_ROWS end
             if destcol < 1 then destcol = 1 end
             if destcol > NUMBER_OF_COLS then destcol = NUMBER_OF_COLS end
-        end
+        -- end
 
         -- add a 'move' action
         addMoveAction(queue, agentrow, agentcol, destrow, destcol)   -- will add as many 'move' actions as necessary
@@ -381,7 +380,6 @@ function functions.createActions(goal, agent)
             else
                 error()     -- should never happen
             end
-
         end
         if agent.occupation.isConverter then
             -- print("Delta")
@@ -389,7 +387,7 @@ function functions.createActions(goal, agent)
             if agent.occupation.value == enum.jobCarpenter then
                 -- print("echo")
                 -- look for a house frame
-                local framerow, framecol = getClosestBuilding(enum.improvementHouseFrame, 1, agentrow, agentcol)
+                local framerow, framecol = getClosestBuilding(enum.improvementHouse, 1, agentrow, agentcol)
                 if framerow ~= nil then
                     -- print("Foxtrot")
                     addMoveAction(queue, agentrow, agentcol, framerow, framecol)   -- will add as many 'move' actions as necessary
@@ -433,7 +431,7 @@ function functions.createActions(goal, agent)
     end
     if goal == enum.goalBuyWood then
         -- print("Goal = buy wood")
-        local qtyneeded = WOOD_HOUSEFRAME
+        local qtyneeded = WOOD_FULLHOUSE
         local shoprow, shopcol = getClosestBuilding(enum.improvementWoodsman, qtyneeded, agentrow, agentcol)
         if shoprow ~= nil then
             addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
@@ -450,24 +448,25 @@ function functions.createActions(goal, agent)
             -- print("No woodsman found")
         end
     end
-    if goal == enum.goalStartHouse then
-        -- pick an empty tile
-        local houserow, housecol = getBlankTile()
-        if houserow ~= nil then
-            agent:give("residenceFrame", houserow, housecol)
-
-            -- place a frame
-            MAP[houserow][housecol].entity.isTile.improvementType = enum.improvementHouseFrame
-            MAP[houserow][housecol].entity.isTile.stockType = enum.stockHouseFrame
-            MAP[houserow][housecol].entity.isTile.stockLevel = 1
-            MAP[houserow][housecol].entity.isTile.tileOwner = agent
-            MAP[houserow][housecol].entity.isTile.timeToBuild = BUILD_HOUSE_TIMER          -- seconds
-
-            -- subtract wood
-            agent.isPerson.stockInv[enum.stockWood] = agent.isPerson.stockInv[enum.stockWood] - WOOD_HOUSEFRAME
-            agent.isPerson.wealth = agent.isPerson.wealth - CARPENTER_HOUSEFRAME    -- this is forward payment for the carpenter
-        end
-    end
+    -- if goal == enum.goalStartHouse then
+    --     -- pick an empty tile
+    --     local houserow, housecol = getBlankTile()
+    --     if houserow ~= nil then
+    --         -- agent:give("residenceFrame", houserow, housecol)
+    --         agent:give("residence", houserow, housecol)
+    --
+    --         -- place a frame
+    --         MAP[houserow][housecol].entity.isTile.improvementType = enum.improvementHouse
+    --         MAP[houserow][housecol].entity.isTile.stockType = enum.stockHouse
+    --         MAP[houserow][housecol].entity.isTile.stockLevel = 0
+    --         MAP[houserow][housecol].entity.isTile.tileOwner = agent
+    --         -- MAP[houserow][housecol].entity.isTile.timeToBuild = BUILD_HOUSE_TIMER          -- seconds
+    --
+    --         -- subtract wood
+    --         agent.isPerson.stockInv[enum.stockWood] = agent.isPerson.stockInv[enum.stockWood] - 1
+    --         -- agent.isPerson.wealth = agent.isPerson.wealth - CARPENTER_HOUSEFRAME    -- this is forward payment for the carpenter
+    --     end
+    -- end
     if goal == enum.goalHeal then
         local qtyneeded = (cf.round((100 - agent.isPerson.health) / 10)) + 1
         local ownsHealershop = false
@@ -495,6 +494,34 @@ function functions.createActions(goal, agent)
         table.insert(queue, action)
         assert(action.stockType ~= nil)
         print("move and buy herbs action added")
+    end
+    if goal == enum.goalStockHouse then
+        -- establish, build, maintain or add to house
+        -- bring wood to house so carpenter can make house
+
+        if not agent:has("residence") then
+            local houserow, housecol = getBlankTile()
+            if houserow ~= nil then
+                agent:give("residence", houserow, housecol)
+
+                MAP[houserow][housecol].entity.isTile.improvementType = enum.improvementHouse
+                MAP[houserow][housecol].entity.isTile.stockType = enum.stockHouse
+                MAP[houserow][housecol].entity.isTile.stockLevel = 0
+                MAP[houserow][housecol].entity.isTile.tileOwner = agent
+
+                print("House established on tile " .. houserow, housecol)
+            end
+        end
+
+        local houserow = agent.residence.row
+        local housecol = agent.residence.col
+
+        --! only move if there is stock at the closest building
+        addMoveAction(queue, agentrow, agentcol, houserow, housecol)   -- will add as many 'move' actions as necessary
+        local action = {}
+        action.action = "stockhouse"
+        action.timeleft = love.math.random(30, 60)
+        table.insert(queue, action)
     end
 
     return queue

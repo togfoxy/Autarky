@@ -92,20 +92,21 @@ function behaviortree.EstablishTree()
 										return 5
 									end
 	TREE.child[4].child[1].activate = function(agent)
-										if not agent:has("residenceFrame") and not agent:has("residence") and agent.isPerson.stockInv[enum.stockWood] < WOOD_HOUSEFRAME and (agent.isPerson.wealth >= PRICE_WOOD + 1) then
+										if agent.isPerson.wealth >= PRICE_WOOD + 1 then
 											return true
 										else
 											return false
 										end
 									end
 
+
 	TREE.child[5] = {}
-	TREE.child[5].goal = enum.goalStartHouse
+	TREE.child[5].goal = enum.goalStockHouse			-- includes initiating a house
 	TREE.child[5].priority = function(agent)
 								return 3
 							end
 	TREE.child[5].activate = function(agent)
-								if (agent.isPerson.stockInv[enum.stockWood] >= WOOD_HOUSEFRAME) and (not agent:has("residenceFrame")) and (not agent:has("residence")) and (agent.isPerson.wealth >= CARPENTER_HOUSEFRAME + 1) then
+								if (agent.isPerson.stockInv[enum.stockWood] >= 1) then
 									return true
 								else
 									return false
