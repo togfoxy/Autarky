@@ -317,7 +317,7 @@ function ecsfunctions.init()
                     end
                 end
                 -- see if they hurt themselves at work
-                if love.math.random(1, 100) == 1 then
+                if love.math.random(1, 500) == 1 then
                     local dmg = cf.round(love.math.random(1,10) * dt, 4)
                     e.isPerson.health = e.isPerson.health - dmg
                 end
@@ -357,31 +357,10 @@ function ecsfunctions.init()
                 if e.occupation.value == enum.jobCarpenter then
                     local row = e.position.row
                     local col = e.position.col
-                    if MAP[row][col].entity.isTile.timeToBuild == nil then
-                        -- house is already built. So sad. Nothing to do
-                        table.remove(e.isPerson.queue, 1)
-                    else
-                        if MAP[row][col].entity.isTile.timeToBuild > 0  then
-                            -- keep building the structure
-                            MAP[row][col].entity.isTile.timeToBuild = MAP[row][col].entity.isTile.timeToBuild - dt
-                            e.isPerson.wealth = e.isPerson.wealth + dt * 0.13
-                        else
-                            -- complete the house
-                            local row = e.position.row
-                            local col = e.position.col
-                            MAP[row][col].entity.isTile.improvementType = enum.improvementHouse
-                            MAP[row][col].entity.isTile.stockType = nil
-                            MAP[row][col].entity.isTile.stockLevel = 0      -- stockLevel must never be nil
-                            MAP[row][col].entity.isTile.timeToBuild = nil
-                            local houseOwner = MAP[row][col].entity.isTile.tileOwner
-
-                            houseOwner:remove("residenceFrame")
-                            houseOwner:ensure("residence", row, col)
-
-                            table.remove(e.isPerson.queue, 1)
-                            fun.addLog(e, "Built a house")
-                        end
-                    end
+                    local owner = MAP[row][col].entity.isTile.tileOwner
+                    owner.residence.health = owner.residence.health + dt
+    print("House health is now " .. owner.residence.health)
+                    e.isPerson.wealth = e.isPerson.wealth + (dt * PRICE_CARPENTER)           -- e = the carpenter
                 end
             end
             if currentaction.action == "buy" then
@@ -429,6 +408,8 @@ function ecsfunctions.init()
                 local houserow = e.residence.row
                 local housecol = e.residence.col
                 MAP[houserow][housecol].entity.isTile.stockLevel = MAP[houserow][housecol].entity.isTile.stockLevel + woodamt
+                table.remove(e.isPerson.queue, 1)
+                fun.addLog(e, "Stocked house")
             end
 
             -- ******************* --

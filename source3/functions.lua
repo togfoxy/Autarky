@@ -385,18 +385,26 @@ function functions.createActions(goal, agent)
             -- print("Delta")
             -- time to convert things
             if agent.occupation.value == enum.jobCarpenter then
-                -- print("echo")
-                -- look for a house frame
-                local framerow, framecol = getClosestBuilding(enum.improvementHouse, 1, agentrow, agentcol)
-                if framerow ~= nil then
-                    -- print("Foxtrot")
-                    addMoveAction(queue, agentrow, agentcol, framerow, framecol)   -- will add as many 'move' actions as necessary
-                    local action = {}
-                    action.action = "work"
-                    action.timeleft = love.math.random(30, 60)
-                    table.insert(queue, action)
+
+                local destrow, destcol = getClosestBuilding(enum.improvementHouse, 1, agentrow, agentcol)
+                if destrow ~= nil then
+                    if MAP[destrow][destcol].entity.isTile.stockLevel >= 1 then
+                        addMoveAction(queue, agentrow, agentcol, destrow, destcol)   -- will add as many 'move' actions as necessary
+
+                        -- work out how long to work
+                        local woodqty = MAP[destrow][destcol].entity.isTile.stockLevel
+                        local worktime = woodqty * SECONDS_SPENT_PER_WOOD   -- seconds
+                        MAP[destrow][destcol].entity.isTile.stockLevel = MAP[destrow][destcol].entity.isTile.stockLevel - woodqty
+                        local action = {}
+                        action.action = "work"
+                        action.timeleft = worktime
+                        table.insert(queue, action)
+    print("Maintaining house. ".. worktime .. " seconds and " .. woodqty .. " wood used.")
+                    else
+                        print("House needs building but has no stock")
+                    end
                 else
-                    -- print("Carpenter has nothing to build")
+                    print("Carpenter has nothing to build")
                 end
             end
         end
@@ -431,7 +439,7 @@ function functions.createActions(goal, agent)
     end
     if goal == enum.goalBuyWood then
         -- print("Goal = buy wood")
-        local qtyneeded = WOOD_FULLHOUSE
+        local qtyneeded = 1
         local shoprow, shopcol = getClosestBuilding(enum.improvementWoodsman, qtyneeded, agentrow, agentcol)
         if shoprow ~= nil then
             addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
