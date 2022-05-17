@@ -20,7 +20,12 @@ function ecsfunctions.init()
         for _, e in ipairs(self.pool) do
             if e.isTile then
 
+                local row, col = e.position.row, e.position.col
                 -- draw tile image
+                local img
+                local imgnumber
+
+                -- NOTE: This is NOT the improvement
                 local img = IMAGES[e.isTile.tileType]
                 local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
                 local imagewidth = img:getWidth()
@@ -39,7 +44,7 @@ function ecsfunctions.init()
                 love.graphics.draw(IMAGES[enum.imagesMud], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
 
                 -- draw contour lines
-                local row, col = e.position.row, e.position.col
+
                 -- check if top neighbour is different to current cell
                 if row > 1 then
                     if MAP[row-1][col].height ~= MAP[row][col].height then
@@ -78,6 +83,13 @@ function ecsfunctions.init()
                 -- draw the improvement
                 if imptype ~= nil then
                     local imagenumber = imptype
+
+                    -- draw house or house frame depending on house health
+                    if imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health < 80 then
+                        imagenumber = enum.imagesHouseFrame
+                    elseif imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health >= 80 then
+                        imagenumber = enum.imagesHouse
+                    end
                     local imagewidth = IMAGES[imagenumber]:getWidth()
                     local imageheight = IMAGES[imagenumber]:getHeight()
 
@@ -266,21 +278,21 @@ function ecsfunctions.init()
                     AUDIO[enum.audioYawn]:play()
                 end
 
-                -- if currentaction.action == "rest" and e:has("residence") then
-                --     if currentaction.timeleft > 5 then
-                --         -- draw sleep bubble
-                --         local item = {}
-                --         item.imagenumber = enum.imagesEmoteSleeping
-                --         item.start = 0
-                --         item.stop = math.min(5, currentaction.timeleft)
-                --         item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
-                --         table.insert(DRAWQUEUE, item)
-                --     end
-                --     -- recover stamina faster
-                --     e.isPerson.stamina = e.isPerson.stamina + (2 * dt)
-                -- else
+                if currentaction.action == "rest" and e:has("residence") and e.residence.health >= 80 then
+                    if currentaction.timeleft > 5 then
+                        -- draw sleep bubble
+                        local item = {}
+                        item.imagenumber = enum.imagesEmoteSleeping
+                        item.start = 0
+                        item.stop = math.min(5, currentaction.timeleft)
+                        item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+                        table.insert(DRAWQUEUE, item)
+                    end
+                    -- recover stamina faster
+                    e.isPerson.stamina = e.isPerson.stamina + (2 * dt)
+                else
                     e.isPerson.stamina = e.isPerson.stamina + (1.5 * dt)        -- gain 1 per second + recover the 0.5 applied above
-                -- end
+                end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
                     fun.addLog(e, "Rested")
@@ -359,7 +371,7 @@ function ecsfunctions.init()
                     local col = e.position.col
                     local owner = MAP[row][col].entity.isTile.tileOwner
                     owner.residence.health = owner.residence.health + dt
-    print("House health is now " .. owner.residence.health)
+                    print("House health is now " .. owner.residence.health)
                     e.isPerson.wealth = e.isPerson.wealth + (dt * PRICE_CARPENTER)           -- e = the carpenter
                 end
             end
@@ -431,6 +443,9 @@ function ecsfunctions.init()
             -- reduce fullness
             e.isPerson.fullness = e.isPerson.fullness - (0.33 * dt)
 
+            -- apply wear to house if they have one
+            if e:has("residence") then e.residence.health = e.residence.health - (dt * HOUSE_WEAR) end
+
             -- do this last as it may nullify the entity
             if e.isPerson.fullness < 0 or e.isPerson.health <= 0 then
                 -- destroy any improvement belonging to starving agent
@@ -438,15 +453,6 @@ function ecsfunctions.init()
                     -- destroy workplace
                     local wprow = e.workplace.row
                     local wpcol = e.workplace.col
-                    MAP[wprow][wpcol].entity.isTile.improvementType = nil
-                    MAP[wprow][wpcol].entity.isTile.stockType = nil
-                    MAP[wprow][wpcol].entity.isTile.tileOwner = nil
-                    MAP[wprow][wpcol].entity.isTile.stockLevel = 0
-                end
-                if e:has("residenceFrame") then
-                    -- destroy house
-                    local wprow = e.residenceFrame.row
-                    local wpcol = e.residenceFrame.col
                     MAP[wprow][wpcol].entity.isTile.improvementType = nil
                     MAP[wprow][wpcol].entity.isTile.stockType = nil
                     MAP[wprow][wpcol].entity.isTile.tileOwner = nil

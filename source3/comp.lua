@@ -38,12 +38,6 @@ function comp.init()
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
     end)
 
-    -- concord.component("residenceFrame", function(c,row,col)
-    --     c.row = row
-    --     c.col = col
-    --     c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
-    --     c.health = 0
-    -- end)
     concord.component("residence", function(c,row,col)
         c.row = row
         c.col = col

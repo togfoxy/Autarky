@@ -11,7 +11,9 @@ imagesHouse = 7
 imagesHealingHouse = 8
 
 imagesMud = 101
+imagesHouseFrame = 102
 imagesVillagerLog = 104
+
 imagesEmoteSleeping = 121
 imagesEmoteTalking = 122
 imagesEmoteCash = 123

@@ -49,6 +49,8 @@ function constants.load()
     RATE_WOOD = 0.0089
     RATE_HERBS = 0.0267
 
+    HOUSE_WEAR = 0.01       -- how fast a house wears down
+
 
 end
 

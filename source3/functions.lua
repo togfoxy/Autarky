@@ -35,8 +35,10 @@ function functions.loadImages()
     IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/appletree_37x50.png")
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
     IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
-    -- IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
+
     IMAGES[enum.imagesHouse] = love.graphics.newImage("assets/images/house4.png")
+    IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
+
     IMAGES[enum.imagesHealingHouse] = love.graphics.newImage("assets/images/healerhouse.png")
     IMAGES[enum.imagesVillagerLog] = love.graphics.newImage("assets/images/villagerlog.png")
 
@@ -456,25 +458,6 @@ function functions.createActions(goal, agent)
             -- print("No woodsman found")
         end
     end
-    -- if goal == enum.goalStartHouse then
-    --     -- pick an empty tile
-    --     local houserow, housecol = getBlankTile()
-    --     if houserow ~= nil then
-    --         -- agent:give("residenceFrame", houserow, housecol)
-    --         agent:give("residence", houserow, housecol)
-    --
-    --         -- place a frame
-    --         MAP[houserow][housecol].entity.isTile.improvementType = enum.improvementHouse
-    --         MAP[houserow][housecol].entity.isTile.stockType = enum.stockHouse
-    --         MAP[houserow][housecol].entity.isTile.stockLevel = 0
-    --         MAP[houserow][housecol].entity.isTile.tileOwner = agent
-    --         -- MAP[houserow][housecol].entity.isTile.timeToBuild = BUILD_HOUSE_TIMER          -- seconds
-    --
-    --         -- subtract wood
-    --         agent.isPerson.stockInv[enum.stockWood] = agent.isPerson.stockInv[enum.stockWood] - 1
-    --         -- agent.isPerson.wealth = agent.isPerson.wealth - CARPENTER_HOUSEFRAME    -- this is forward payment for the carpenter
-    --     end
-    -- end
     if goal == enum.goalHeal then
         local qtyneeded = (cf.round((100 - agent.isPerson.health) / 10)) + 1
         local ownsHealershop = false
