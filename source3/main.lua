@@ -1,4 +1,4 @@
-GAME_VERSION = "0.08"
+GAME_VERSION = "0.09"
 
 inspect = require 'lib.inspect'
 -- https://github.com/kikito/inspect.lua
@@ -72,10 +72,18 @@ function love.keyreleased( key, scancode )
 		end
 		VILLAGERS_SELECTED = 0
 	end
+
+
 	if key == "kp5" then
 		ZOOMFACTOR = 1
 		TRANSLATEX = 960
 		TRANSLATEY = 540
+	end
+	if key == "m" then
+		MUSIC_TOGGLE = not MUSIC_TOGGLE
+	end
+	if key == "s" then
+		SOUND_TOGGLE = not SOUND_TOGGLE
 	end
 end
 
@@ -157,20 +165,7 @@ function love.load()
 	LEFT_MARGIN = TILE_SIZE / 2
     TOP_MARGIN = TILE_SIZE / 2
 
-print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
-
-    -- res.setGame(SCREEN_WIDTH, SCREEN_HEIGHT)
-
-
-    -- if love.filesystem.isFused( ) then
-	-- 	DEBUG = false
-    --     void = love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT,{fullscreen=true,display=1,resizable=true, borderless=false})	-- display = monitor number (1 or 2)
-    -- else
-	-- 	DEBUG = true
-    --     void = love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT,{fullscreen=true,display=1,resizable=true, borderless=false})	-- display = monitor number (1 or 2)
-    -- end
-
-
+	print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
 
     love.window.setTitle("Autarky " .. GAME_VERSION)
 	love.keyboard.setKeyRepeat(true)
@@ -222,6 +217,7 @@ function love.update(dt)
 		:give("isPerson")
 		table.insert(VILLAGERS, villager)
 		AUDIO[enum.audioNewVillager]:play()
+		fun.playAudio(enum.audioNewVillager, false, true)
 	end
 
 	for i = #DRAWQUEUE, 1, -1 do

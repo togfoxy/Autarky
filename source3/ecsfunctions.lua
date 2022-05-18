@@ -20,7 +20,12 @@ function ecsfunctions.init()
         for _, e in ipairs(self.pool) do
             if e.isTile then
 
+                local row, col = e.position.row, e.position.col
                 -- draw tile image
+                local img
+                local imgnumber
+
+                -- NOTE: This is NOT the improvement
                 local img = IMAGES[e.isTile.tileType]
                 local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
                 local imagewidth = img:getWidth()
@@ -39,7 +44,7 @@ function ecsfunctions.init()
                 love.graphics.draw(IMAGES[enum.imagesMud], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
 
                 -- draw contour lines
-                local row, col = e.position.row, e.position.col
+
                 -- check if top neighbour is different to current cell
                 if row > 1 then
                     if MAP[row-1][col].height ~= MAP[row][col].height then
@@ -78,6 +83,13 @@ function ecsfunctions.init()
                 -- draw the improvement
                 if imptype ~= nil then
                     local imagenumber = imptype
+
+                    -- draw house or house frame depending on house health
+                    if imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health < 80 then
+                        imagenumber = enum.imagesHouseFrame
+                    elseif imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health >= 80 then
+                        imagenumber = enum.imagesHouse
+                    end
                     local imagewidth = IMAGES[imagenumber]:getWidth()
                     local imageheight = IMAGES[imagenumber]:getHeight()
 
@@ -263,10 +275,10 @@ function ecsfunctions.init()
                 currentaction.timeleft = currentaction.timeleft - dt
                 if currentaction.timeleft > 3 and love.math.random(1, 10000) == 1 then
                     -- play audio
-                    AUDIO[enum.audioYawn]:play()
+                    fun.playAudio(enum.audioYawn, false, true)
                 end
 
-                if currentaction.action == "rest" and e:has("residence") then
+                if currentaction.action == "rest" and e:has("residence") and e.residence.health >= 80 then
                     if currentaction.timeleft > 5 then
                         -- draw sleep bubble
                         local item = {}
@@ -310,14 +322,14 @@ function ecsfunctions.init()
                 if currentaction.timeleft > 3 and love.math.random(1, 5000) == 1 then
                     -- play audio
                     if e.occupation.value == enum.jobFarmer then
-                        AUDIO[enum.audioRustle]:play()
+                        fun.playAudio(enum.audioRustle, false, true)
                     end
                     if e.occupation.value == enum.jobWoodsman then
-                        AUDIO[enum.audioSawWood]:play()
+                        fun.playAudio(enum.audioSawWood, false, true)
                     end
                 end
                 -- see if they hurt themselves at work
-                if love.math.random(1, 100) == 1 then
+                if love.math.random(1, 500) == 1 then
                     local dmg = cf.round(love.math.random(1,10) * dt, 4)
                     e.isPerson.health = e.isPerson.health - dmg
                 end
@@ -357,31 +369,10 @@ function ecsfunctions.init()
                 if e.occupation.value == enum.jobCarpenter then
                     local row = e.position.row
                     local col = e.position.col
-                    if MAP[row][col].entity.isTile.timeToBuild == nil then
-                        -- house is already built. So sad. Nothing to do
-                        table.remove(e.isPerson.queue, 1)
-                    else
-                        if MAP[row][col].entity.isTile.timeToBuild > 0  then
-                            -- keep building the structure
-                            MAP[row][col].entity.isTile.timeToBuild = MAP[row][col].entity.isTile.timeToBuild - dt
-                            e.isPerson.wealth = e.isPerson.wealth + dt * 0.13
-                        else
-                            -- complete the house
-                            local row = e.position.row
-                            local col = e.position.col
-                            MAP[row][col].entity.isTile.improvementType = enum.improvementHouse
-                            MAP[row][col].entity.isTile.stockType = nil
-                            MAP[row][col].entity.isTile.stockLevel = 0      -- stockLevel must never be nil
-                            MAP[row][col].entity.isTile.timeToBuild = nil
-                            local houseOwner = MAP[row][col].entity.isTile.tileOwner
-
-                            houseOwner:remove("residenceFrame")
-                            houseOwner:ensure("residence", row, col)
-
-                            table.remove(e.isPerson.queue, 1)
-                            fun.addLog(e, "Built a house")
-                        end
-                    end
+                    local owner = MAP[row][col].entity.isTile.tileOwner
+                    owner.residence.health = owner.residence.health + dt
+                    print("House health is now " .. owner.residence.health)
+                    e.isPerson.wealth = e.isPerson.wealth + (dt * PRICE_CARPENTER)           -- e = the carpenter
                 end
             end
             if currentaction.action == "buy" then
@@ -394,14 +385,12 @@ function ecsfunctions.init()
                 if currentaction.stockType == enum.stockFruit then
                     e.isPerson.fullness = e.isPerson.fullness + (amtbought * 100)   -- each food restores 100 fullness
                     if amtbought > 0 and love.math.random(1, 1000) == 1 then
-                            AUDIO[enum.audioEat]:play()
-                            print("Play 'eat'")
+                        fun.playAudio(enum.audioEat, false, true)
                     end
                 elseif currentaction.stockType == enum.stockHealingHerbs then
                     e.isPerson.health = e.isPerson.health + (amtbought * 10)
                     if amtbought > 0 and love.math.random(1, 1000) == 1 then
-                            AUDIO[enum.audioBandage]:play()
-                            print("Play 'heal'")
+                        fun.playAudio(enum.audioBandage, false, true)
                     end
                 else
                     e.isPerson.stockInv[currentaction.stockType] = e.isPerson.stockInv[currentaction.stockType] + amtbought
@@ -419,6 +408,18 @@ function ecsfunctions.init()
 
                 table.remove(e.isPerson.queue, 1)
                 fun.addLog(e, "Bought something")
+            end
+
+            if currentaction.action == "stockhouse" then
+                -- transfer wood from agent to house
+                local woodamt = e.isPerson.stockInv[enum.stockWood]
+                e.isPerson.stockInv[enum.stockWood] = 0
+
+                local houserow = e.residence.row
+                local housecol = e.residence.col
+                MAP[houserow][housecol].entity.isTile.stockLevel = MAP[houserow][housecol].entity.isTile.stockLevel + woodamt
+                table.remove(e.isPerson.queue, 1)
+                fun.addLog(e, "Stocked house")
             end
 
             -- ******************* --
@@ -440,6 +441,9 @@ function ecsfunctions.init()
             -- reduce fullness
             e.isPerson.fullness = e.isPerson.fullness - (0.33 * dt)
 
+            -- apply wear to house if they have one
+            if e:has("residence") then e.residence.health = e.residence.health - (dt * HOUSE_WEAR) end
+
             -- do this last as it may nullify the entity
             if e.isPerson.fullness < 0 or e.isPerson.health <= 0 then
                 -- destroy any improvement belonging to starving agent
@@ -447,15 +451,6 @@ function ecsfunctions.init()
                     -- destroy workplace
                     local wprow = e.workplace.row
                     local wpcol = e.workplace.col
-                    MAP[wprow][wpcol].entity.isTile.improvementType = nil
-                    MAP[wprow][wpcol].entity.isTile.stockType = nil
-                    MAP[wprow][wpcol].entity.isTile.tileOwner = nil
-                    MAP[wprow][wpcol].entity.isTile.stockLevel = 0
-                end
-                if e:has("residenceFrame") then
-                    -- destroy house
-                    local wprow = e.residenceFrame.row
-                    local wpcol = e.residenceFrame.col
                     MAP[wprow][wpcol].entity.isTile.improvementType = nil
                     MAP[wprow][wpcol].entity.isTile.stockType = nil
                     MAP[wprow][wpcol].entity.isTile.tileOwner = nil
