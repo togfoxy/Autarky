@@ -95,7 +95,7 @@ function draw.HUD()
     txt.value = nil
     table.insert(HUDText, txt)
     txt = {}
-    txt.label = "(select red man first)"
+    txt.label = "(select red person first)"
     txt.value = nil
     table.insert(HUDText, txt)
     if VILLAGERS_SELECTED > 0 then
@@ -149,6 +149,29 @@ function draw.HUD()
 
     txt = {}
     txt.label = "keypad 5 = reset camera"
+    txt.value = nil
+    table.insert(HUDText, txt)
+
+    txt = {}
+    txt.label = "---"
+    txt.value = nil
+    table.insert(HUDText, txt)
+
+    txt = {}
+    if MUSIC_TOGGLE then
+        txt.label = "'M'usic is on"
+    else
+        txt.label = "'M'usic is off"
+    end
+    txt.value = nil
+    table.insert(HUDText, txt)
+
+    txt = {}
+    if SOUND_TOGGLE then
+        txt.label = "'S'ound is on"
+    else
+        txt.label = "'S'ound is off"
+    end
     txt.value = nil
     table.insert(HUDText, txt)
 

@@ -107,13 +107,11 @@ function functions.PlayAmbientMusic()
 			if love.math.random(1,2) == 1 then
                 -- music
                 local random = love.math.random(11, 17)
-                AUDIO[random]:play()
-    print("Playing music #" .. random)
+                fun.playAudio(random, true, false)
 			else
 
                 local random = love.math.random(21, 22)
-    print("Playing ambient " .. random)
-    			AUDIO[random]:play()
+                fun.playAudio(random, true, false)
 			end
 		end
 	end
@@ -578,6 +576,17 @@ function functions.addLog(person, txtitem)
     local logitem = {}
     logitem.text = txtitem
     table.insert(person.isPerson.log, logitem)
+end
+
+function functions.playAudio(audionumber, isMusic, isSound)
+    if isMusic and MUSIC_TOGGLE then
+        AUDIO[audionumber]:play()
+    end
+    if isSound and SOUND_TOGGLE then
+        AUDIO[audionumber]:play()
+    end
+    print("playing music/sound #" .. audionumber)
+
 end
 
 return functions

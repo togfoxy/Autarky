@@ -275,7 +275,7 @@ function ecsfunctions.init()
                 currentaction.timeleft = currentaction.timeleft - dt
                 if currentaction.timeleft > 3 and love.math.random(1, 10000) == 1 then
                     -- play audio
-                    AUDIO[enum.audioYawn]:play()
+                    fun.playAudio(enum.audioYawn, false, true)
                 end
 
                 if currentaction.action == "rest" and e:has("residence") and e.residence.health >= 80 then
@@ -322,10 +322,10 @@ function ecsfunctions.init()
                 if currentaction.timeleft > 3 and love.math.random(1, 5000) == 1 then
                     -- play audio
                     if e.occupation.value == enum.jobFarmer then
-                        AUDIO[enum.audioRustle]:play()
+                        fun.playAudio(enum.audioRustle, false, true)
                     end
                     if e.occupation.value == enum.jobWoodsman then
-                        AUDIO[enum.audioSawWood]:play()
+                        fun.playAudio(enum.audioSawWood, false, true)
                     end
                 end
                 -- see if they hurt themselves at work
@@ -385,14 +385,12 @@ function ecsfunctions.init()
                 if currentaction.stockType == enum.stockFruit then
                     e.isPerson.fullness = e.isPerson.fullness + (amtbought * 100)   -- each food restores 100 fullness
                     if amtbought > 0 and love.math.random(1, 1000) == 1 then
-                            AUDIO[enum.audioEat]:play()
-                            print("Play 'eat'")
+                        fun.playAudio(enum.audioEat, false, true)
                     end
                 elseif currentaction.stockType == enum.stockHealingHerbs then
                     e.isPerson.health = e.isPerson.health + (amtbought * 10)
                     if amtbought > 0 and love.math.random(1, 1000) == 1 then
-                            AUDIO[enum.audioBandage]:play()
-                            print("Play 'heal'")
+                        fun.playAudio(enum.audioBandage, false, true)
                     end
                 else
                     e.isPerson.stockInv[currentaction.stockType] = e.isPerson.stockInv[currentaction.stockType] + amtbought

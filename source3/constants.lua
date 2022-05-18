@@ -5,6 +5,8 @@ function constants.load()
     NUMBER_OF_VILLAGERS = 8
 
     ZOOMFACTOR = 1
+    MUSIC_TOGGLE = true
+    SOUND_TOGGLE = true
 
     SCREEN_STACK = {}
 
