@@ -87,6 +87,17 @@ function ecsfunctions.init()
                     -- draw house or house frame depending on house health
                     if imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health < 80 then
                         imagenumber = enum.imagesHouseFrame
+
+                        -- take this opportunity to draw the health bar
+                        local x1, y1, x2, y2
+                        x1 = drawx + (TILE_SIZE / 2)
+                        y1 = drawy + (TILE_SIZE / 2)
+                        x2 = x1
+                        y2 = y1 - (MAP[row][col].entity.isTile.tileOwner.residence.health / 100) * TILE_SIZE
+                        love.graphics.setColor(0,1,0,1)
+                        love.graphics.line(x1,y1,x2,y2)
+
+
                     elseif imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health >= 80 then
                         imagenumber = enum.imagesHouse
                     end
@@ -101,6 +112,8 @@ function ecsfunctions.init()
 
                     love.graphics.setColor(1,1,1,1)
                     love.graphics.draw(IMAGES[imagenumber], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
+
+                    -- draw the health of the improvement as a bar
                 end
 
                 -- draw stocklevels for each tile
@@ -371,7 +384,6 @@ function ecsfunctions.init()
                     local col = e.position.col
                     local owner = MAP[row][col].entity.isTile.tileOwner
                     owner.residence.health = owner.residence.health + dt
-                    print("House health is now " .. owner.residence.health)
                     e.isPerson.wealth = e.isPerson.wealth + (dt * PRICE_CARPENTER)           -- e = the carpenter
                 end
             end
