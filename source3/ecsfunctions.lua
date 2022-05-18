@@ -364,11 +364,11 @@ function ecsfunctions.init()
 
                     local stockgained
                     if e.occupation.stockType == enum.stockFruit then
-                        stockgained = (RATE_FRUIT * dt)
+                        stockgained = (FRUIT_PRODUCTION_RATE * dt)
                     elseif e.occupation.stockType == enum.stockWood then
-                        stockgained = (RATE_WOOD * dt)
+                        stockgained = (WOOD_PRODUCTION_RATE * dt)
                     elseif e.occupation.stockType == enum.stockHealingHerbs then
-                        stockgained = (RATE_HERBS * dt)
+                        stockgained = (HERB_PRODUCTION_RATE * dt)
                     end
                     assert(stockgained ~= nil)
 
@@ -383,8 +383,8 @@ function ecsfunctions.init()
                     local row = e.position.row
                     local col = e.position.col
                     local owner = MAP[row][col].entity.isTile.tileOwner
-                    owner.residence.health = owner.residence.health + dt
-                    e.isPerson.wealth = e.isPerson.wealth + (dt * PRICE_CARPENTER)           -- e = the carpenter
+                    owner.residence.health = owner.residence.health + (dt * CARPENTER_BUILD_RATE)
+                    e.isPerson.wealth = e.isPerson.wealth + (dt * CARPENTER_WAGE)           -- e = the carpenter
                 end
             end
             if currentaction.action == "buy" then

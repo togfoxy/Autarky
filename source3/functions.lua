@@ -358,11 +358,11 @@ function functions.createActions(goal, agent)
                 MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
 
                 if agent.occupation.stockType == enum.stockFruit then
-                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = PRICE_FRUIT
+                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = FRUIT_SELL_PRICE
                 elseif agent.occupation.stockType == enum.stockWood then
-                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = PRICE_WOOD
+                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = WOOD_SELL_PRICE
                 elseif agent.occupation.stockType == enum.stockHealingHerbs then
-                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = PRICE_HERBS
+                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = HERB_SELL_PRICE
                 end
                 print("Owner assigned to " .. workplacerow, workplacecol)
             end
@@ -393,7 +393,7 @@ function functions.createActions(goal, agent)
 
                         -- work out how long to work
                         local woodqty = MAP[destrow][destcol].entity.isTile.stockLevel
-                        local worktime = woodqty * SECONDS_SPENT_PER_WOOD   -- seconds
+                        local worktime = woodqty * CARPENTER_BUILD_RATE   -- seconds
                         MAP[destrow][destcol].entity.isTile.stockLevel = MAP[destrow][destcol].entity.isTile.stockLevel - woodqty
                         local action = {}
                         action.action = "work"
@@ -412,7 +412,7 @@ function functions.createActions(goal, agent)
     if goal == enum.goalEat then
         local qtyneeded = 1
         local ownsFruitshop = false
-        if agent:has("workplace") and agent.isPerson.wealth < (qtyneeded * PRICE_FRUIT) then
+        if agent:has("workplace") and agent.isPerson.wealth < (qtyneeded * FRUIT_SELL_PRICE) then
             if MAP[workplacerow][workplacecol].entity.isTile.stockLevel >= qtyneeded and
                 MAP[workplacerow][workplacecol].entity.isTile.stockType == enum.stockFruit then
                     ownsFruitshop = true

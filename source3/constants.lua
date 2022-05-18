@@ -32,26 +32,26 @@ function constants.load()
     -- jumper stuff
     TILEWALKABLE = 0
 
-    -- wealth cost for each item
-    PRICE_FRUIT = 1
-    PRICE_WOOD = 3
-    PRICE_HERBS = 3
-    PRICE_CARPENTER = 0.05
-
-    -- cost for things like services
-    CARPENTER_HOUSEFRAME = 8
-    WOOD_FULLHOUSE = 5
-    HOUSE_GAIN_PER_WOOD = 10        -- percent
-    SECONDS_SPENT_PER_WOOD = 10
-    BUILD_HOUSE_TIMER = 60
 
 
-    -- production rates
-    RATE_FRUIT = 0.0267
-    RATE_WOOD = 0.0089
-    RATE_HERBS = 0.0267
 
-    HOUSE_WEAR = 0.01       -- how fast a house wears down
+    -- Economy stuff
+
+    TIME_SCALE = 0.05
+
+    FRUIT_PRODUCTION_RATE = 1 * TIME_SCALE   -- produce 1 per time period
+    FRUIT_SELL_PRICE = 1
+
+    WOOD_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 3
+    WOOD_SELL_PRICE = FRUIT_SELL_PRICE * 3
+
+    HERB_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 6
+    HERB_SELL_PRICE = FRUIT_SELL_PRICE * 6
+
+    CARPENTER_BUILD_RATE = FRUIT_PRODUCTION_RATE * 200    -- how much time the carpenter spends on one wood
+    CARPENTER_WAGE = (FRUIT_SELL_PRICE * 5) / CARPENTER_BUILD_RATE
+
+    HOUSE_WEAR = CARPENTER_BUILD_RATE / 20       -- how fast a house wears down
 
 
 end

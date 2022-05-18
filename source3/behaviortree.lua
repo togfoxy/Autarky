@@ -56,14 +56,14 @@ function behaviortree.EstablishTree()
 								-- deactivate if person is full or broke and not a farmer
 								if agent.isPerson.fullness > 70 then
 									return false
-								elseif agent.isPerson.wealth < PRICE_FRUIT and agent:has("occupation") then
+								elseif agent.isPerson.wealth < FRUIT_SELL_PRICE and agent:has("occupation") then
 									if agent.occupation.value == enum.jobFarmer then
 										return true
 									else
 										return false
 									end
 								else
-									if agent.isPerson.wealth >= PRICE_FRUIT then
+									if agent.isPerson.wealth >= FRUIT_SELL_PRICE then
 										return true
 									else
 										return false
@@ -77,7 +77,7 @@ function behaviortree.EstablishTree()
 								return 3
 							end
 	TREE.child[4].activate = function(agent)
-								if agent.isPerson.wealth >= PRICE_FRUIT + 1 then
+								if agent.isPerson.wealth >= FRUIT_SELL_PRICE + 1 then
 									return true
 								else
 									return false
@@ -92,7 +92,7 @@ function behaviortree.EstablishTree()
 										return 5
 									end
 	TREE.child[4].child[1].activate = function(agent)
-										if agent.isPerson.wealth >= PRICE_WOOD + 1 then
+										if agent.isPerson.wealth >= WOOD_SELL_PRICE + 1 then
 											return true
 										else
 											return false
@@ -122,7 +122,7 @@ function behaviortree.EstablishTree()
 								return priority
 							end
 	TREE.child[6].activate = function(agent)
-								if agent.isPerson.wealth >= (PRICE_HERBS + 1) and agent.isPerson.health < 100 then
+								if agent.isPerson.wealth >= (HERB_SELL_PRICE + 1) and agent.isPerson.health < 100 then
 									return true
 								else
 									return false
