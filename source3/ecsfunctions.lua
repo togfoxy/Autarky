@@ -87,6 +87,17 @@ function ecsfunctions.init()
                     -- draw house or house frame depending on house health
                     if imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health < 80 then
                         imagenumber = enum.imagesHouseFrame
+
+                        -- take this opportunity to draw the health bar
+                        local x1, y1, x2, y2
+                        x1 = drawx + (TILE_SIZE / 2)
+                        y1 = drawy + (TILE_SIZE / 2)
+                        x2 = x1
+                        y2 = y1 - (MAP[row][col].entity.isTile.tileOwner.residence.health / 100) * TILE_SIZE
+                        love.graphics.setColor(0,1,0,1)
+                        love.graphics.line(x1,y1,x2,y2)
+
+
                     elseif imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health >= 80 then
                         imagenumber = enum.imagesHouse
                     end
@@ -101,6 +112,8 @@ function ecsfunctions.init()
 
                     love.graphics.setColor(1,1,1,1)
                     love.graphics.draw(IMAGES[imagenumber], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
+
+                    -- draw the health of the improvement as a bar
                 end
 
                 -- draw stocklevels for each tile
@@ -351,11 +364,11 @@ function ecsfunctions.init()
 
                     local stockgained
                     if e.occupation.stockType == enum.stockFruit then
-                        stockgained = (RATE_FRUIT * dt)
+                        stockgained = (FRUIT_PRODUCTION_RATE * dt)
                     elseif e.occupation.stockType == enum.stockWood then
-                        stockgained = (RATE_WOOD * dt)
+                        stockgained = (WOOD_PRODUCTION_RATE * dt)
                     elseif e.occupation.stockType == enum.stockHealingHerbs then
-                        stockgained = (RATE_HERBS * dt)
+                        stockgained = (HERB_PRODUCTION_RATE * dt)
                     end
                     assert(stockgained ~= nil)
 
@@ -370,9 +383,11 @@ function ecsfunctions.init()
                     local row = e.position.row
                     local col = e.position.col
                     local owner = MAP[row][col].entity.isTile.tileOwner
-                    owner.residence.health = owner.residence.health + dt
+                    owner.residence.health = owner.residence.health + (dt * CARPENTER_BUILD_RATE * HEALTH_GAIN_FROM_WOOD)
                     print("House health is now " .. owner.residence.health)
-                    e.isPerson.wealth = e.isPerson.wealth + (dt * PRICE_CARPENTER)           -- e = the carpenter
+                    local wage = (dt * CARPENTER_WAGE)
+                    e.isPerson.wealth = e.isPerson.wealth + wage          -- e = the carpenter
+                    owner.isPerson.wealth = owner.isPerson.wealth - wage          -- is okay if goes negative
                 end
             end
             if currentaction.action == "buy" then
@@ -442,7 +457,10 @@ function ecsfunctions.init()
             e.isPerson.fullness = e.isPerson.fullness - (0.33 * dt)
 
             -- apply wear to house if they have one
-            if e:has("residence") then e.residence.health = e.residence.health - (dt * HOUSE_WEAR) end
+            if e:has("residence") then
+                --! e.residence.health = e.residence.health - (dt * HOUSE_WEAR)
+                if e.residence.health < 0 then e.residence.health = 0 end
+            end
 
             -- do this last as it may nullify the entity
             if e.isPerson.fullness < 0 or e.isPerson.health <= 0 then

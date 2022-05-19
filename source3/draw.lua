@@ -57,7 +57,8 @@ function draw.HUD()
         end
     end
     if count > 0 then
-        avgstocklevel = cf.round(totalstocklevel / count, 1)
+        -- avgstocklevel = cf.round(totalstocklevel / count, 1)
+        avgstocklevel = cf.round(totalstocklevel / #VILLAGERS, 1)
         txt = {}
         txt.label = "Food: "
         txt.value = avgstocklevel
