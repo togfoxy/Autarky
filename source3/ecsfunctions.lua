@@ -383,8 +383,11 @@ function ecsfunctions.init()
                     local row = e.position.row
                     local col = e.position.col
                     local owner = MAP[row][col].entity.isTile.tileOwner
-                    owner.residence.health = owner.residence.health + (dt * CARPENTER_BUILD_RATE)
-                    e.isPerson.wealth = e.isPerson.wealth + (dt * CARPENTER_WAGE)           -- e = the carpenter
+                    owner.residence.health = owner.residence.health + (dt * CARPENTER_BUILD_RATE * HEALTH_GAIN_FROM_WOOD)
+                    print("House health is now " .. owner.residence.health)
+                    local wage = (dt * CARPENTER_WAGE)
+                    e.isPerson.wealth = e.isPerson.wealth + wage          -- e = the carpenter
+                    owner.isPerson.wealth = owner.isPerson.wealth - wage          -- is okay if goes negative
                 end
             end
             if currentaction.action == "buy" then
@@ -454,7 +457,10 @@ function ecsfunctions.init()
             e.isPerson.fullness = e.isPerson.fullness - (0.33 * dt)
 
             -- apply wear to house if they have one
-            if e:has("residence") then e.residence.health = e.residence.health - (dt * HOUSE_WEAR) end
+            if e:has("residence") then
+                --! e.residence.health = e.residence.health - (dt * HOUSE_WEAR)
+                if e.residence.health < 0 then e.residence.health = 0 end
+            end
 
             -- do this last as it may nullify the entity
             if e.isPerson.fullness < 0 or e.isPerson.health <= 0 then

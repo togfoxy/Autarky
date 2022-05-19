@@ -399,7 +399,7 @@ function functions.createActions(goal, agent)
                         action.action = "work"
                         action.timeleft = worktime
                         table.insert(queue, action)
-    print("Maintaining house. ".. worktime .. " seconds and " .. woodqty .. " wood used.")
+                        print("Maintaining house. ".. (worktime) .. " seconds and " .. woodqty .. " wood used.")
                     else
                         print("House needs building but has no stock")
                     end

@@ -106,7 +106,7 @@ function behaviortree.EstablishTree()
 								return 3
 							end
 	TREE.child[5].activate = function(agent)
-								if (agent.isPerson.stockInv[enum.stockWood] >= 1) then
+								if (agent.isPerson.stockInv[enum.stockWood] >= 1 and agent.isPerson.wealth >= CARPENTER_INCOME_PER_JOB + 1) then
 									return true
 								else
 									return false
