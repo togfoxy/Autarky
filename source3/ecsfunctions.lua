@@ -205,6 +205,7 @@ function ecsfunctions.init()
                     txt = txt .. "fullness: " .. cf.round(e.isPerson.fullness) .. "\n"
                     txt = txt .. "wealth: " .. cf.round(e.isPerson.wealth,1) .. "\n"
                     txt = txt .. "wood: " .. cf.round(e.isPerson.stockInv[enum.stockWood]) .. "\n"
+                    txt = txt .. "tax owed: " .. cf.round(e.isPerson.taxesOwed, 1) .. "\n"
 
                     love.graphics.setColor(1,1,1,1)
                     love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 60)
@@ -458,7 +459,7 @@ function ecsfunctions.init()
 
             -- apply wear to house if they have one
             if e:has("residence") then
-                --! e.residence.health = e.residence.health - (dt * HOUSE_WEAR)
+                e.residence.health = e.residence.health - (dt * HOUSE_WEAR)
                 if e.residence.health < 0 then e.residence.health = 0 end
             end
 

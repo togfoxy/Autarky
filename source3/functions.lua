@@ -286,7 +286,8 @@ function functions.buyStock(agent, stocktype, maxqty)
             local funds = purchaseamt * sellprice
 
             MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
-            MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + funds
+            MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + (funds * (1-GST_RATE))
+            MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.taxesOwed = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.taxesOwed + (funds * (GST_RATE))
             agent.isPerson.wealth = agent.isPerson.wealth - funds
         else
             print(inspect(MAP[agentrow][agentcol].entity.isTile.tileOwner))
