@@ -55,13 +55,13 @@ function functions.loadImages()
     SPRITES[enum.spriteBlueMan] = love.graphics.newImage("assets/images/Civilian Male Walk Blue.png")
     QUADS[enum.spriteBlueMan] = cf.fromImageToQuads(SPRITES[enum.spriteBlueMan], 15, 32)
 
-    SPRITES[enum.spriteBlueWoman] = love.graphics.newImage("assets/images/Civilian Female Blue.png")
+    SPRITES[enum.spriteBlueWoman] = love.graphics.newImage("assets/images/Civilian Female Walk Blue.png")
     QUADS[enum.spriteBlueWoman] = cf.fromImageToQuads(SPRITES[enum.spriteBlueWoman], 15, 32)
 
     SPRITES[enum.spriteRedMan] = love.graphics.newImage("assets/images/Civilian Male Walk Red.png")
     QUADS[enum.spriteRedMan] = cf.fromImageToQuads(SPRITES[enum.spriteRedMan], 15, 32)
 
-    SPRITES[enum.spriteRedWoman] = love.graphics.newImage("assets/images/Civilian Female Red.png")
+    SPRITES[enum.spriteRedWoman] = love.graphics.newImage("assets/images/Civilian Female Walk Red.png")
     QUADS[enum.spriteRedWoman] = cf.fromImageToQuads(SPRITES[enum.spriteRedWoman], 15, 32)
 end
 
@@ -292,7 +292,7 @@ function functions.buyStock(agent, stocktype, maxqty)
         else
             print(inspect(MAP[agentrow][agentcol].entity.isTile.tileOwner))
             print(agentrow, agentcol, stocktype, stockavail)
-            -- error("Agent tried to buy stock from tile that has no owner.")
+            error("Agent tried to buy stock from tile that has no owner.")
         end
     end
     return purchaseamt
@@ -419,24 +419,27 @@ function functions.createActions(goal, agent)
                     ownsFruitshop = true
             end
         end
+        local shoprow, shopcol
         if ownsFruitshop then
             addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
         else
             -- not a farmer or rich or own farm has no stock
-            local shoprow, shopcol = getClosestBuilding(enum.improvementFarm, qtyneeded, agentrow, agentcol)
+            shoprow, shopcol = getClosestBuilding(enum.improvementFarm, qtyneeded, agentrow, agentcol)
             if shoprow ~= nil then
                 addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
             end
         end
-        -- buy food
-        action = {}
-        action.action = "buy"
-        action.stockType = enum.stockFruit
-        action.purchaseAmount = qtyneeded
-        -- print("Added 'buy' goal")
-        table.insert(queue, action)
-        assert(action.stockType ~= nil)
-        print("move and buy fruit action added")
+        if ownsFruitshop or shoprow ~= nil then
+            -- buy food
+            action = {}
+            action.action = "buy"
+            action.stockType = enum.stockFruit
+            action.purchaseAmount = qtyneeded
+            -- print("Added 'buy' goal")
+            table.insert(queue, action)
+            assert(action.stockType ~= nil)
+            print("move and buy fruit action added")
+        end
     end
     if goal == enum.goalBuyWood then
         -- print("Goal = buy wood")
@@ -526,6 +529,10 @@ function functions.applyMovement(e, targetx, targety, velocity, dt)
     local currentx = (e.position.x)
     local currenty = (e.position.y)
 
+    -- capture the current position as the previous position
+    e.position.previousx = currentx
+    e.position.previousy = currenty
+
     -- get the vector that moves the entity closer to the destination
     local xvector = targetx - currentx  -- tiles
     local yvector = targety - currenty  -- tiles
@@ -541,8 +548,8 @@ function functions.applyMovement(e, targetx, targety, velocity, dt)
         yvector = yvector / scale
     end
 
-    currentx = cf.round(currentx + xvector, 1)
-    currenty = cf.round(currenty + yvector, 1)
+    currentx = cf.round(currentx + xvector, 0)
+    currenty = cf.round(currenty + yvector, 0)
 
     e.position.x = currentx
     e.position.y = currenty
@@ -588,6 +595,63 @@ function functions.playAudio(audionumber, isMusic, isSound)
     end
     print("playing music/sound #" .. audionumber)
 
+end
+
+function functions.determineFacing(e)
+    local prevx = e.position.previousx
+    local prevy = e.position.previousy
+    local currentx = e.position.x
+    local currenty = e.position.y
+
+    if prevx == currentx and prevy == currenty then
+        -- not moving
+        return "S"
+    end
+    if prevx == currentx and prevy > currenty then
+        -- moving up
+        return "N"
+    end
+    if prevx == currentx and prevy < currenty then
+        -- moving down
+        return "S"
+    end
+    if prevx > currentx and prevy == currenty then
+        -- moving left
+        return "W"
+    end
+    if prevx < currentx and prevy == currenty then
+        -- moving right
+        return "E"
+    end
+    if prevx < currentx and prevy > currenty then
+        -- moving up and right
+        return "NE"
+    end
+    if prevx < currentx and prevy < currenty then
+        -- moving down and right
+        return "SE"
+    end
+    if prevx > currentx and prevy < currenty then
+        -- moving down and left
+        return "SW"
+    end
+    if prevx > currentx and prevy > currenty then
+        -- moving up and left
+        return "NW"
+    end
+    error("Entity has unknown facing")
+end
+
+function functions.getImageNumberFromFacing(facing)
+    if facing == "N" then return 21 end
+    if facing == "NE" then return 26 end
+    if facing == "E" then return 31 end
+    if facing == "SE" then return 36 end
+    if facing == "S" then return 1 end
+    if facing == "SW" then return 6 end
+    if facing == "W" then return 11 end
+    if facing == "NW" then return 16 end
+    error("Unknown facing")
 end
 
 return functions

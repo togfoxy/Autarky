@@ -50,6 +50,8 @@ function comp.init()
         c.row = row or love.math.random(1, NUMBER_OF_ROWS)  -- this is updated in "applyMovement"
         c.col = col or love.math.random(1, NUMBER_OF_COLS)
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
+        c.previousx = c.x
+        c.previousy = c.y
     end)
 
     concord.component("isTile", function(c, tiletype, tileheight, improvementtype)

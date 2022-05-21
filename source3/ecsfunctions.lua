@@ -146,6 +146,7 @@ function ecsfunctions.init()
                     love.graphics.draw(IMAGES[imgnumber], drawx, drawy, 0, 0.25, 0.25, 0, 130)
                 end
 
+                -- draw if sleeping
                 local imgrotation = 0
                 if e.isPerson.queue[1] ~= nil then
                     if e.isPerson.queue[1].action == "rest" then
@@ -153,10 +154,14 @@ function ecsfunctions.init()
                     end
                 end
 
+                local facing = fun.determineFacing(e)      -- gets the cardinal facing of the entity. Is a string
+                local imagenum = fun.getImageNumberFromFacing(facing)
+            -- print(facing, imagenum)
+
                 local sprite, quad
                 if e.isPerson.gender == enum.genderMale and e:has("occupation") then
                     sprite = SPRITES[enum.spriteBlueMan]
-                    quad = QUADS[enum.spriteBlueMan][1]
+                    quad = QUADS[enum.spriteBlueMan][imagenum]
                 end
                 if e.isPerson.gender == enum.genderFemale and e:has("occupation") then
                     sprite = SPRITES[enum.spriteBlueWoman]
@@ -164,11 +169,11 @@ function ecsfunctions.init()
                 end
                 if e.isPerson.gender == enum.genderMale and not e:has("occupation") then
                     sprite = SPRITES[enum.spriteRedMan]
-                    quad = QUADS[enum.spriteRedMan][1]
+                    quad = QUADS[enum.spriteRedMan][imagenum]
                 end
                 if e.isPerson.gender == enum.genderFemale and not e:has("occupation") then
                     sprite = SPRITES[enum.spriteRedWoman]
-                    quad = QUADS[enum.spriteRedWoman][1]
+                    quad = QUADS[enum.spriteRedWoman][imagenum]
                 end
                 love.graphics.draw(sprite, quad, drawx, drawy, imgrotation, 1, 1, 10, 25)
 
@@ -287,12 +292,17 @@ function ecsfunctions.init()
 
             if currentaction.action == "idle" or currentaction.action == "rest" then
                 currentaction.timeleft = currentaction.timeleft - dt
-                if currentaction.timeleft > 3 and love.math.random(1, 10000) == 1 then
+
+                -- capture the current position as the previous position
+                e.position.previousx = e.position.x
+                e.position.previousy = e.position.y
+
+                if currentaction.timeleft > 3 and love.math.random(1, 20000) == 1 then
                     -- play audio
                     fun.playAudio(enum.audioYawn, false, true)
                 end
 
-                if currentaction.action == "rest" and e:has("residence") and e.residence.health >= 80 then
+                if currentaction.action == "rest" and e:has("residence") and e.residence.health >= 80 then  --! make the 80 value a constant
                     if currentaction.timeleft > 5 then
                         -- draw sleep bubble
                         local item = {}
@@ -317,6 +327,10 @@ function ecsfunctions.init()
                 local destx = currentaction.x
                 local desty = currentaction.y
                 if e.position.x == destx and e.position.y == desty then
+                    -- capture the current position as the previous position
+                    e.position.previousx = e.position.x
+                    e.position.previousy = e.position.y
+
                     -- arrived at destination
                     table.remove(e.isPerson.queue, 1)
                     fun.addLog(e, "Moved")
