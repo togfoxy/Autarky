@@ -113,7 +113,7 @@ function ecsfunctions.init()
                     end
                     if imptype == enum.improvementWoodsman then
                         -- determine which image from spritesheet
-                        imagenum = cf.round(e.isTile.stockLevel) + 1
+                        imagenum = math.floor(e.isTile.stockLevel) + 1
                         if imagenum > 6 then imagenum = 6 end
                         sprite = SPRITES[enum.spriteWoodPile]
                         quad = QUADS[enum.spriteWoodPile][imagenum]

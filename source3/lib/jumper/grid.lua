@@ -67,7 +67,7 @@ if (...) then
 		if n_count < 1 then
 			print("***** Jumper failed! Delta *****")
 			print(n_count)
-			print(inspect(t))
+			-- print(inspect(t))
 			-- return false
 		end
 		local init_count = t[0] and 0 or 1

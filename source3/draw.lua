@@ -122,6 +122,10 @@ function draw.HUD()
         txt.label = "h = healer"
         txt.value = nil
         table.insert(HUDText, txt)
+        txt = {}
+        txt.label = "t = tax collector"
+        txt.value = nil
+        table.insert(HUDText, txt)
     end
 
     txt = {}
