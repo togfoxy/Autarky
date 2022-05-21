@@ -154,18 +154,26 @@ function ecsfunctions.init()
                     end
                 end
 
+                -- draw the villager
                 local facing = fun.determineFacing(e)      -- gets the cardinal facing of the entity. Is a string
                 local imagenum = fun.getImageNumberFromFacing(facing)
-            -- print(facing, imagenum)
+                local imagenumoffset = cf.round(e.position.movementDelta / 0.5)
+                imagenum = imagenum + imagenumoffset
+
 
                 local sprite, quad
                 if e.isPerson.gender == enum.genderMale and e:has("occupation") then
-                    sprite = SPRITES[enum.spriteBlueMan]
-                    quad = QUADS[enum.spriteBlueMan][imagenum]
+                    if e.occupation.value == enum.jobFarmer then
+                        sprite = SPRITES[enum.spriteFarmerMan]
+                        quad = QUADS[enum.spriteFarmerMan][imagenum]
+                    else
+                        sprite = SPRITES[enum.spriteBlueMan]
+                        quad = QUADS[enum.spriteBlueMan][imagenum]
+                    end
                 end
                 if e.isPerson.gender == enum.genderFemale and e:has("occupation") then
                     sprite = SPRITES[enum.spriteBlueWoman]
-                    quad = QUADS[enum.spriteBlueWoman][1]
+                    quad = QUADS[enum.spriteBlueWoman][imagenum]
                 end
                 if e.isPerson.gender == enum.genderMale and not e:has("occupation") then
                     sprite = SPRITES[enum.spriteRedMan]
@@ -296,6 +304,7 @@ function ecsfunctions.init()
                 -- capture the current position as the previous position
                 e.position.previousx = e.position.x
                 e.position.previousy = e.position.y
+                e.position.movementDelta = 0
 
                 if currentaction.timeleft > 3 and love.math.random(1, 20000) == 1 then
                     -- play audio
@@ -337,16 +346,17 @@ function ecsfunctions.init()
                 else
                     -- move towards destination
                     if e.isPerson.stamina > 0 then
-                        local newx, newy = fun.applyMovement(e, destx, desty, WALKING_SPEED, dt)       -- entity, x, y, speed, dt
+                        fun.applyMovement(e, destx, desty, WALKING_SPEED, dt)       -- entity, x, y, speed, dt
                     else
-                        local newx, newy = fun.applyMovement(e, destx, desty, WALKING_SPEED / 2, dt)       -- entity, x, y, speed, dt
+                        fun.applyMovement(e, destx, desty, WALKING_SPEED / 2, dt)       -- entity, x, y, speed, dt
                     end
-
                 end
             end
 
             if currentaction.action == "work" then
                 currentaction.timeleft = currentaction.timeleft - dt
+
+                -- play audio
                 if currentaction.timeleft > 3 and love.math.random(1, 5000) == 1 then
                     -- play audio
                     if e.occupation.value == enum.jobFarmer then
@@ -355,13 +365,17 @@ function ecsfunctions.init()
                     if e.occupation.value == enum.jobWoodsman then
                         fun.playAudio(enum.audioSawWood, false, true)
                     end
+                    --! need healer audio?
+                    --! need carpenter audio?
                 end
+
                 -- see if they hurt themselves at work
                 if love.math.random(1, 500) == 1 then
                     local dmg = cf.round(love.math.random(1,10) * dt, 4)
                     e.isPerson.health = e.isPerson.health - dmg
                 end
 
+                -- update log
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
                     fun.addLog(e, "Worked")
@@ -371,6 +385,9 @@ function ecsfunctions.init()
                 -- print(e.occupation.value)
                 -- print(e.occupation.stockType)
                 -- print("+++")
+
+                -- reap benefits of work
+
                 if e.occupation.stockType ~= nil and e.occupation.value ~= enum.jobCarpenter then
                     -- accumulate stock
                     local row = e.position.row
@@ -394,6 +411,7 @@ function ecsfunctions.init()
                     stockgained = cf.round(stockgained, 4)
                     MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + stockgained
                 end
+
                 if e.occupation.value == enum.jobCarpenter then
                     local row = e.position.row
                     local col = e.position.col
@@ -404,7 +422,26 @@ function ecsfunctions.init()
                     e.isPerson.wealth = e.isPerson.wealth + wage          -- e = the carpenter
                     owner.isPerson.wealth = owner.isPerson.wealth - wage          -- is okay if goes negative
                 end
+
+                if e.occupation.value == enum.jobTaxCollector then
+                    -- tax all the villagers on this tile
+                    local row = e.position.row
+                    local col = e.position.col
+
+                    for k, villager in pairs(VILLAGERS) do
+                        if villager.position.row == row and villager.position.col == col and villager.isPerson.taxesOwed >= 1 then
+                           local taxamount = cf.round(villager.isPerson.taxesOwed)
+                           local collectorwage = cf.round(taxamount * TAXCOLLECTOR_WAGE,4)
+                           local villageincome = cf.round(taxamount - collectorwage,4)
+
+                           villager.isPerson.taxesOwed = villager.isPerson.taxesOwed - taxamount
+                           VILLAGE_WEALTH = VILLAGE_WEALTH + villageincome
+                           e.isPerson.wealth = e.isPerson.wealth + collectorwage
+                        end
+                    end
+                end
             end
+
             if currentaction.action == "buy" then
                 local agentrow = e.position.row
                 local agentcol = e.position.col

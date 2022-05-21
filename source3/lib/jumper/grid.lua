@@ -65,8 +65,8 @@ if (...) then
 	local check_contents = function(t,...)
 		local n_count = size(t)
 		if n_count < 1 then
-			print("Jumper failed! Delta")
-			print(t)
+			print("***** Jumper failed! Delta *****")
+			print(inspect(t))
 			-- return false
 		end
 		local init_count = t[0] and 0 or 1

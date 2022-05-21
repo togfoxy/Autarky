@@ -8,9 +8,11 @@ function draw.HUD()
     local totalstamina, avgstamina = 0,0
     local HUDText = {}
 
-    -- determine average stamina
-    -- determine average fullness
-    -- determine average wealth
+    txt = {}
+    txt.label = "Coffers: "
+    txt.value = VILLAGE_WEALTH
+    table.insert(HUDText, txt)
+
     for k, v in pairs(VILLAGERS) do
         count = count + 1
         totalwealth = totalwealth + v.isPerson.wealth

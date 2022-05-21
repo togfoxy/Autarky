@@ -66,13 +66,21 @@ function love.keyreleased( key, scancode )
 		for k,v in pairs(VILLAGERS) do
 			if v:has("isSelected") and (not v:has("occupation")) then
 				-- print("occup granted")
-				v:ensure("occupation", enum.jobHealer, enum.stockHealingHerbs, true, false, true)
+				v:ensure("occupation", enum.jobHealer, enum.stockHealingHerbs, true, false, false)
 			end
 			v:remove("isSelected")
 		end
 		VILLAGERS_SELECTED = 0
 	end
-
+	if key == "t" then
+		for k,v in pairs(VILLAGERS) do
+			if v:has("isSelected") and (not v:has("occupation")) then
+				v:ensure("occupation", enum.jobTaxCollector, nil, false, false, true)	-- jobtype, stocktype, bolProducer, bolService, bolConverter)
+			end
+			v:remove("isSelected")
+		end
+		VILLAGERS_SELECTED = 0
+	end
 
 	if key == "kp5" then
 		ZOOMFACTOR = 1

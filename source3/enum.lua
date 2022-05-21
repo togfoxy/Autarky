@@ -24,6 +24,7 @@ spriteBlueMan = 1
 spriteRedMan = 2
 spriteBlueWoman = 3
 spriteRedWoman = 4
+spriteFarmerMan = 5
 
 -- terrain types
 terrainGrassDry = 1
@@ -44,6 +45,7 @@ jobFarmer = 5
 jobWoodsman = 6
 jobCarpenter = 201      -- this is a service - not a primary producer
 jobHealer = 8           -- produces healing herbs
+jobTaxCollector = 202
 
 
 -- stock types
@@ -59,6 +61,7 @@ iconsApple = 35
 iconsAxe = 36
 iconsHammer = 231
 iconsHealer = 38
+iconsCoin = 232
 
 
 

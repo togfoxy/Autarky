@@ -46,6 +46,7 @@ function functions.loadImages()
     IMAGES[enum.iconsAxe] = love.graphics.newImage("assets/images/axeicon64x64.png")
     IMAGES[enum.iconsHammer] = love.graphics.newImage("assets/images/hammericon164x64.png")
     IMAGES[enum.iconsHealer] = love.graphics.newImage("assets/images/healericon64x64.png")
+    IMAGES[enum.iconsCoin] = love.graphics.newImage("assets/images/coinicon64x64.png")
 
     IMAGES[enum.imagesEmoteSleeping] = love.graphics.newImage("assets/images/emote_sleeps.png")
     IMAGES[enum.imagesEmoteTalking] = love.graphics.newImage("assets/images/emote_talking.png")
@@ -63,6 +64,13 @@ function functions.loadImages()
 
     SPRITES[enum.spriteRedWoman] = love.graphics.newImage("assets/images/Civilian Female Walk Red.png")
     QUADS[enum.spriteRedWoman] = cf.fromImageToQuads(SPRITES[enum.spriteRedWoman], 15, 32)
+
+    -- farmer
+    SPRITES[enum.spriteFarmerMan] = love.graphics.newImage("assets/images/Farmer Male Walk.png")
+    QUADS[enum.spriteFarmerMan] = cf.fromImageToQuads(SPRITES[enum.spriteFarmerMan], 15, 32)
+
+
+
 end
 
 function functions.loadAudio()
@@ -221,6 +229,35 @@ local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, st
     end
     if closestrow == nil then
         -- print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
+    end
+    return closestrow, closestcol
+end
+
+local function getClosestPerson(taxesOwed, startrow, startcol)
+    -- gets closest person that meets the needed criteria
+    local closestvalue = -1
+    local closestrow, closestcol
+    local closestvillager
+
+    for k, villager in pairs(VILLAGERS) do
+        if villager.isPerson.taxesOwed >= taxesOwed then
+            local endrow = villager.position.row
+            local endcol = villager.position.col
+            local cmap = convertToCollisionMap(MAP)
+            cmap[endrow][endcol] = TILEWALKABLE
+            local _, dist = cf.findPath(cmap, TILEWALKABLE, startcol, startrow, endcol, endrow, false)
+            if closestvalue < 0 or dist < closestvalue then
+               closestvalue = dist
+               closestrow = endrow
+               closestcol = endcol
+               closestvillager = villager
+            end
+        end
+    end
+    if closestrow == nil then
+        -- print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
+    else
+        print("found villager at row/col: ".. closestvillager.position.row, closestvillager.position.col)
     end
     return closestrow, closestcol
 end
@@ -386,7 +423,6 @@ function functions.createActions(goal, agent)
             -- print("Delta")
             -- time to convert things
             if agent.occupation.value == enum.jobCarpenter then
-
                 local destrow, destcol = getClosestBuilding(enum.improvementHouse, 1, agentrow, agentcol)
                 if destrow ~= nil then
                     if MAP[destrow][destcol].entity.isTile.stockLevel >= 1 then
@@ -396,6 +432,7 @@ function functions.createActions(goal, agent)
                         local woodqty = MAP[destrow][destcol].entity.isTile.stockLevel
                         local worktime = woodqty * CARPENTER_BUILD_RATE   -- seconds
                         MAP[destrow][destcol].entity.isTile.stockLevel = MAP[destrow][destcol].entity.isTile.stockLevel - woodqty
+
                         local action = {}
                         action.action = "work"
                         action.timeleft = worktime
@@ -408,6 +445,18 @@ function functions.createActions(goal, agent)
                     print("Carpenter has nothing to build")
                 end
             end
+            if agent.occupation.value == enum.jobTaxCollector then
+                local destrow, destcol = getClosestPerson(1, agentrow, agentcol)
+                if destrow ~= nil then
+                    addMoveAction(queue, agentrow, agentcol, destrow, destcol)
+                    local action = {}
+                    action.action = "work"
+                    action.timeleft = 5
+                    table.insert(queue, action)
+                    print("Collecting taxes")
+                end
+            end
+
         end
     end
     if goal == enum.goalEat then
@@ -522,7 +571,7 @@ end
 
 function functions.applyMovement(e, targetx, targety, velocity, dt)
     -- assumes an entity has a position and a target.
-    -- return a new row/col that progresses towards that target
+    -- updates the x,y for the entity (e)
 
     local distancemovedthisstep = velocity * dt
     -- map row/col to x/y
@@ -532,6 +581,8 @@ function functions.applyMovement(e, targetx, targety, velocity, dt)
     -- capture the current position as the previous position
     e.position.previousx = currentx
     e.position.previousy = currenty
+    e.position.movementDelta = e.position.movementDelta + dt
+    if e.position.movementDelta > 2 then e.position.movementDelta = 0 end
 
     -- get the vector that moves the entity closer to the destination
     local xvector = targetx - currentx  -- tiles
@@ -553,8 +604,6 @@ function functions.applyMovement(e, targetx, targety, velocity, dt)
 
     e.position.x = currentx
     e.position.y = currenty
-
-  -- print(currentx, currenty, xvector  , yvector  )
 
     e.position.row = cf.round((currenty + TOP_MARGIN) / TILE_SIZE)
     e.position.col = cf.round((currentx + LEFT_MARGIN) / TILE_SIZE)

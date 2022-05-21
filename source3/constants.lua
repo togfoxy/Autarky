@@ -3,6 +3,7 @@ constants = {}
 function constants.load()
 
     NUMBER_OF_VILLAGERS = 8
+    VILLAGE_WEALTH = 0
 
     ZOOMFACTOR = 1
     MUSIC_TOGGLE = true
@@ -55,6 +56,8 @@ function constants.load()
 
     HOUSE_WEAR = CARPENTER_BUILD_RATE / 20       -- how fast a house wears down
     HEALTH_GAIN_FROM_WOOD = 3.1
+
+    TAXCOLLECTOR_WAGE = 0.10        -- they earn 10% of the taxes they collect
 
 end
 

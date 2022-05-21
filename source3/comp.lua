@@ -52,6 +52,7 @@ function comp.init()
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
         c.previousx = c.x
         c.previousy = c.y
+        c.movementDelta = 0     -- track movement for animation purposes
     end)
 
     concord.component("isTile", function(c, tiletype, tileheight, improvementtype)
