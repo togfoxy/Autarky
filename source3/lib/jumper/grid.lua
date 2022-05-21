@@ -66,6 +66,7 @@ if (...) then
 		local n_count = size(t)
 		if n_count < 1 then
 			print("***** Jumper failed! Delta *****")
+			print(n_count)
 			print(inspect(t))
 			-- return false
 		end

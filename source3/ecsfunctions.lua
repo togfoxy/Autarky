@@ -81,8 +81,10 @@ function ecsfunctions.init()
                 if MAP[row][col].entity.isTile.improvementType ~= nil then imptype = e.isTile.improvementType end
 
                 -- draw the improvement
+                local sprite, quad
                 if imptype ~= nil then
                     local imagenumber = imptype
+                    local imagewidth, imageheight
 
                     -- draw house or house frame depending on house health
                     if imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health < 80 then
@@ -101,8 +103,19 @@ function ecsfunctions.init()
                     elseif imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health >= 80 then
                         imagenumber = enum.imagesHouse
                     end
-                    local imagewidth = IMAGES[imagenumber]:getWidth()
-                    local imageheight = IMAGES[imagenumber]:getHeight()
+                    if imptype == enum.improvementFarm then
+                        -- determine which image from spritesheet
+                        imagenum = cf.round(e.isTile.stockLevel * 4) + 1
+                        if imagenum > 5 then imagenum = 5 end
+                        sprite = SPRITES[enum.spriteAppleTree]
+                        quad = QUADS[enum.spriteAppleTree][imagenum]
+                        imagewidth, imageheight = 37,50     --! need to not hardcode this
+                    end
+
+                    if imagewidth == nil then
+                        imagewidth = IMAGES[imagenumber]:getWidth()
+                        imageheight = IMAGES[imagenumber]:getHeight()
+                    end
 
                     local drawscalex = (TILE_SIZE / imagewidth)
                     local drawscaley = (TILE_SIZE / imageheight)
@@ -111,8 +124,12 @@ function ecsfunctions.init()
                     local offsety = imageheight / 2
 
                     love.graphics.setColor(1,1,1,1)
-                    love.graphics.draw(IMAGES[imagenumber], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
 
+                    if imptype == enum.improvementFarm then
+                        love.graphics.draw(sprite, quad, drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
+                    else
+                        love.graphics.draw(IMAGES[imagenumber], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
+                    end
                     -- draw the health of the improvement as a bar
                 end
 
@@ -365,12 +382,10 @@ function ecsfunctions.init()
                     if e.occupation.value == enum.jobWoodsman then
                         fun.playAudio(enum.audioSawWood, false, true)
                     end
-                    --! need healer audio?
-                    --! need carpenter audio?
                 end
 
                 -- see if they hurt themselves at work
-                if love.math.random(1, 500) == 1 then
+                if love.math.random(1, INJURY_RATE) == 1 then
                     local dmg = cf.round(love.math.random(1,10) * dt, 4)
                     e.isPerson.health = e.isPerson.health - dmg
                 end

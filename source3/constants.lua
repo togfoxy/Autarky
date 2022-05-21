@@ -40,6 +40,7 @@ function constants.load()
 
     TIME_SCALE = 0.025
     GST_RATE = 0.10             -- 10%
+    INJURY_RATE = 300
 
     FRUIT_PRODUCTION_RATE = 1 * TIME_SCALE   -- produce 1 per time period
     FRUIT_SELL_PRICE = 1

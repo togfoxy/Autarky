@@ -32,7 +32,7 @@ function functions.loadImages()
 	IMAGES[enum.imagesGrassTeal] = love.graphics.newImage("assets/images/grass_teal_block_256x.png")
     --IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_256.png")
     IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_alpha.png")
-    IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/appletree_37x50.png")
+    -- IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/appletree_37x50.png")
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
     IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
 
@@ -53,6 +53,9 @@ function functions.loadImages()
     IMAGES[enum.imagesEmoteCash] = love.graphics.newImage("assets/images/emote_cash.png")
 
     -- quads
+    SPRITES[enum.spriteAppleTree] = love.graphics.newImage("assets/images/AppleTree_sheet.png")
+    QUADS[enum.spriteAppleTree] = cf.fromImageToQuads(SPRITES[enum.spriteAppleTree], 37, 50)
+
     SPRITES[enum.spriteBlueMan] = love.graphics.newImage("assets/images/Civilian Male Walk Blue.png")
     QUADS[enum.spriteBlueMan] = cf.fromImageToQuads(SPRITES[enum.spriteBlueMan], 15, 32)
 
@@ -420,7 +423,6 @@ function functions.createActions(goal, agent)
             end
         end
         if agent.occupation.isConverter then
-            -- print("Delta")
             -- time to convert things
             if agent.occupation.value == enum.jobCarpenter then
                 local destrow, destcol = getClosestBuilding(enum.improvementHouse, 1, agentrow, agentcol)
@@ -558,7 +560,6 @@ function functions.createActions(goal, agent)
         local houserow = agent.residence.row
         local housecol = agent.residence.col
 
-        --! only move if there is stock at the closest building
         addMoveAction(queue, agentrow, agentcol, houserow, housecol)   -- will add as many 'move' actions as necessary
         local action = {}
         action.action = "stockhouse"
