@@ -111,6 +111,14 @@ function ecsfunctions.init()
                         quad = QUADS[enum.spriteAppleTree][imagenum]
                         imagewidth, imageheight = 37,50     --! need to not hardcode this
                     end
+                    if imptype == enum.improvementWoodsman then
+                        -- determine which image from spritesheet
+                        imagenum = cf.round(e.isTile.stockLevel) + 1
+                        if imagenum > 6 then imagenum = 6 end
+                        sprite = SPRITES[enum.spriteWoodPile]
+                        quad = QUADS[enum.spriteWoodPile][imagenum]
+                        imagewidth, imageheight = 50,50     --! need to not hardcode this
+                    end
 
                     if imagewidth == nil then
                         imagewidth = IMAGES[imagenumber]:getWidth()
@@ -125,7 +133,7 @@ function ecsfunctions.init()
 
                     love.graphics.setColor(1,1,1,1)
 
-                    if imptype == enum.improvementFarm then
+                    if imptype == enum.improvementFarm or imptype == enum.improvementWoodsman then
                         love.graphics.draw(sprite, quad, drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
                     else
                         love.graphics.draw(IMAGES[imagenumber], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)

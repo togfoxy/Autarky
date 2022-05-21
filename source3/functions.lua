@@ -34,7 +34,7 @@ function functions.loadImages()
     IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_alpha.png")
     -- IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/appletree_37x50.png")
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
-    IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
+    -- IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
 
     IMAGES[enum.imagesHouse] = love.graphics.newImage("assets/images/house4.png")
     IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
@@ -55,6 +55,9 @@ function functions.loadImages()
     -- quads
     SPRITES[enum.spriteAppleTree] = love.graphics.newImage("assets/images/AppleTree_sheet.png")
     QUADS[enum.spriteAppleTree] = cf.fromImageToQuads(SPRITES[enum.spriteAppleTree], 37, 50)
+
+    SPRITES[enum.spriteWoodPile] = love.graphics.newImage("assets/images/WoodPile_sheet_50x50.png")
+    QUADS[enum.spriteWoodPile] = cf.fromImageToQuads(SPRITES[enum.spriteWoodPile], 50, 50)
 
     SPRITES[enum.spriteBlueMan] = love.graphics.newImage("assets/images/Civilian Male Walk Blue.png")
     QUADS[enum.spriteBlueMan] = cf.fromImageToQuads(SPRITES[enum.spriteBlueMan], 15, 32)
