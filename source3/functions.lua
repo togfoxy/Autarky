@@ -32,9 +32,9 @@ function functions.loadImages()
 	IMAGES[enum.imagesGrassTeal] = love.graphics.newImage("assets/images/grass_teal_block_256x.png")
     --IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_256.png")
     IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_alpha.png")
-    IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/appletree_37x50.png")
+    -- IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/appletree_37x50.png")
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
-    IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
+    -- IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
 
     IMAGES[enum.imagesHouse] = love.graphics.newImage("assets/images/house4.png")
     IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
@@ -46,23 +46,37 @@ function functions.loadImages()
     IMAGES[enum.iconsAxe] = love.graphics.newImage("assets/images/axeicon64x64.png")
     IMAGES[enum.iconsHammer] = love.graphics.newImage("assets/images/hammericon164x64.png")
     IMAGES[enum.iconsHealer] = love.graphics.newImage("assets/images/healericon64x64.png")
+    IMAGES[enum.iconsCoin] = love.graphics.newImage("assets/images/coinicon64x64.png")
 
     IMAGES[enum.imagesEmoteSleeping] = love.graphics.newImage("assets/images/emote_sleeps.png")
     IMAGES[enum.imagesEmoteTalking] = love.graphics.newImage("assets/images/emote_talking.png")
     IMAGES[enum.imagesEmoteCash] = love.graphics.newImage("assets/images/emote_cash.png")
 
     -- quads
+    SPRITES[enum.spriteAppleTree] = love.graphics.newImage("assets/images/AppleTree_sheet.png")
+    QUADS[enum.spriteAppleTree] = cf.fromImageToQuads(SPRITES[enum.spriteAppleTree], 37, 50)
+
+    SPRITES[enum.spriteWoodPile] = love.graphics.newImage("assets/images/WoodPile_sheet_50x50.png")
+    QUADS[enum.spriteWoodPile] = cf.fromImageToQuads(SPRITES[enum.spriteWoodPile], 50, 50)
+
     SPRITES[enum.spriteBlueMan] = love.graphics.newImage("assets/images/Civilian Male Walk Blue.png")
     QUADS[enum.spriteBlueMan] = cf.fromImageToQuads(SPRITES[enum.spriteBlueMan], 15, 32)
 
-    SPRITES[enum.spriteBlueWoman] = love.graphics.newImage("assets/images/Civilian Female Blue.png")
+    SPRITES[enum.spriteBlueWoman] = love.graphics.newImage("assets/images/Civilian Female Walk Blue.png")
     QUADS[enum.spriteBlueWoman] = cf.fromImageToQuads(SPRITES[enum.spriteBlueWoman], 15, 32)
 
     SPRITES[enum.spriteRedMan] = love.graphics.newImage("assets/images/Civilian Male Walk Red.png")
     QUADS[enum.spriteRedMan] = cf.fromImageToQuads(SPRITES[enum.spriteRedMan], 15, 32)
 
-    SPRITES[enum.spriteRedWoman] = love.graphics.newImage("assets/images/Civilian Female Red.png")
+    SPRITES[enum.spriteRedWoman] = love.graphics.newImage("assets/images/Civilian Female Walk Red.png")
     QUADS[enum.spriteRedWoman] = cf.fromImageToQuads(SPRITES[enum.spriteRedWoman], 15, 32)
+
+    -- farmer
+    SPRITES[enum.spriteFarmerMan] = love.graphics.newImage("assets/images/Farmer Male Walk.png")
+    QUADS[enum.spriteFarmerMan] = cf.fromImageToQuads(SPRITES[enum.spriteFarmerMan], 15, 32)
+
+
+
 end
 
 function functions.loadAudio()
@@ -225,6 +239,35 @@ local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, st
     return closestrow, closestcol
 end
 
+local function getClosestPerson(taxesOwed, startrow, startcol)
+    -- gets closest person that meets the needed criteria
+    local closestvalue = -1
+    local closestrow, closestcol
+    local closestvillager
+
+    for k, villager in pairs(VILLAGERS) do
+        if villager.isPerson.taxesOwed >= taxesOwed then
+            local endrow = villager.position.row
+            local endcol = villager.position.col
+            local cmap = convertToCollisionMap(MAP)
+            cmap[endrow][endcol] = TILEWALKABLE
+            local _, dist = cf.findPath(cmap, TILEWALKABLE, startcol, startrow, endcol, endrow, false)
+            if closestvalue < 0 or dist < closestvalue then
+               closestvalue = dist
+               closestrow = endrow
+               closestcol = endcol
+               closestvillager = villager
+            end
+        end
+    end
+    if closestrow == nil then
+        -- print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
+    else
+        print("found villager at row/col: ".. closestvillager.position.row, closestvillager.position.col)
+    end
+    return closestrow, closestcol
+end
+
 local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
     -- uses jumper to add as many "move" actions as necessary to get to the waypoint
 
@@ -286,12 +329,13 @@ function functions.buyStock(agent, stocktype, maxqty)
             local funds = purchaseamt * sellprice
 
             MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
-            MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + funds
+            MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + (funds * (1-GST_RATE))
+            MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.taxesOwed = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.taxesOwed + (funds * (GST_RATE))
             agent.isPerson.wealth = agent.isPerson.wealth - funds
         else
             print(inspect(MAP[agentrow][agentcol].entity.isTile.tileOwner))
             print(agentrow, agentcol, stocktype, stockavail)
-            -- error("Agent tried to buy stock from tile that has no owner.")
+            error("Agent tried to buy stock from tile that has no owner.")
         end
     end
     return purchaseamt
@@ -382,10 +426,8 @@ function functions.createActions(goal, agent)
             end
         end
         if agent.occupation.isConverter then
-            -- print("Delta")
             -- time to convert things
             if agent.occupation.value == enum.jobCarpenter then
-
                 local destrow, destcol = getClosestBuilding(enum.improvementHouse, 1, agentrow, agentcol)
                 if destrow ~= nil then
                     if MAP[destrow][destcol].entity.isTile.stockLevel >= 1 then
@@ -395,6 +437,7 @@ function functions.createActions(goal, agent)
                         local woodqty = MAP[destrow][destcol].entity.isTile.stockLevel
                         local worktime = woodqty * CARPENTER_BUILD_RATE   -- seconds
                         MAP[destrow][destcol].entity.isTile.stockLevel = MAP[destrow][destcol].entity.isTile.stockLevel - woodqty
+
                         local action = {}
                         action.action = "work"
                         action.timeleft = worktime
@@ -407,6 +450,18 @@ function functions.createActions(goal, agent)
                     print("Carpenter has nothing to build")
                 end
             end
+            if agent.occupation.value == enum.jobTaxCollector then
+                local destrow, destcol = getClosestPerson(1, agentrow, agentcol)
+                if destrow ~= nil then
+                    addMoveAction(queue, agentrow, agentcol, destrow, destcol)
+                    local action = {}
+                    action.action = "work"
+                    action.timeleft = 5
+                    table.insert(queue, action)
+                    print("Collecting taxes")
+                end
+            end
+
         end
     end
     if goal == enum.goalEat then
@@ -418,24 +473,27 @@ function functions.createActions(goal, agent)
                     ownsFruitshop = true
             end
         end
+        local shoprow, shopcol
         if ownsFruitshop then
             addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
         else
             -- not a farmer or rich or own farm has no stock
-            local shoprow, shopcol = getClosestBuilding(enum.improvementFarm, qtyneeded, agentrow, agentcol)
+            shoprow, shopcol = getClosestBuilding(enum.improvementFarm, qtyneeded, agentrow, agentcol)
             if shoprow ~= nil then
                 addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
             end
         end
-        -- buy food
-        action = {}
-        action.action = "buy"
-        action.stockType = enum.stockFruit
-        action.purchaseAmount = qtyneeded
-        -- print("Added 'buy' goal")
-        table.insert(queue, action)
-        assert(action.stockType ~= nil)
-        print("move and buy fruit action added")
+        if ownsFruitshop or shoprow ~= nil then
+            -- buy food
+            action = {}
+            action.action = "buy"
+            action.stockType = enum.stockFruit
+            action.purchaseAmount = qtyneeded
+            -- print("Added 'buy' goal")
+            table.insert(queue, action)
+            assert(action.stockType ~= nil)
+            print("move and buy fruit action added")
+        end
     end
     if goal == enum.goalBuyWood then
         -- print("Goal = buy wood")
@@ -505,7 +563,6 @@ function functions.createActions(goal, agent)
         local houserow = agent.residence.row
         local housecol = agent.residence.col
 
-        --! only move if there is stock at the closest building
         addMoveAction(queue, agentrow, agentcol, houserow, housecol)   -- will add as many 'move' actions as necessary
         local action = {}
         action.action = "stockhouse"
@@ -518,12 +575,18 @@ end
 
 function functions.applyMovement(e, targetx, targety, velocity, dt)
     -- assumes an entity has a position and a target.
-    -- return a new row/col that progresses towards that target
+    -- updates the x,y for the entity (e)
 
     local distancemovedthisstep = velocity * dt
     -- map row/col to x/y
     local currentx = (e.position.x)
     local currenty = (e.position.y)
+
+    -- capture the current position as the previous position
+    e.position.previousx = currentx
+    e.position.previousy = currenty
+    e.position.movementDelta = e.position.movementDelta + dt
+    if e.position.movementDelta > 2 then e.position.movementDelta = 0 end
 
     -- get the vector that moves the entity closer to the destination
     local xvector = targetx - currentx  -- tiles
@@ -540,13 +603,11 @@ function functions.applyMovement(e, targetx, targety, velocity, dt)
         yvector = yvector / scale
     end
 
-    currentx = cf.round(currentx + xvector, 1)
-    currenty = cf.round(currenty + yvector, 1)
+    currentx = cf.round(currentx + xvector, 0)
+    currenty = cf.round(currenty + yvector, 0)
 
     e.position.x = currentx
     e.position.y = currenty
-
-  -- print(currentx, currenty, xvector  , yvector  )
 
     e.position.row = cf.round((currenty + TOP_MARGIN) / TILE_SIZE)
     e.position.col = cf.round((currentx + LEFT_MARGIN) / TILE_SIZE)
@@ -587,6 +648,63 @@ function functions.playAudio(audionumber, isMusic, isSound)
     end
     print("playing music/sound #" .. audionumber)
 
+end
+
+function functions.determineFacing(e)
+    local prevx = e.position.previousx
+    local prevy = e.position.previousy
+    local currentx = e.position.x
+    local currenty = e.position.y
+
+    if prevx == currentx and prevy == currenty then
+        -- not moving
+        return "S"
+    end
+    if prevx == currentx and prevy > currenty then
+        -- moving up
+        return "N"
+    end
+    if prevx == currentx and prevy < currenty then
+        -- moving down
+        return "S"
+    end
+    if prevx > currentx and prevy == currenty then
+        -- moving left
+        return "W"
+    end
+    if prevx < currentx and prevy == currenty then
+        -- moving right
+        return "E"
+    end
+    if prevx < currentx and prevy > currenty then
+        -- moving up and right
+        return "NE"
+    end
+    if prevx < currentx and prevy < currenty then
+        -- moving down and right
+        return "SE"
+    end
+    if prevx > currentx and prevy < currenty then
+        -- moving down and left
+        return "SW"
+    end
+    if prevx > currentx and prevy > currenty then
+        -- moving up and left
+        return "NW"
+    end
+    error("Entity has unknown facing")
+end
+
+function functions.getImageNumberFromFacing(facing)
+    if facing == "N" then return 21 end
+    if facing == "NE" then return 26 end
+    if facing == "E" then return 31 end
+    if facing == "SE" then return 36 end
+    if facing == "S" then return 1 end
+    if facing == "SW" then return 6 end
+    if facing == "W" then return 11 end
+    if facing == "NW" then return 16 end
+    error("Unknown facing")
 end
 
 return functions

@@ -81,8 +81,10 @@ function ecsfunctions.init()
                 if MAP[row][col].entity.isTile.improvementType ~= nil then imptype = e.isTile.improvementType end
 
                 -- draw the improvement
+                local sprite, quad
                 if imptype ~= nil then
                     local imagenumber = imptype
+                    local imagewidth, imageheight
 
                     -- draw house or house frame depending on house health
                     if imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health < 80 then
@@ -101,8 +103,27 @@ function ecsfunctions.init()
                     elseif imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health >= 80 then
                         imagenumber = enum.imagesHouse
                     end
-                    local imagewidth = IMAGES[imagenumber]:getWidth()
-                    local imageheight = IMAGES[imagenumber]:getHeight()
+                    if imptype == enum.improvementFarm then
+                        -- determine which image from spritesheet
+                        imagenum = cf.round(e.isTile.stockLevel * 4) + 1
+                        if imagenum > 5 then imagenum = 5 end
+                        sprite = SPRITES[enum.spriteAppleTree]
+                        quad = QUADS[enum.spriteAppleTree][imagenum]
+                        imagewidth, imageheight = 37,50     --! need to not hardcode this
+                    end
+                    if imptype == enum.improvementWoodsman then
+                        -- determine which image from spritesheet
+                        imagenum = math.floor(e.isTile.stockLevel) + 1
+                        if imagenum > 6 then imagenum = 6 end
+                        sprite = SPRITES[enum.spriteWoodPile]
+                        quad = QUADS[enum.spriteWoodPile][imagenum]
+                        imagewidth, imageheight = 50,50     --! need to not hardcode this
+                    end
+
+                    if imagewidth == nil then
+                        imagewidth = IMAGES[imagenumber]:getWidth()
+                        imageheight = IMAGES[imagenumber]:getHeight()
+                    end
 
                     local drawscalex = (TILE_SIZE / imagewidth)
                     local drawscaley = (TILE_SIZE / imageheight)
@@ -111,8 +132,12 @@ function ecsfunctions.init()
                     local offsety = imageheight / 2
 
                     love.graphics.setColor(1,1,1,1)
-                    love.graphics.draw(IMAGES[imagenumber], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
 
+                    if imptype == enum.improvementFarm or imptype == enum.improvementWoodsman then
+                        love.graphics.draw(sprite, quad, drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
+                    else
+                        love.graphics.draw(IMAGES[imagenumber], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
+                    end
                     -- draw the health of the improvement as a bar
                 end
 
@@ -146,6 +171,7 @@ function ecsfunctions.init()
                     love.graphics.draw(IMAGES[imgnumber], drawx, drawy, 0, 0.25, 0.25, 0, 130)
                 end
 
+                -- draw if sleeping
                 local imgrotation = 0
                 if e.isPerson.queue[1] ~= nil then
                     if e.isPerson.queue[1].action == "rest" then
@@ -153,22 +179,34 @@ function ecsfunctions.init()
                     end
                 end
 
+                -- draw the villager
+                local facing = fun.determineFacing(e)      -- gets the cardinal facing of the entity. Is a string
+                local imagenum = fun.getImageNumberFromFacing(facing)
+                local imagenumoffset = cf.round(e.position.movementDelta / 0.5)
+                imagenum = imagenum + imagenumoffset
+
+
                 local sprite, quad
                 if e.isPerson.gender == enum.genderMale and e:has("occupation") then
-                    sprite = SPRITES[enum.spriteBlueMan]
-                    quad = QUADS[enum.spriteBlueMan][1]
+                    if e.occupation.value == enum.jobFarmer then
+                        sprite = SPRITES[enum.spriteFarmerMan]
+                        quad = QUADS[enum.spriteFarmerMan][imagenum]
+                    else
+                        sprite = SPRITES[enum.spriteBlueMan]
+                        quad = QUADS[enum.spriteBlueMan][imagenum]
+                    end
                 end
                 if e.isPerson.gender == enum.genderFemale and e:has("occupation") then
                     sprite = SPRITES[enum.spriteBlueWoman]
-                    quad = QUADS[enum.spriteBlueWoman][1]
+                    quad = QUADS[enum.spriteBlueWoman][imagenum]
                 end
                 if e.isPerson.gender == enum.genderMale and not e:has("occupation") then
                     sprite = SPRITES[enum.spriteRedMan]
-                    quad = QUADS[enum.spriteRedMan][1]
+                    quad = QUADS[enum.spriteRedMan][imagenum]
                 end
                 if e.isPerson.gender == enum.genderFemale and not e:has("occupation") then
                     sprite = SPRITES[enum.spriteRedWoman]
-                    quad = QUADS[enum.spriteRedWoman][1]
+                    quad = QUADS[enum.spriteRedWoman][imagenum]
                 end
                 love.graphics.draw(sprite, quad, drawx, drawy, imgrotation, 1, 1, 10, 25)
 
@@ -205,6 +243,7 @@ function ecsfunctions.init()
                     txt = txt .. "fullness: " .. cf.round(e.isPerson.fullness) .. "\n"
                     txt = txt .. "wealth: " .. cf.round(e.isPerson.wealth,1) .. "\n"
                     txt = txt .. "wood: " .. cf.round(e.isPerson.stockInv[enum.stockWood]) .. "\n"
+                    txt = txt .. "tax owed: " .. cf.round(e.isPerson.taxesOwed, 1) .. "\n"
 
                     love.graphics.setColor(1,1,1,1)
                     love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 60)
@@ -286,12 +325,18 @@ function ecsfunctions.init()
 
             if currentaction.action == "idle" or currentaction.action == "rest" then
                 currentaction.timeleft = currentaction.timeleft - dt
-                if currentaction.timeleft > 3 and love.math.random(1, 10000) == 1 then
+
+                -- capture the current position as the previous position
+                e.position.previousx = e.position.x
+                e.position.previousy = e.position.y
+                e.position.movementDelta = 0
+
+                if currentaction.timeleft > 3 and love.math.random(1, 20000) == 1 then
                     -- play audio
                     fun.playAudio(enum.audioYawn, false, true)
                 end
 
-                if currentaction.action == "rest" and e:has("residence") and e.residence.health >= 80 then
+                if currentaction.action == "rest" and e:has("residence") and e.residence.health >= 80 then  --! make the 80 value a constant
                     if currentaction.timeleft > 5 then
                         -- draw sleep bubble
                         local item = {}
@@ -316,22 +361,27 @@ function ecsfunctions.init()
                 local destx = currentaction.x
                 local desty = currentaction.y
                 if e.position.x == destx and e.position.y == desty then
+                    -- capture the current position as the previous position
+                    e.position.previousx = e.position.x
+                    e.position.previousy = e.position.y
+
                     -- arrived at destination
                     table.remove(e.isPerson.queue, 1)
                     fun.addLog(e, "Moved")
                 else
                     -- move towards destination
                     if e.isPerson.stamina > 0 then
-                        local newx, newy = fun.applyMovement(e, destx, desty, WALKING_SPEED, dt)       -- entity, x, y, speed, dt
+                        fun.applyMovement(e, destx, desty, WALKING_SPEED, dt)       -- entity, x, y, speed, dt
                     else
-                        local newx, newy = fun.applyMovement(e, destx, desty, WALKING_SPEED / 2, dt)       -- entity, x, y, speed, dt
+                        fun.applyMovement(e, destx, desty, WALKING_SPEED / 2, dt)       -- entity, x, y, speed, dt
                     end
-
                 end
             end
 
             if currentaction.action == "work" then
                 currentaction.timeleft = currentaction.timeleft - dt
+
+                -- play audio
                 if currentaction.timeleft > 3 and love.math.random(1, 5000) == 1 then
                     -- play audio
                     if e.occupation.value == enum.jobFarmer then
@@ -341,12 +391,14 @@ function ecsfunctions.init()
                         fun.playAudio(enum.audioSawWood, false, true)
                     end
                 end
+
                 -- see if they hurt themselves at work
-                if love.math.random(1, 500) == 1 then
+                if love.math.random(1, INJURY_RATE) == 1 then
                     local dmg = cf.round(love.math.random(1,10) * dt, 4)
                     e.isPerson.health = e.isPerson.health - dmg
                 end
 
+                -- update log
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
                     fun.addLog(e, "Worked")
@@ -356,6 +408,9 @@ function ecsfunctions.init()
                 -- print(e.occupation.value)
                 -- print(e.occupation.stockType)
                 -- print("+++")
+
+                -- reap benefits of work
+
                 if e.occupation.stockType ~= nil and e.occupation.value ~= enum.jobCarpenter then
                     -- accumulate stock
                     local row = e.position.row
@@ -379,6 +434,7 @@ function ecsfunctions.init()
                     stockgained = cf.round(stockgained, 4)
                     MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + stockgained
                 end
+
                 if e.occupation.value == enum.jobCarpenter then
                     local row = e.position.row
                     local col = e.position.col
@@ -389,7 +445,26 @@ function ecsfunctions.init()
                     e.isPerson.wealth = e.isPerson.wealth + wage          -- e = the carpenter
                     owner.isPerson.wealth = owner.isPerson.wealth - wage          -- is okay if goes negative
                 end
+
+                if e.occupation.value == enum.jobTaxCollector then
+                    -- tax all the villagers on this tile
+                    local row = e.position.row
+                    local col = e.position.col
+
+                    for k, villager in pairs(VILLAGERS) do
+                        if villager.position.row == row and villager.position.col == col and villager.isPerson.taxesOwed >= 1 then
+                           local taxamount = cf.round(villager.isPerson.taxesOwed)
+                           local collectorwage = cf.round(taxamount * TAXCOLLECTOR_WAGE,4)
+                           local villageincome = cf.round(taxamount - collectorwage,4)
+
+                           villager.isPerson.taxesOwed = villager.isPerson.taxesOwed - taxamount
+                           VILLAGE_WEALTH = VILLAGE_WEALTH + villageincome
+                           e.isPerson.wealth = e.isPerson.wealth + collectorwage
+                        end
+                    end
+                end
             end
+
             if currentaction.action == "buy" then
                 local agentrow = e.position.row
                 local agentcol = e.position.col
@@ -458,7 +533,7 @@ function ecsfunctions.init()
 
             -- apply wear to house if they have one
             if e:has("residence") then
-                --! e.residence.health = e.residence.health - (dt * HOUSE_WEAR)
+                e.residence.health = e.residence.health - (dt * HOUSE_WEAR)
                 if e.residence.health < 0 then e.residence.health = 0 end
             end
 

@@ -22,6 +22,7 @@ function comp.init()
         c.wealth = 3           -- starting amount. 3 days worth of food.
         c.stockInv[enum.stockWood] = 0
         c.log = {}
+        c.taxesOwed = 0
     end)
 
     concord.component("occupation", function(c, jobtype, stocktype, bolProducer, bolService, bolConverter)
@@ -49,6 +50,9 @@ function comp.init()
         c.row = row or love.math.random(1, NUMBER_OF_ROWS)  -- this is updated in "applyMovement"
         c.col = col or love.math.random(1, NUMBER_OF_COLS)
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
+        c.previousx = c.x
+        c.previousy = c.y
+        c.movementDelta = 0     -- track movement for animation purposes
     end)
 
     concord.component("isTile", function(c, tiletype, tileheight, improvementtype)

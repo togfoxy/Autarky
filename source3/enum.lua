@@ -5,8 +5,8 @@ imagesGrassDry = 1
 imagesGrassGreen = 2
 imagesGrassTeal = 3
 imagesWell = 4
-imagesFarm = 5          -- tree
-imagesWoodsman = 6      -- logs
+spriteAppleTree = 5     -- tree
+spriteWoodPile = 6      -- logs
 imagesHouse = 7
 imagesHealingHouse = 8
 
@@ -20,10 +20,13 @@ imagesEmoteCash = 123
 
 
 -- quads/sprites
-spriteBlueMan = 1
-spriteRedMan = 2
-spriteBlueWoman = 3
-spriteRedWoman = 4
+spriteBlueMan = 100
+spriteRedMan = 102
+spriteBlueWoman = 103
+spriteRedWoman = 104
+spriteFarmerMan = 105
+
+
 
 -- terrain types
 terrainGrassDry = 1
@@ -44,6 +47,7 @@ jobFarmer = 5
 jobWoodsman = 6
 jobCarpenter = 201      -- this is a service - not a primary producer
 jobHealer = 8           -- produces healing herbs
+jobTaxCollector = 202
 
 
 -- stock types
@@ -59,6 +63,7 @@ iconsApple = 35
 iconsAxe = 36
 iconsHammer = 231
 iconsHealer = 38
+iconsCoin = 232
 
 
 
