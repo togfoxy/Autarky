@@ -226,8 +226,9 @@ function ecsfunctions.init()
                     local drawboxy = SCREEN_HEIGHT - imageheight - 100
 
                     love.graphics.setColor(1,1,1,1)
-                    love.graphics.draw(img, 50, drawboxy)
+                    love.graphics.draw(img, 50, drawboxy, 0, 1.5, 1)
                     local texty = drawboxy + 7
+
 
                     for i = maxindex, maxindex - 4, -1 do
                         if i < 1 then break end
@@ -307,6 +308,7 @@ function ecsfunctions.init()
                 action = {}
                 action.action = "idle"      -- idle is same as rest but idle means "nothing else to do" but rest was chosen from btree
                 action.timeleft = love.math.random(10, 20)
+                action.log = "Idle"
                 table.insert(e.isPerson.queue, action)
 
                 -- add a talking bubble
@@ -361,7 +363,7 @@ function ecsfunctions.init()
                 end
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
-                    fun.addLog(e, "Rested")
+                    fun.addLog(e, currentaction.log)
                 end
             end
 
@@ -375,7 +377,7 @@ function ecsfunctions.init()
 
                     -- arrived at destination
                     table.remove(e.isPerson.queue, 1)
-                    fun.addLog(e, "Moved")
+                    fun.addLog(e, currentaction.log)
                 else
                     -- move towards destination
                     if e.isPerson.stamina > 0 then
@@ -410,7 +412,7 @@ function ecsfunctions.init()
                 -- update log
                 if currentaction.timeleft <= 0 then
                     table.remove(e.isPerson.queue, 1)
-                    fun.addLog(e, "Worked")
+                    fun.addLog(e, currentaction.log)
                 end
 
                 -- print("+++")
@@ -507,7 +509,7 @@ function ecsfunctions.init()
                 end
 
                 table.remove(e.isPerson.queue, 1)
-                fun.addLog(e, "Bought something")
+                fun.addLog(e, currentaction.log)
             end
 
             if currentaction.action == "stockhouse" then
@@ -519,7 +521,7 @@ function ecsfunctions.init()
                 local housecol = e.residence.col
                 MAP[houserow][housecol].entity.isTile.stockLevel = MAP[houserow][housecol].entity.isTile.stockLevel + woodamt
                 table.remove(e.isPerson.queue, 1)
-                fun.addLog(e, "Stocked house")
+                fun.addLog(e, currentaction.log)
             end
 
             -- ******************* --
