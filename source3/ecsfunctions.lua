@@ -86,23 +86,23 @@ function ecsfunctions.init()
                     local imagenumber = imptype
                     local imagewidth, imageheight
 
-                    -- draw house or house frame depending on house health
-                    if imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health < 80 then
-                        imagenumber = enum.imagesHouseFrame
-
-                        -- take this opportunity to draw the health bar
-                        local x1, y1, x2, y2
-                        x1 = drawx + (TILE_SIZE / 2)
-                        y1 = drawy + (TILE_SIZE / 2)
-                        x2 = x1
-                        y2 = y1 - (MAP[row][col].entity.isTile.tileOwner.residence.health / 100) * TILE_SIZE
-                        love.graphics.setColor(0,1,0,1)
-                        love.graphics.line(x1,y1,x2,y2)
-
-
-                    elseif imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health >= 80 then
-                        imagenumber = enum.imagesHouse
-                    end
+                    -- -- draw house or house frame depending on house health
+                    -- if imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health < 80 then
+                    --     imagenumber = enum.imagesHouseFrame
+                    --
+                    --     -- take this opportunity to draw the health bar
+                    --     local x1, y1, x2, y2
+                    --     x1 = drawx + (TILE_SIZE / 2)
+                    --     y1 = drawy + (TILE_SIZE / 2)
+                    --     x2 = x1
+                    --     y2 = y1 - (MAP[row][col].entity.isTile.tileOwner.residence.health / 100) * TILE_SIZE
+                    --     love.graphics.setColor(0,1,0,1)
+                    --     love.graphics.line(x1,y1,x2,y2)
+                    --
+                    --
+                    -- elseif imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health >= 80 then
+                    --     imagenumber = enum.imagesHouse
+                    -- end
                     if imptype == enum.improvementFarm then
                         -- determine which image from spritesheet
                         imagenum = cf.round(e.isTile.stockLevel * 4) + 1
@@ -119,6 +119,14 @@ function ecsfunctions.init()
                         quad = QUADS[enum.spriteWoodPile][imagenum]
                         imagewidth, imageheight = 50,50     --! need to not hardcode this
                     end
+                    if imptype == enum.improvementHouse then
+                        local househealth = MAP[row][col].entity.isTile.tileOwner.residence.health
+                        imagenum = math.floor(househealth / 25) + 1
+                        if imagenum > 5 then imagenum = 5 end
+                        sprite = SPRITES[enum.spriteHouse]
+                        quad = QUADS[enum.spriteHouse][imagenum]
+                        imagewidth, imageheight = 50,104     --! need to not hardcode this
+                    end
 
                     if imagewidth == nil then
                         imagewidth = IMAGES[imagenumber]:getWidth()
@@ -133,7 +141,7 @@ function ecsfunctions.init()
 
                     love.graphics.setColor(1,1,1,1)
 
-                    if imptype == enum.improvementFarm or imptype == enum.improvementWoodsman then
+                    if imptype == enum.improvementFarm or imptype == enum.improvementWoodsman or imptype == enum.improvementHouse then
                         love.graphics.draw(sprite, quad, drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
                     else
                         love.graphics.draw(IMAGES[imagenumber], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
@@ -374,6 +382,7 @@ function ecsfunctions.init()
                         fun.applyMovement(e, destx, desty, WALKING_SPEED, dt)       -- entity, x, y, speed, dt
                     else
                         fun.applyMovement(e, destx, desty, WALKING_SPEED / 2, dt)       -- entity, x, y, speed, dt
+    print("Walking speed = " .. WALKING_SPEED / 2)
                     end
                 end
             end
@@ -440,6 +449,7 @@ function ecsfunctions.init()
                     local col = e.position.col
                     local owner = MAP[row][col].entity.isTile.tileOwner
                     owner.residence.health = owner.residence.health + (dt * CARPENTER_BUILD_RATE * HEALTH_GAIN_FROM_WOOD)
+                    if owner.residence.health > 110 then owner.residence.health = 110 end
                     print("House health is now " .. owner.residence.health)
                     local wage = (dt * CARPENTER_WAGE)
                     e.isPerson.wealth = e.isPerson.wealth + wage          -- e = the carpenter

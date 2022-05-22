@@ -2,8 +2,9 @@ constants = {}
 
 function constants.load()
 
-    NUMBER_OF_VILLAGERS = 8
+    NUMBER_OF_VILLAGERS = 3
     VILLAGE_WEALTH = 0
+    NEW_VILLAGER_THRESHOLD = 3000   --!        -- seconds it takes for a new villager
 
     ZOOMFACTOR = 1
     MUSIC_TOGGLE = true

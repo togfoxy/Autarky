@@ -36,8 +36,8 @@ function functions.loadImages()
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
     -- IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
 
-    IMAGES[enum.imagesHouse] = love.graphics.newImage("assets/images/house4.png")
-    IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
+    -- IMAGES[enum.imagesHouse] = love.graphics.newImage("assets/images/house4.png")
+    -- IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
 
     IMAGES[enum.imagesHealingHouse] = love.graphics.newImage("assets/images/healerhouse.png")
     IMAGES[enum.imagesVillagerLog] = love.graphics.newImage("assets/images/villagerlog.png")
@@ -58,6 +58,9 @@ function functions.loadImages()
 
     SPRITES[enum.spriteWoodPile] = love.graphics.newImage("assets/images/WoodPile_sheet_50x50.png")
     QUADS[enum.spriteWoodPile] = cf.fromImageToQuads(SPRITES[enum.spriteWoodPile], 50, 50)
+
+    SPRITES[enum.spriteHouse] = love.graphics.newImage("assets/images/House_sheet_50x104.png")
+    QUADS[enum.spriteHouse] = cf.fromImageToQuads(SPRITES[enum.spriteHouse], 50, 104)
 
     SPRITES[enum.spriteBlueMan] = love.graphics.newImage("assets/images/Civilian Male Walk Blue.png")
     QUADS[enum.spriteBlueMan] = cf.fromImageToQuads(SPRITES[enum.spriteBlueMan], 15, 32)
@@ -333,9 +336,9 @@ function functions.buyStock(agent, stocktype, maxqty)
             MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.taxesOwed = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.taxesOwed + (funds * (GST_RATE))
             agent.isPerson.wealth = agent.isPerson.wealth - funds
         else
-            print(inspect(MAP[agentrow][agentcol].entity.isTile.tileOwner))
-            print(agentrow, agentcol, stocktype, stockavail)
-            error("Agent tried to buy stock from tile that has no owner.")
+            -- print(inspect(MAP[agentrow][agentcol].entity.isTile.tileOwner))
+            -- print(agentrow, agentcol, stocktype, stockavail)
+            -- error("Agent tried to buy stock from tile that has no owner.")
         end
     end
     return purchaseamt
