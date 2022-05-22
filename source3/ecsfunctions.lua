@@ -610,8 +610,8 @@ function ecsfunctions.init()
     -- capture the tile that has the well firs of all
 	WELLS = {}
 	WELLS[1] = {}
-	WELLS[1].row = love.math.random(3, NUMBER_OF_ROWS - 4)  -- The 3 and -2 keeps the well off the screen edge
-	WELLS[1].col = love.math.random(3, NUMBER_OF_COLS - 2)
+	WELLS[1].row = love.math.random(4, NUMBER_OF_ROWS - 4)  -- The 3 and -2 keeps the well off the screen edge
+	WELLS[1].col = love.math.random(4, NUMBER_OF_COLS - 4)
 
     -- debugging
     -- WELLS[1].row = 4
