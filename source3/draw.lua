@@ -137,10 +137,6 @@ function draw.HUD()
     txt.value = nil
     table.insert(HUDText, txt)
     txt = {}
-    txt.label = "\n"
-    txt.value = nil
-    table.insert(HUDText, txt)
-    txt = {}
     txt.label = "mouse wheel = zoom"
     txt.value = nil
     table.insert(HUDText, txt)

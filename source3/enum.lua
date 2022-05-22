@@ -7,7 +7,7 @@ imagesGrassTeal = 3
 imagesWell = 4
 spriteAppleTree = 5     -- tree
 spriteWoodPile = 6      -- logs
-imagesHouse = 7
+spriteHouse = 7
 imagesHealingHouse = 8
 
 imagesMud = 101

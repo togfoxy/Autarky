@@ -36,8 +36,8 @@ function functions.loadImages()
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
     -- IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
 
-    IMAGES[enum.imagesHouse] = love.graphics.newImage("assets/images/house4.png")
-    IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
+    -- IMAGES[enum.imagesHouse] = love.graphics.newImage("assets/images/house4.png")
+    -- IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
 
     IMAGES[enum.imagesHealingHouse] = love.graphics.newImage("assets/images/healerhouse.png")
     IMAGES[enum.imagesVillagerLog] = love.graphics.newImage("assets/images/villagerlog.png")
@@ -58,6 +58,9 @@ function functions.loadImages()
 
     SPRITES[enum.spriteWoodPile] = love.graphics.newImage("assets/images/WoodPile_sheet_50x50.png")
     QUADS[enum.spriteWoodPile] = cf.fromImageToQuads(SPRITES[enum.spriteWoodPile], 50, 50)
+
+    SPRITES[enum.spriteHouse] = love.graphics.newImage("assets/images/House_sheet_50x104.png")
+    QUADS[enum.spriteHouse] = cf.fromImageToQuads(SPRITES[enum.spriteHouse], 50, 104)
 
     SPRITES[enum.spriteBlueMan] = love.graphics.newImage("assets/images/Civilian Male Walk Blue.png")
     QUADS[enum.spriteBlueMan] = cf.fromImageToQuads(SPRITES[enum.spriteBlueMan], 15, 32)
@@ -292,6 +295,7 @@ local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
         if index > 1 then   -- don't apply the first waypoint as it is too close to the agent
             local action = {}
             action.action = "move"
+            action.log = "Moved"
             action.row = node.y
             action.col = node.x
             -- action.x, action.y = fun.getXYfromRowCol(action.row, action.col)    -- returns x and y (in that order)
@@ -333,9 +337,9 @@ function functions.buyStock(agent, stocktype, maxqty)
             MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.taxesOwed = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.taxesOwed + (funds * (GST_RATE))
             agent.isPerson.wealth = agent.isPerson.wealth - funds
         else
-            print(inspect(MAP[agentrow][agentcol].entity.isTile.tileOwner))
-            print(agentrow, agentcol, stocktype, stockavail)
-            error("Agent tried to buy stock from tile that has no owner.")
+            -- print(inspect(MAP[agentrow][agentcol].entity.isTile.tileOwner))
+            -- print(agentrow, agentcol, stocktype, stockavail)
+            -- error("Agent tried to buy stock from tile that has no owner.")
         end
     end
     return purchaseamt
@@ -360,7 +364,7 @@ function functions.createActions(goal, agent)
         -- add an 'idle' action at that location
         local destrow
         local destcol
-        -- if agent:has("residence") then
+        -- if agent:has("residence") then       --!
         --     -- rest at house
         --     destrow = agent.residence.row
         --     destcol = agent.residence.col
@@ -383,6 +387,7 @@ function functions.createActions(goal, agent)
         action = {}
         action.action = "rest"
         action.timeleft = ((100 - agent.isPerson.stamina) / 2) + love.math.random(5, 30)      -- some random formula. Please tweak!
+        action.log = "Rested"
         table.insert(queue, action)
     end
     if goal == enum.goalWork then
@@ -420,6 +425,7 @@ function functions.createActions(goal, agent)
                 local action = {}
                 action.action = "work"
                 action.timeleft = love.math.random(30, 60)
+                action.log = "Farmed"
                 table.insert(queue, action)
             else
                 error()     -- should never happen
@@ -441,6 +447,7 @@ function functions.createActions(goal, agent)
                         local action = {}
                         action.action = "work"
                         action.timeleft = worktime
+                        action.log = "Working on house"
                         table.insert(queue, action)
                         print("Maintaining house. ".. (worktime) .. " seconds and " .. woodqty .. " wood used.")
                     else
@@ -457,6 +464,7 @@ function functions.createActions(goal, agent)
                     local action = {}
                     action.action = "work"
                     action.timeleft = 5
+                    action.log = "Collected taxes"
                     table.insert(queue, action)
                     print("Collecting taxes")
                 end
@@ -489,6 +497,7 @@ function functions.createActions(goal, agent)
             action.action = "buy"
             action.stockType = enum.stockFruit
             action.purchaseAmount = qtyneeded
+            action.log = "Bought some fruit"
             -- print("Added 'buy' goal")
             table.insert(queue, action)
             assert(action.stockType ~= nil)
@@ -506,7 +515,7 @@ function functions.createActions(goal, agent)
             action.action = "buy"
             action.stockType = enum.stockWood
             action.purchaseAmount = qtyneeded
-            -- print("Added 'buy' goal")
+            action.log = "Bought some wood"
             table.insert(queue, action)
             print("move and buy wood action added")
             assert(action.stockType ~= nil)
@@ -538,6 +547,7 @@ function functions.createActions(goal, agent)
         action.action = "buy"
         action.stockType = enum.stockHealingHerbs
         action.purchaseAmount = qtyneeded
+        action.log = "Bought some healing herbs"
         table.insert(queue, action)
         assert(action.stockType ~= nil)
         print("move and buy herbs action added")
@@ -567,6 +577,7 @@ function functions.createActions(goal, agent)
         local action = {}
         action.action = "stockhouse"
         action.timeleft = love.math.random(30, 60)
+        action.log = "Brought wood to house"
         table.insert(queue, action)
     end
 
@@ -634,6 +645,7 @@ function functions.killAgent(uniqueid)
 end
 
 function functions.addLog(person, txtitem)
+    assert(txtitem ~= nil)
     local logitem = {}
     logitem.text = txtitem
     table.insert(person.isPerson.log, logitem)

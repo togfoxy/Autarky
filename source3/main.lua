@@ -1,4 +1,4 @@
-GAME_VERSION = "0.09"
+GAME_VERSION = "0.11"
 
 inspect = require 'lib.inspect'
 -- https://github.com/kikito/inspect.lua
@@ -86,6 +86,12 @@ function love.keyreleased( key, scancode )
 		ZOOMFACTOR = 1
 		TRANSLATEX = 960
 		TRANSLATEY = 540
+
+		-- unselect everyone
+		for k,v in pairs(VILLAGERS) do
+			v:remove("isSelected")
+		end
+		VILLAGERS_SELECTED = 0
 	end
 	if key == "m" then
 		MUSIC_TOGGLE = not MUSIC_TOGGLE
@@ -215,8 +221,9 @@ function love.update(dt)
 
     WORLD:emit("update", dt)
 
+
 	NEW_VILLAGER_TIMER = NEW_VILLAGER_TIMER + dt
-	if NEW_VILLAGER_TIMER > 300 then
+	if NEW_VILLAGER_TIMER > NEW_VILLAGER_THRESHOLD then
 		NEW_VILLAGER_TIMER = 0
 		local villager = concord.entity(WORLD)
 		:give("drawable")
