@@ -86,6 +86,12 @@ function love.keyreleased( key, scancode )
 		ZOOMFACTOR = 1
 		TRANSLATEX = 960
 		TRANSLATEY = 540
+
+		-- unselect everyone
+		for k,v in pairs(VILLAGERS) do
+			v:remove("isSelected")
+		end
+		VILLAGERS_SELECTED = 0
 	end
 	if key == "m" then
 		MUSIC_TOGGLE = not MUSIC_TOGGLE
