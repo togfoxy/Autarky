@@ -62,7 +62,7 @@ function draw.HUD()
         -- avgstocklevel = cf.round(totalstocklevel / count, 1)
         avgstocklevel = cf.round(totalstocklevel / #VILLAGERS, 1)
         txt = {}
-        txt.label = "Food: "
+        txt.label = "Avg food: "
         txt.value = avgstocklevel
         if avgstocklevel < 1 then txt.red = true else txt.red = false end
         table.insert(HUDText, txt)
@@ -82,7 +82,7 @@ function draw.HUD()
     if count > 0 then
         avgstocklevel = cf.round(totalstocklevel / count, 1)
         txt = {}
-        txt.label = "Wood: "
+        txt.label = "Avg wood: "
         txt.value = avgstocklevel
         if avgstocklevel < 1 then txt.red = true else txt.red = false end
         table.insert(HUDText, txt)
