@@ -492,7 +492,7 @@ function functions.createActions(goal, agent)
             end
         end
     end
-    if goal == enum.goalEat then
+    if goal == enum.goalEatFruit then
         local qtyneeded = 1
         local ownsFruitshop = false
         if agent:has("workplace") and agent.isPerson.wealth < (qtyneeded * FRUIT_SELL_PRICE) then
@@ -600,6 +600,25 @@ function functions.createActions(goal, agent)
         action.log = "Brought wood to house"
         table.insert(queue, action)
     end
+    if goal == enum.goalGetWelfare then
+
+    print("Goal = get welfare")
+        if fun.getJobCount(enum.jobWelfareOfficer) > 0 then
+            shoprow, shopcol = getClosestBuilding(enum.improvementWelfare, 1, agentrow, agentcol)
+            if shoprow ~= nil then
+                addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+                action = {}
+                action.action = "buy"
+                action.stockType = enum.stockWelfare
+                action.purchaseAmount = 1
+                action.log = "Seek welfare"
+                -- print("Added 'buy' goal")
+                table.insert(queue, action)
+            end
+        else
+            print("Looking for welfare but can't find an officer")
+        end
+    end
 
     return queue
 end
@@ -697,10 +716,10 @@ function functions.playAudio(audionumber, isMusic, isSound)
 end
 
 function functions.determineFacing(e)
-    local prevx = e.position.previousx
-    local prevy = e.position.previousy
-    local currentx = e.position.x
-    local currenty = e.position.y
+    local prevx = (e.position.previousx)
+    local prevy = (e.position.previousy)
+    local currentx = (e.position.x)
+    local currenty = (e.position.y)
 
     if prevx == currentx and prevy == currenty then
         -- not moving

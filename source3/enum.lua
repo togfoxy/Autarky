@@ -80,6 +80,8 @@ goalBuy = 4     -- parent goal
 goalBuyWood = 5 -- child goal
 goalStockHouse = 6
 goalHeal = 7
+goalEatFruit = 8
+goalGetWelfare = 9
 
 
 -- audio/music  ## ensure they have their own sequence without overlaps
