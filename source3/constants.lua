@@ -4,7 +4,7 @@ function constants.load()
 
     NUMBER_OF_VILLAGERS = 7
     VILLAGE_WEALTH = 0
-    NEW_VILLAGER_THRESHOLD = 300   --!        -- seconds it takes for a new villager
+    NEW_VILLAGER_THRESHOLD = 150   --!        -- seconds it takes for a new villager
 
     ZOOMFACTOR = 1
     MUSIC_TOGGLE = true
@@ -58,6 +58,8 @@ function constants.load()
 
     HOUSE_WEAR = CARPENTER_BUILD_RATE / 20       -- how fast a house wears down
     HEALTH_GAIN_FROM_WOOD = 3.1
+
+    WELFARE_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE
 
     TAXCOLLECTOR_WAGE = 0.10        -- they earn 10% of the taxes they collect
 

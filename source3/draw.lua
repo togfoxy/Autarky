@@ -10,7 +10,7 @@ function draw.HUD()
 
     txt = {}
     txt.label = "Coffers: "
-    txt.value = VILLAGE_WEALTH
+    txt.value = cf.round(VILLAGE_WEALTH)
     table.insert(HUDText, txt)
 
     for k, v in pairs(VILLAGERS) do
@@ -22,21 +22,21 @@ function draw.HUD()
     if count > 0 then
         avgwealth = cf.round(totalwealth/count, 1)
         txt = {}
-        txt.label = "Wealth: "
+        txt.label = "Avg wealth: "
         txt.value = avgwealth
         if avgwealth <= 2 then txt.red = true else txt.red = false end
         table.insert(HUDText, txt)
 
         avgfullness = cf.round(totalfullness/count)
         txt = {}
-        txt.label = "Fullness: "
+        txt.label = "Avg fullness: "
         txt.value = avgfullness
         if avgfullness <= 30 then txt.red = true else txt.red = false end
         table.insert(HUDText, txt)
 
         avgstamina = cf.round(totalstamina/count)
         txt = {}
-        txt.label = "Stamina: "
+        txt.label = "Avg stamina: "
         txt.value = avgstamina
         if avgstamina <= 30 then txt.red = true else txt.red = false end
         table.insert(HUDText, txt)
@@ -111,11 +111,11 @@ function draw.HUD()
         txt.value = nil
         table.insert(HUDText, txt)
         txt = {}
-        txt.label = "w = woodsman"
+        txt.label = "l = lumberjack"
         txt.value = nil
         table.insert(HUDText, txt)
         txt = {}
-        txt.label = "c = carpenter"
+        txt.label = "b = builder"
         txt.value = nil
         table.insert(HUDText, txt)
         txt = {}
@@ -124,6 +124,10 @@ function draw.HUD()
         table.insert(HUDText, txt)
         txt = {}
         txt.label = "t = tax collector"
+        txt.value = nil
+        table.insert(HUDText, txt)
+        txt = {}
+        txt.label = "w = welfare officer"
         txt.value = nil
         table.insert(HUDText, txt)
     end

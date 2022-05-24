@@ -384,7 +384,6 @@ function ecsfunctions.init()
                         fun.applyMovement(e, destx, desty, WALKING_SPEED, dt)       -- entity, x, y, speed, dt
                     else
                         fun.applyMovement(e, destx, desty, WALKING_SPEED / 2, dt)       -- entity, x, y, speed, dt
-    print("Walking speed = " .. WALKING_SPEED / 2)
                     end
                 end
             end
@@ -451,7 +450,10 @@ function ecsfunctions.init()
                     local col = e.position.col
                     local owner = MAP[row][col].entity.isTile.tileOwner
                     owner.residence.health = owner.residence.health + (dt * CARPENTER_BUILD_RATE * HEALTH_GAIN_FROM_WOOD)
-                    if owner.residence.health > 110 then owner.residence.health = 110 end
+                    if owner.residence.health > 110 then
+                        owner.residence.health = 110
+                        table.remove(e.isPerson.queue, 1)
+                    end
                     print("House health is now " .. owner.residence.health)
                     local wage = (dt * CARPENTER_WAGE)
                     e.isPerson.wealth = e.isPerson.wealth + wage          -- e = the carpenter
@@ -473,6 +475,21 @@ function ecsfunctions.init()
                            VILLAGE_WEALTH = VILLAGE_WEALTH + villageincome
                            e.isPerson.wealth = e.isPerson.wealth + collectorwage
                         end
+                    end
+                end
+                if e.occupation.value == enum.jobWelfareOfficer then
+                    -- convert coffer into payments
+                    local row = e.position.row
+                    local col = e.position.col
+                    local maxamt = math.floor(#VILLAGERS / 2)
+                    if MAP[row][col].entity.isTile.stockLevel < maxamt then
+                        local amt = (WELFARE_PRODUCTION_RATE * dt)
+                        if VILLAGE_WEALTH >= amt then
+                            MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + (WELFARE_PRODUCTION_RATE * dt)
+                            VILLAGE_WEALTH = VILLAGE_WEALTH - amt
+                        end
+                    else
+                        print("Too much welfare. Won't create more")
                     end
                 end
             end

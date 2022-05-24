@@ -30,23 +30,20 @@ function functions.loadImages()
 	IMAGES[enum.imagesGrassDry] = love.graphics.newImage("assets/images/grass_dry_block_256x.png")
 	IMAGES[enum.imagesGrassGreen] = love.graphics.newImage("assets/images/grass_green_block_256x.png")
 	IMAGES[enum.imagesGrassTeal] = love.graphics.newImage("assets/images/grass_teal_block_256x.png")
-    --IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_256.png")
     IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_alpha.png")
-    -- IMAGES[enum.imagesFarm] = love.graphics.newImage("assets/images/appletree_37x50.png")
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
-    -- IMAGES[enum.imagesWoodsman] = love.graphics.newImage("assets/images/woodsman.png")
 
-    -- IMAGES[enum.imagesHouse] = love.graphics.newImage("assets/images/house4.png")
-    -- IMAGES[enum.imagesHouseFrame] = love.graphics.newImage("assets/images/house4frame.png")
 
     IMAGES[enum.imagesHealingHouse] = love.graphics.newImage("assets/images/healerhouse.png")
     IMAGES[enum.imagesVillagerLog] = love.graphics.newImage("assets/images/villagerlog.png")
+    IMAGES[enum.imagesWelfareHouse] = love.graphics.newImage("assets/images/welfarehouse.png")
 
     IMAGES[enum.iconsApple] = love.graphics.newImage("assets/images/appleicon.png")
     IMAGES[enum.iconsAxe] = love.graphics.newImage("assets/images/axeicon64x64.png")
     IMAGES[enum.iconsHammer] = love.graphics.newImage("assets/images/hammericon164x64.png")
     IMAGES[enum.iconsHealer] = love.graphics.newImage("assets/images/healericon64x64.png")
     IMAGES[enum.iconsCoin] = love.graphics.newImage("assets/images/coinicon64x64.png")
+    IMAGES[enum.iconsWelfare] = love.graphics.newImage("assets/images/handshakeicon64x64.png")
 
     IMAGES[enum.imagesEmoteSleeping] = love.graphics.newImage("assets/images/emote_sleeps.png")
     IMAGES[enum.imagesEmoteTalking] = love.graphics.newImage("assets/images/emote_talking.png")
@@ -345,6 +342,30 @@ function functions.buyStock(agent, stocktype, maxqty)
     return purchaseamt
 end
 
+local function assignWorkplace(agent)
+    -- print("beta")
+    -- create a workplace
+    local workplacerow
+    local workplacecol
+
+    workplacerow, workplacecol = getBlankTile()
+    assert(workplacerow ~= nil)
+    agent:give("workplace", workplacerow, workplacecol)
+    MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
+    MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stockType
+    MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
+
+    if agent.occupation.stockType == enum.stockFruit then
+        MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = FRUIT_SELL_PRICE
+    elseif agent.occupation.stockType == enum.stockWood then
+        MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = WOOD_SELL_PRICE
+    elseif agent.occupation.stockType == enum.stockHealingHerbs then
+        MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = HERB_SELL_PRICE
+    end
+    print("Owner assigned to " .. workplacerow, workplacecol)
+
+end
+
 function functions.createActions(goal, agent)
     -- takes the goal provided by the behavior tree and returns a complex set of actions to achieve that goal
     -- returns a table of actions
@@ -396,26 +417,11 @@ function functions.createActions(goal, agent)
         -- print("alpha:" .. tostring(agent.occupation.isConverter))
         if agent.occupation.isProducer then
             if not agent:has("workplace") then
-
-                -- print("beta")
-                -- create a workplace
-                workplacerow, workplacecol = getBlankTile()
-                assert(workplacerow ~= nil)
-                agent:give("workplace", workplacerow, workplacecol)
-                MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
-                MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stockType
-                MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
-
-                if agent.occupation.stockType == enum.stockFruit then
-                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = FRUIT_SELL_PRICE
-                elseif agent.occupation.stockType == enum.stockWood then
-                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = WOOD_SELL_PRICE
-                elseif agent.occupation.stockType == enum.stockHealingHerbs then
-                    MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = HERB_SELL_PRICE
-                end
-                print("Owner assigned to " .. workplacerow, workplacecol)
+                assignWorkplace(agent)
             end
             if agent:has("workplace") then
+                workplacerow = agent.workplace.row
+                workplacecol = agent.workplace.col
 
                 -- print("charlie")
                 -- move to workplace
@@ -469,7 +475,21 @@ function functions.createActions(goal, agent)
                     print("Collecting taxes")
                 end
             end
-
+        end
+        if agent.occupation.isService then
+            if not agent:has("workplace") then
+                assignWorkplace(agent)
+            end
+            if agent:has("workplace") then
+                workplacerow = agent.workplace.row
+                workplacecol = agent.workplace.col
+                addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+                local action = {}
+                action.action = "work"
+                action.timeleft = love.math.random(30, 60)
+                action.log = "Provided welfare"
+                table.insert(queue, action)
+            end
         end
     end
     if goal == enum.goalEat then
@@ -588,7 +608,12 @@ function functions.applyMovement(e, targetx, targety, velocity, dt)
     -- assumes an entity has a position and a target.
     -- updates the x,y for the entity (e)
 
+    -- print("Target is " .. targetx, targety)
+
     local distancemovedthisstep = velocity * dt
+    -- print(distancemovedthisstep, velocity, velocity * dt)
+    --if e.isPerson.stamina < 1 then print("Hi") end
+
     -- map row/col to x/y
     local currentx = (e.position.x)
     local currenty = (e.position.y)
@@ -596,8 +621,11 @@ function functions.applyMovement(e, targetx, targety, velocity, dt)
     -- capture the current position as the previous position
     e.position.previousx = currentx
     e.position.previousy = currenty
-    e.position.movementDelta = e.position.movementDelta + dt
-    if e.position.movementDelta > 2 then e.position.movementDelta = 0 end
+    e.position.movementDelta = e.position.movementDelta + dt    -- track time between animation frames
+    if e.position.movementDelta > 2 then
+        -- reset the animation timer back to zero
+        e.position.movementDelta = 0
+    end
 
     -- get the vector that moves the entity closer to the destination
     local xvector = targetx - currentx  -- tiles
@@ -609,13 +637,19 @@ function functions.applyMovement(e, targetx, targety, velocity, dt)
     local yscale = math.abs(yvector / distancemovedthisstep)
     local scale = math.max(xscale, yscale)
 
+    --print(cf.round(scale), cf.round(xscale),cf.round(yscale))
+
     if scale > 1 then
         xvector = xvector / scale
         yvector = yvector / scale
     end
 
-    currentx = cf.round(currentx + xvector, 0)
-    currenty = cf.round(currenty + yvector, 0)
+    --print(xvector, yvector)
+
+    -- currentx = cf.round(currentx + xvector, 0)
+    -- currenty = cf.round(currenty + yvector, 0)
+    currentx = (currentx + xvector)
+    currenty = (currenty + yvector)
 
     e.position.x = currentx
     e.position.y = currenty
@@ -717,6 +751,18 @@ function functions.getImageNumberFromFacing(facing)
     if facing == "W" then return 11 end
     if facing == "NW" then return 16 end
     error("Unknown facing")
+end
+
+function functions.getJobCount(jobID)
+    local count = 0
+    for i = 1, #VILLAGERS do
+        if VILLAGERS[i]:has("occupation") then
+            if VILLAGERS[i].occupation.value == jobID then
+                count = count + 1
+            end
+        end
+    end
+    return count
 end
 
 return functions
