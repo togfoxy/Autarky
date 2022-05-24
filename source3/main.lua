@@ -42,7 +42,7 @@ function love.keyreleased( key, scancode )
 		VILLAGERS_SELECTED = 0
 	end
 	-- turn selected agent into woodsman
-	if key == "w" then
+	if key == "l" then
 		for k,v in pairs(VILLAGERS) do
 			if v:has("isSelected") and (not v:has("occupation")) then
 				-- print("occup granted")
@@ -52,7 +52,7 @@ function love.keyreleased( key, scancode )
 		end
 		VILLAGERS_SELECTED = 0
 	end
-	if key == "c" then
+	if key == "b" then
 		for k,v in pairs(VILLAGERS) do
 			if v:has("isSelected") and (not v:has("occupation")) then
 				-- print("occup granted")
@@ -78,6 +78,19 @@ function love.keyreleased( key, scancode )
 				v:ensure("occupation", enum.jobTaxCollector, nil, false, false, true)	-- jobtype, stocktype, bolProducer, bolService, bolConverter)
 			end
 			v:remove("isSelected")
+		end
+		VILLAGERS_SELECTED = 0
+	end
+
+	if key == "w" then
+		if VILLAGERS_SELECTED == 1 then	-- can only be one welfare officer
+			local numofwelfareofficers = fun.getJobCount(enum.jobWelfareOfficer)
+			for k,v in pairs(VILLAGERS) do
+				if v:has("isSelected") and (not v:has("occupation")) and numofwelfareofficers < 1 then
+					v:ensure("occupation", enum.jobWelfareOfficer, stockWelfare, false, true, false)	-- jobtype, stocktype, bolProducer, bolService, bolConverter)
+				end
+				v:remove("isSelected")
+			end
 		end
 		VILLAGERS_SELECTED = 0
 	end

@@ -290,7 +290,7 @@ function ecsfunctions.init()
                 local goal
                 if e.isPerson.fullness < 30 then
                     -- force agent to eat
-                    goal = enum.goalEat
+                    goal = enum.goalEatFruit
                 elseif e.isPerson.health < 30 then
                     goal = enum.goalHeal
                 else
@@ -384,7 +384,6 @@ function ecsfunctions.init()
                         fun.applyMovement(e, destx, desty, WALKING_SPEED, dt)       -- entity, x, y, speed, dt
                     else
                         fun.applyMovement(e, destx, desty, WALKING_SPEED / 2, dt)       -- entity, x, y, speed, dt
-    print("Walking speed = " .. WALKING_SPEED / 2)
                     end
                 end
             end
@@ -451,7 +450,10 @@ function ecsfunctions.init()
                     local col = e.position.col
                     local owner = MAP[row][col].entity.isTile.tileOwner
                     owner.residence.health = owner.residence.health + (dt * CARPENTER_BUILD_RATE * HEALTH_GAIN_FROM_WOOD)
-                    if owner.residence.health > 110 then owner.residence.health = 110 end
+                    if owner.residence.health > 110 then
+                        owner.residence.health = 110
+                        table.remove(e.isPerson.queue, 1)
+                    end
                     print("House health is now " .. owner.residence.health)
                     local wage = (dt * CARPENTER_WAGE)
                     e.isPerson.wealth = e.isPerson.wealth + wage          -- e = the carpenter
@@ -475,6 +477,21 @@ function ecsfunctions.init()
                         end
                     end
                 end
+                if e.occupation.value == enum.jobWelfareOfficer then
+                    -- convert coffer into payments
+                    local row = e.position.row
+                    local col = e.position.col
+                    local maxamt = math.floor(#VILLAGERS / 2)
+                    if MAP[row][col].entity.isTile.stockLevel < maxamt then
+                        local amt = (WELFARE_PRODUCTION_RATE * dt)
+                        if VILLAGE_WEALTH >= amt then
+                            MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + (WELFARE_PRODUCTION_RATE * dt)
+                            VILLAGE_WEALTH = VILLAGE_WEALTH - amt
+                        end
+                    else
+                        print("Too much welfare. Won't create more")
+                    end
+                end
             end
 
             if currentaction.action == "buy" then
@@ -482,20 +499,35 @@ function ecsfunctions.init()
                 local agentcol = e.position.col
                 print("Buying stock type " .. currentaction.stockType)
 
-                local amtbought = fun.buyStock(e, currentaction.stockType, currentaction.purchaseAmount)
-                print("Bought " .. amtbought .. " of stock type " .. currentaction.stockType)
-                if currentaction.stockType == enum.stockFruit then
-                    e.isPerson.fullness = e.isPerson.fullness + (amtbought * 100)   -- each food restores 100 fullness
-                    if amtbought > 0 and love.math.random(1, 1000) == 1 then
-                        fun.playAudio(enum.audioEat, false, true)
-                    end
-                elseif currentaction.stockType == enum.stockHealingHerbs then
-                    e.isPerson.health = e.isPerson.health + (amtbought * 10)
-                    if amtbought > 0 and love.math.random(1, 1000) == 1 then
-                        fun.playAudio(enum.audioBandage, false, true)
+                local amtbought
+                if currentaction.stockType ~= enum.stockWelfare then    -- welfare has a special formula
+                    amtbought = fun.buyStock(e, currentaction.stockType, currentaction.purchaseAmount)    -- this deducts stock from the shop
+                    print("Bought " .. amtbought .. " of stock type " .. currentaction.stockType)
+                    if currentaction.stockType == enum.stockFruit then
+                        e.isPerson.fullness = e.isPerson.fullness + (amtbought * 100)   -- each food restores 100 fullness
+                        if amtbought > 0 and love.math.random(1, 1000) == 1 then
+                            fun.playAudio(enum.audioEat, false, true)
+                        end
+                    elseif currentaction.stockType == enum.stockHealingHerbs then
+                        e.isPerson.health = e.isPerson.health + (amtbought * 10)
+                        if amtbought > 0 and love.math.random(1, 1000) == 1 then
+                            fun.playAudio(enum.audioBandage, false, true)
+                        end
+                    else
+                        e.isPerson.stockInv[currentaction.stockType] = e.isPerson.stockInv[currentaction.stockType] + amtbought
                     end
                 else
-                    e.isPerson.stockInv[currentaction.stockType] = e.isPerson.stockInv[currentaction.stockType] + amtbought
+                    -- handle welfare differently
+                    local agentrow = e.position.row
+                    local agentcol = e.position.col
+                    local stockavail = math.floor(MAP[agentrow][agentcol].entity.isTile.stockLevel)
+                    amtbought = math.min(stockavail, currentaction.purchaseAmount)
+                    if stockavail >= amtbought then
+                        MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - amtbought
+                        e.isPerson.wealth = e.isPerson.wealth + amtbought
+                    else
+                        print("Tried to get welfare but no stock")
+                    end
                 end
 
                 if amtbought > 0 then
@@ -523,6 +555,8 @@ function ecsfunctions.init()
                 table.remove(e.isPerson.queue, 1)
                 fun.addLog(e, currentaction.log)
             end
+
+
 
             -- ******************* --
             -- do things that don't depend on an action

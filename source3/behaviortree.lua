@@ -56,20 +56,42 @@ function behaviortree.EstablishTree()
 								-- deactivate if person is full or broke and not a farmer
 								if agent.isPerson.fullness > 70 then
 									return false
-								elseif agent.isPerson.wealth < FRUIT_SELL_PRICE and agent:has("occupation") then
-									if agent.occupation.value == enum.jobFarmer then
-										return true
-									else
-										return false
-									end
 								else
-									if agent.isPerson.wealth >= FRUIT_SELL_PRICE then
-										return true
-									else
-										return false
-									end
+									return true
 								end
 							end
+
+	TREE.child[3].child = {}
+	TREE.child[3].child[1] = {}
+	TREE.child[3].child[1].goal = enum.goalEatFruit
+	TREE.child[3].child[1].priority = function(agent)
+										return 5
+									end
+	TREE.child[3].child[1].activate = function(agent)
+ 										if agent.isPerson.wealth >= FRUIT_SELL_PRICE then
+											return true
+										elseif agent.isPerson.wealth < FRUIT_SELL_PRICE and agent:has("occupation") and agent.occupation.value == enum.jobFarmer then
+											if agent.occupation.value == enum.jobFarmer then	-- this is nested to avoid error with nils
+												return true
+											else
+												return false
+											end
+										else
+											return false
+										end
+									end
+	TREE.child[3].child[2] = {}
+	TREE.child[3].child[2].goal = enum.goalGetWelfare
+	TREE.child[3].child[2].priority = function(agent)
+										return 5
+									end
+	TREE.child[3].child[2].activate = function(agent)
+										if agent.isPerson.wealth >= FRUIT_SELL_PRICE then
+											return false
+										else
+											return true
+										end
+									end
 
 	TREE.child[4] = {}								-- parent node
 	TREE.child[4].goal = enum.goalBuy
@@ -92,7 +114,7 @@ function behaviortree.EstablishTree()
 										return 5
 									end
 	TREE.child[4].child[1].activate = function(agent)
-										if agent.isPerson.wealth >= WOOD_SELL_PRICE + 1 then
+										if agent.isPerson.wealth >= WOOD_SELL_PRICE + 1 and agent.isPerson.stockInv[enum.stockWood] <= 2 then
 											return true
 										else
 											return false
@@ -128,6 +150,8 @@ function behaviortree.EstablishTree()
 									return false
 								end
 							end
+
+
 end
 
 return behaviortree

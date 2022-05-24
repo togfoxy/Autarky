@@ -9,6 +9,7 @@ spriteAppleTree = 5     -- tree
 spriteWoodPile = 6      -- logs
 spriteHouse = 7
 imagesHealingHouse = 8
+imagesWelfareHouse = 9
 
 imagesMud = 101
 imagesHouseFrame = 102
@@ -40,6 +41,7 @@ improvementFarm = 5 -- job, improvement and image should be the same integer val
 improvementWoodsman = 6
 improvementHouse = 7
 improvementHealer = 8
+improvementWelfare = 9
 
 -- jobs/occupations
 -- NOTE: ensure these occupations align to the improvement type (which aligns to the image!)
@@ -47,6 +49,7 @@ jobFarmer = 5
 jobWoodsman = 6
 jobCarpenter = 201      -- this is a service - not a primary producer
 jobHealer = 8           -- produces healing herbs
+jobWelfareOfficer = 9
 jobTaxCollector = 202
 
 
@@ -56,6 +59,7 @@ stockFruit = 5
 stockWood = 6
 stockHouse = 7
 stockHealingHerbs = 8
+stockWelfare = 9
 
 -- occupation icons
 -- NOTE: ensure this lines up with the job + 30 for offset to avoid clashes
@@ -64,6 +68,7 @@ iconsAxe = 36
 iconsHammer = 231
 iconsHealer = 38
 iconsCoin = 232
+iconsWelfare = 39
 
 
 
@@ -75,6 +80,8 @@ goalBuy = 4     -- parent goal
 goalBuyWood = 5 -- child goal
 goalStockHouse = 6
 goalHeal = 7
+goalEatFruit = 8
+goalGetWelfare = 9
 
 
 -- audio/music  ## ensure they have their own sequence without overlaps
