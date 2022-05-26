@@ -2,6 +2,9 @@ actionrest = {}
 
 function actionrest.rest(e, currentaction, dt)
 
+    local agentrow = e.position.row
+    local agentcol = e.position.col
+    
     currentaction.timeleft = currentaction.timeleft - dt
 
     -- capture the current position as the previous position

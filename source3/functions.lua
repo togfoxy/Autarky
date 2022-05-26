@@ -431,9 +431,11 @@ function functions.createActions(goal, agent)
                 -- add a 'move' action
                 addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
                 -- do work
+                local time1 = love.math.random(20, 45)      -- some random formula. Please tweak!
+                local time2 = agent.isPerson.fullness
                 local action = {}
                 action.action = "work"
-                action.timeleft = love.math.random(20, 45)
+                action.timeleft = math.min(time1, time2)
                 action.log = "Farmed"
                 table.insert(queue, action)
             else

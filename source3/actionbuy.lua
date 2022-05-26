@@ -16,7 +16,7 @@ function actionbuy.buy(e, currentaction)
                 fun.playAudio(enum.audioEat, false, true)
             end
         elseif currentaction.stockType == enum.stockHealingHerbs then
-            e.isPerson.health = e.isPerson.health + (amtbought * 10)
+            e.isPerson.health = e.isPerson.health + (amtbought * HERB_HEAL_AMOUNT)
             if amtbought > 0 and love.math.random(1, 1000) == 1 then
                 fun.playAudio(enum.audioBandage, false, true)
             end

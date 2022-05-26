@@ -72,8 +72,13 @@ function actionwork.work(e, currentaction, dt)
         end
         print("House health is now " .. owner.residence.health)
         local wage = (dt * CARPENTER_WAGE)
-        e.isPerson.wealth = e.isPerson.wealth + wage          -- e = the carpenter
+        local taxamount = wage * 0.10
+        e.isPerson.wealth = e.isPerson.wealth + wage - taxamount          -- e = the carpenter
+        VILLAGE_WEALTH = VILLAGE_WEALTH + taxamount
         owner.isPerson.wealth = owner.isPerson.wealth - wage          -- is okay if goes negative
+        if owner.isPerson.wealth <= 1.1 then
+            table.remove(e.isPerson.queue, 1)   -- stop the job when home owner runs low on money
+        end
     end
 
     if e.occupation.value == enum.jobTaxCollector then

@@ -2,7 +2,7 @@ constants = {}
 
 function constants.load()
 
-    NUMBER_OF_VILLAGERS = 3
+    NUMBER_OF_VILLAGERS = 7
     VILLAGE_WEALTH = 0
     NEW_VILLAGER_THRESHOLD = 300   --!        -- seconds it takes for a new villager
 
@@ -42,7 +42,7 @@ function constants.load()
     WALKING_SPEED = 900
     TIME_SCALE = 0.05          --0.025
     GST_RATE = 0.10             -- 10%
-    INJURY_RATE = 500             -- higher numbers = more injuries
+    INJURY_RATE = 40             -- higher numbers = more injuries
     STAMINA_USE_RATE = 17
     STAMINA_RECOVERY_RATE = STAMINA_USE_RATE * 3
 
@@ -52,8 +52,9 @@ function constants.load()
     WOOD_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 3
     WOOD_SELL_PRICE = FRUIT_SELL_PRICE * 3
 
-    HERB_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 6
-    HERB_SELL_PRICE = FRUIT_SELL_PRICE * 6
+    HERB_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 1
+    HERB_SELL_PRICE = FRUIT_SELL_PRICE * 1
+    HERB_HEAL_AMOUNT = cf.round(HERB_SELL_PRICE / 4, 4)      -- heal 1 health per 4 wealth earned
 
     CARPENTER_BUILD_RATE = FRUIT_PRODUCTION_RATE * 100    -- how much time the carpenter spends on one wood
     CARPENTER_INCOME_PER_JOB = 5
