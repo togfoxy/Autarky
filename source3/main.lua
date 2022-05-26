@@ -22,6 +22,13 @@ bt = require 'behaviortree'
 draw = require 'draw'
 con = require 'constants'
 
+actbuy = require 'actionbuy'
+actidle = require 'actionidle'
+actmove = require 'actionmove'
+actrest = require 'actionrest'
+actstockhouse = require 'actionstockhouse'
+actwork = require 'actionwork'
+
 con.load()	-- load the constants
 
 
