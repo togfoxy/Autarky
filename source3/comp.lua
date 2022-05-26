@@ -16,8 +16,14 @@ function comp.init()
         c.stamina = 100         -- fully rested
         c.fullness = 125        -- hunger. Start a little topped up so they have a chance to establish themselves.
         c.stockInv = {}         -- track how much of each stock is owned
+        c.stockBelief = {}
         for i = 1, 99 do
             c.stockInv[i] = 0
+            c.stockBelief[i] = {}
+            c.stockBelief[i][1] = 1       -- lowest belief for stock item 'i'
+            c.stockBelief[i][2] = 2       -- highest belief
+            c.stockBelief[i][3] = 0       -- total financial amount transacted    -- finanical amount / count = average for item 'i'
+            c.stockBelief[i][4] = 0       -- total count transacted
         end
         c.wealth = 3          -- starting amount. 3 days worth of food.
         c.stockInv[enum.stockWood] = 0

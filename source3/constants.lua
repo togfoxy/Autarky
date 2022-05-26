@@ -52,8 +52,8 @@ function constants.load()
     WOOD_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 3
     WOOD_SELL_PRICE = FRUIT_SELL_PRICE * 3
 
-    HERB_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 1
-    HERB_SELL_PRICE = FRUIT_SELL_PRICE * 1
+    HERB_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 2
+    HERB_SELL_PRICE = FRUIT_SELL_PRICE * 2
     HERB_HEAL_AMOUNT = cf.round(HERB_SELL_PRICE / 4, 4)      -- heal 1 health per 4 wealth earned
 
     CARPENTER_BUILD_RATE = FRUIT_PRODUCTION_RATE * 100    -- how much time the carpenter spends on one wood

@@ -352,7 +352,8 @@ function ecsfunctions.init()
             end
 
             if currentaction.action == "buy" then
-                actbuy.buy(e, currentaction)
+                -- actbuy.buy(e, currentaction)
+                actbuy.newbuy(e, currentaction)
             end
 
             if currentaction.action == "stockhouse" then

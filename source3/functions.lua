@@ -606,8 +606,6 @@ function functions.createActions(goal, agent)
         table.insert(queue, action)
     end
     if goal == enum.goalGetWelfare then
-
-    print("Goal = get welfare")
         if fun.getJobCount(enum.jobWelfareOfficer) > 0 then
             shoprow, shopcol = getClosestBuilding(enum.improvementWelfare, 1, agentrow, agentcol)
             if shoprow ~= nil then
