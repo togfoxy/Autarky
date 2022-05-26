@@ -2,7 +2,7 @@ constants = {}
 
 function constants.load()
 
-    NUMBER_OF_VILLAGERS = 7
+    NUMBER_OF_VILLAGERS = 3
     VILLAGE_WEALTH = 0
     NEW_VILLAGER_THRESHOLD = 300   --!        -- seconds it takes for a new villager
 
@@ -25,7 +25,7 @@ function constants.load()
     MAP = {}			-- a 2d table of tiles
     VILLAGERS = {}
     TREE = {}			-- a tree that holds all possible behaviours for a person
-    WALKING_SPEED = 50
+
 
     DEBUG = false
     NEW_VILLAGER_TIMER = 0
@@ -39,9 +39,12 @@ function constants.load()
 
     -- Economy stuff
 
+    WALKING_SPEED = 900
     TIME_SCALE = 0.05          --0.025
     GST_RATE = 0.10             -- 10%
-    INJURY_RATE = 300
+    INJURY_RATE = 500             -- higher numbers = more injuries
+    STAMINA_USE_RATE = 17
+    STAMINA_RECOVERY_RATE = STAMINA_USE_RATE * 3
 
     FRUIT_PRODUCTION_RATE = 1 * TIME_SCALE   -- produce 1 per time period
     FRUIT_SELL_PRICE = 1

@@ -291,6 +291,8 @@ function ecsfunctions.init()
                 if e.isPerson.fullness < 30 then
                     -- force agent to eat
                     goal = enum.goalEatFruit
+                elseif e.isPerson.stamina < 30 then
+                    goal = enum.goalRest
                 elseif e.isPerson.health < 30 then
                     goal = enum.goalHeal
                 else
@@ -333,230 +335,29 @@ function ecsfunctions.init()
             --     -- print(MAP[agentrow][agentcol].entity.isTile.improvementType)
             -- end
 
-            if currentaction.action == "idle" or currentaction.action == "rest" then
-                currentaction.timeleft = currentaction.timeleft - dt
+            if currentaction.action == "idle" then
+                actidle.idle(e, currentaction, dt)
+            end
 
-                -- capture the current position as the previous position
-                e.position.previousx = e.position.x
-                e.position.previousy = e.position.y
-                e.position.movementDelta = 0
-
-                if currentaction.timeleft > 3 and love.math.random(1, 20000) == 1 then
-                    -- play audio
-                    fun.playAudio(enum.audioYawn, false, true)
-                end
-
-                if currentaction.action == "rest" and e:has("residence") and e.residence.health >= 80 then  --! make the 80 value a constant
-                    if currentaction.timeleft > 5 then
-                        -- draw sleep bubble
-                        local item = {}
-                        item.imagenumber = enum.imagesEmoteSleeping
-                        item.start = 0
-                        item.stop = math.min(5, currentaction.timeleft)
-                        item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
-                        table.insert(DRAWQUEUE, item)
-                    end
-                    -- recover stamina faster
-                    e.isPerson.stamina = e.isPerson.stamina + (2 * dt)
-                else
-                    e.isPerson.stamina = e.isPerson.stamina + (1.5 * dt)        -- gain 1 per second + recover the 0.5 applied above
-                end
-                if currentaction.timeleft <= 0 then
-                    table.remove(e.isPerson.queue, 1)
-                    fun.addLog(e, currentaction.log)
-                end
+            if currentaction.action == "rest" then
+                actrest.rest(e, currentaction, dt)
             end
 
             if currentaction.action == "move" then
-                local destx = currentaction.x
-                local desty = currentaction.y
-                if e.position.x == destx and e.position.y == desty then
-                    -- capture the current position as the previous position
-                    e.position.previousx = e.position.x
-                    e.position.previousy = e.position.y
-
-                    -- arrived at destination
-                    table.remove(e.isPerson.queue, 1)
-                    fun.addLog(e, currentaction.log)
-                else
-                    -- move towards destination
-                    if e.isPerson.stamina > 0 then
-                        fun.applyMovement(e, destx, desty, WALKING_SPEED, dt)       -- entity, x, y, speed, dt
-                    else
-                        fun.applyMovement(e, destx, desty, WALKING_SPEED / 2, dt)       -- entity, x, y, speed, dt
-                    end
-                end
+                actmove.move(e, currentaction, dt)
             end
 
             if currentaction.action == "work" then
-                currentaction.timeleft = currentaction.timeleft - dt
-
-                -- play audio
-                if currentaction.timeleft > 3 and love.math.random(1, 5000) == 1 then
-                    -- play audio
-                    if e.occupation.value == enum.jobFarmer then
-                        fun.playAudio(enum.audioRustle, false, true)
-                    end
-                    if e.occupation.value == enum.jobWoodsman then
-                        fun.playAudio(enum.audioSawWood, false, true)
-                    end
-                end
-
-                -- see if they hurt themselves at work
-                if love.math.random(1, INJURY_RATE) == 1 then
-                    local dmg = cf.round(love.math.random(1,10) * dt, 4)
-                    e.isPerson.health = e.isPerson.health - dmg
-                end
-
-                -- update log
-                if currentaction.timeleft <= 0 then
-                    table.remove(e.isPerson.queue, 1)
-                    fun.addLog(e, currentaction.log)
-                end
-
-                -- print("+++")
-                -- print(e.occupation.value)
-                -- print(e.occupation.stockType)
-                -- print("+++")
-
-                -- reap benefits of work
-
-                if e.occupation.stockType ~= nil and e.occupation.value ~= enum.jobCarpenter then
-                    -- accumulate stock
-                    local row = e.position.row
-                    local col = e.position.col
-                    if MAP[row][col].stockLevel == nil then MAP[row][col].stockLevel = 0 end
-
-                    local stockgained
-                    if e.occupation.stockType == enum.stockFruit then
-                        stockgained = (FRUIT_PRODUCTION_RATE * dt)
-                    elseif e.occupation.stockType == enum.stockWood then
-                        stockgained = (WOOD_PRODUCTION_RATE * dt)
-                    elseif e.occupation.stockType == enum.stockHealingHerbs then
-                        stockgained = (HERB_PRODUCTION_RATE * dt)
-                    end
-                    assert(stockgained ~= nil)
-
-                    if e.isPerson.stamina <= 0 then
-                        stockgained = stockgained / 2   -- less productive when tired
-                    end
-
-                    stockgained = cf.round(stockgained, 4)
-                    MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + stockgained
-                end
-
-                if e.occupation.value == enum.jobCarpenter then
-                    local row = e.position.row
-                    local col = e.position.col
-                    local owner = MAP[row][col].entity.isTile.tileOwner
-                    owner.residence.health = owner.residence.health + (dt * CARPENTER_BUILD_RATE * HEALTH_GAIN_FROM_WOOD)
-                    if owner.residence.health > 110 then
-                        owner.residence.health = 110
-                        table.remove(e.isPerson.queue, 1)
-                    end
-                    print("House health is now " .. owner.residence.health)
-                    local wage = (dt * CARPENTER_WAGE)
-                    e.isPerson.wealth = e.isPerson.wealth + wage          -- e = the carpenter
-                    owner.isPerson.wealth = owner.isPerson.wealth - wage          -- is okay if goes negative
-                end
-
-                if e.occupation.value == enum.jobTaxCollector then
-                    -- tax all the villagers on this tile
-                    local row = e.position.row
-                    local col = e.position.col
-
-                    for k, villager in pairs(VILLAGERS) do
-                        if villager.position.row == row and villager.position.col == col and villager.isPerson.taxesOwed >= 1 then
-                           local taxamount = cf.round(villager.isPerson.taxesOwed)
-                           local collectorwage = cf.round(taxamount * TAXCOLLECTOR_WAGE,4)
-                           local villageincome = cf.round(taxamount - collectorwage,4)
-
-                           villager.isPerson.taxesOwed = villager.isPerson.taxesOwed - taxamount
-                           VILLAGE_WEALTH = VILLAGE_WEALTH + villageincome
-                           e.isPerson.wealth = e.isPerson.wealth + collectorwage
-                        end
-                    end
-                end
-                if e.occupation.value == enum.jobWelfareOfficer then
-                    -- convert coffer into payments
-                    local row = e.position.row
-                    local col = e.position.col
-                    local maxamt = math.floor(#VILLAGERS / 2)
-                    if MAP[row][col].entity.isTile.stockLevel < maxamt then
-                        local amt = (WELFARE_PRODUCTION_RATE * dt)
-                        if VILLAGE_WEALTH >= amt then
-                            MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + (WELFARE_PRODUCTION_RATE * dt)
-                            VILLAGE_WEALTH = VILLAGE_WEALTH - amt
-                        end
-                    else
-                        print("Too much welfare. Won't create more")
-                    end
-                end
+                actwork.work(e, currentaction, dt)
             end
 
             if currentaction.action == "buy" then
-                local agentrow = e.position.row
-                local agentcol = e.position.col
-                print("Buying stock type " .. currentaction.stockType)
-
-                local amtbought
-                if currentaction.stockType ~= enum.stockWelfare then    -- welfare has a special formula
-                    amtbought = fun.buyStock(e, currentaction.stockType, currentaction.purchaseAmount)    -- this deducts stock from the shop
-                    print("Bought " .. amtbought .. " of stock type " .. currentaction.stockType)
-                    if currentaction.stockType == enum.stockFruit then
-                        e.isPerson.fullness = e.isPerson.fullness + (amtbought * 100)   -- each food restores 100 fullness
-                        if amtbought > 0 and love.math.random(1, 1000) == 1 then
-                            fun.playAudio(enum.audioEat, false, true)
-                        end
-                    elseif currentaction.stockType == enum.stockHealingHerbs then
-                        e.isPerson.health = e.isPerson.health + (amtbought * 10)
-                        if amtbought > 0 and love.math.random(1, 1000) == 1 then
-                            fun.playAudio(enum.audioBandage, false, true)
-                        end
-                    else
-                        e.isPerson.stockInv[currentaction.stockType] = e.isPerson.stockInv[currentaction.stockType] + amtbought
-                    end
-                else
-                    -- handle welfare differently
-                    local agentrow = e.position.row
-                    local agentcol = e.position.col
-                    local stockavail = math.floor(MAP[agentrow][agentcol].entity.isTile.stockLevel)
-                    amtbought = math.min(stockavail, currentaction.purchaseAmount)
-                    if stockavail >= amtbought then
-                        MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - amtbought
-                        e.isPerson.wealth = e.isPerson.wealth + amtbought
-                    else
-                        print("Tried to get welfare but no stock")
-                    end
-                end
-
-                if amtbought > 0 then
-                    -- add a money bubble
-                    local item = {}
-                    item.imagenumber = enum.imagesEmoteCash
-                    item.start = 0
-                    item.stop = 3
-                    item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
-                    table.insert(DRAWQUEUE, item)
-                end
-
-                table.remove(e.isPerson.queue, 1)
-                fun.addLog(e, currentaction.log)
+                actbuy.buy(e, currentaction)
             end
 
             if currentaction.action == "stockhouse" then
-                -- transfer wood from agent to house
-                local woodamt = e.isPerson.stockInv[enum.stockWood]
-                e.isPerson.stockInv[enum.stockWood] = 0
-
-                local houserow = e.residence.row
-                local housecol = e.residence.col
-                MAP[houserow][housecol].entity.isTile.stockLevel = MAP[houserow][housecol].entity.isTile.stockLevel + woodamt
-                table.remove(e.isPerson.queue, 1)
-                fun.addLog(e, currentaction.log)
+                actstockhouse.stockhouse(e, currentaction)
             end
-
-
 
             -- ******************* --
             -- do things that don't depend on an action
@@ -566,20 +367,20 @@ function ecsfunctions.init()
 
             -- add mud
             if MAP[row][col].entity.isTile.improvementType == nil then
-                MAP[row][col].entity.isTile.mudLevel = MAP[row][col].entity.isTile.mudLevel + (dt * 1.5)
+                MAP[row][col].entity.isTile.mudLevel = MAP[row][col].entity.isTile.mudLevel + (dt * 1.5 * TIME_SCALE)       --! make constants
             end
             if MAP[row][col].entity.isTile.mudLevel > 255 then MAP[row][col].entity.isTile.mudLevel = 255 end
 
             -- reduce stamina
-            e.isPerson.stamina = e.isPerson.stamina - (0.5 * dt)
+            e.isPerson.stamina = e.isPerson.stamina - (STAMINA_USE_RATE * TIME_SCALE * dt)   --! make constants
             if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
 
             -- reduce fullness
-            e.isPerson.fullness = e.isPerson.fullness - (0.33 * dt)
+            e.isPerson.fullness = e.isPerson.fullness - (10 * TIME_SCALE * dt)    --! make constants
 
             -- apply wear to house if they have one
             if e:has("residence") then
-                e.residence.health = e.residence.health - (dt * HOUSE_WEAR)
+                e.residence.health = e.residence.health - (dt * TIME_SCALE * HOUSE_WEAR)
                 if e.residence.health < 0 then e.residence.health = 0 end
             end
 
@@ -630,7 +431,7 @@ function ecsfunctions.init()
         for _, e in ipairs(self.pool) do
 
             -- decrease mud so that grass grows
-            e.isTile.mudLevel = cf.round(e.isTile.mudLevel - (dt / 3), 4)
+            e.isTile.mudLevel = cf.round(e.isTile.mudLevel - (dt / 3) * TIME_SCALE, 4)
             if e.isTile.mudLevel < 0 then e.isTile.mudLevel = 0 end
         end
     end
