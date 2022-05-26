@@ -385,11 +385,11 @@ function functions.createActions(goal, agent)
         -- add an 'idle' action at that location
         local destrow
         local destcol
-        -- if agent:has("residence") then       --!
-        --     -- rest at house
-        --     destrow = agent.residence.row
-        --     destcol = agent.residence.col
-        -- else
+        if agent:has("residence") then       --!
+             -- rest at house
+            destrow = agent.residence.row
+            destcol = agent.residence.col
+         else
             -- choose a random location near the well
             local random1 = love.math.random(-3, 3)
             local random2 = love.math.random(-3, 3)
@@ -399,7 +399,7 @@ function functions.createActions(goal, agent)
             if destrow > NUMBER_OF_ROWS then destrow = NUMBER_OF_ROWS end
             if destcol < 1 then destcol = 1 end
             if destcol > NUMBER_OF_COLS then destcol = NUMBER_OF_COLS end
-        -- end
+        end
 
         -- add a 'move' action
         addMoveAction(queue, agentrow, agentcol, destrow, destcol)   -- will add as many 'move' actions as necessary
@@ -407,7 +407,10 @@ function functions.createActions(goal, agent)
         -- add an 'idle' action
         action = {}
         action.action = "rest"
-        action.timeleft = ((100 - agent.isPerson.stamina) / 2) + love.math.random(5, 30)      -- some random formula. Please tweak!
+
+        local time1 = ((100 - agent.isPerson.stamina) / 2) + love.math.random(5, 30)      -- some random formula. Please tweak!
+        local time2 = agent.isPerson.fullness
+        action.timeleft = math.min(time1, time2)    -- rest as much as you want (time1) but don't starve doing it (time2)
         action.log = "Rested"
         table.insert(queue, action)
     end
@@ -428,9 +431,11 @@ function functions.createActions(goal, agent)
                 -- add a 'move' action
                 addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
                 -- do work
+                local time1 = love.math.random(20, 45)      -- some random formula. Please tweak!
+                local time2 = agent.isPerson.fullness
                 local action = {}
                 action.action = "work"
-                action.timeleft = love.math.random(30, 60)
+                action.timeleft = math.min(time1, time2)
                 action.log = "Farmed"
                 table.insert(queue, action)
             else
@@ -629,7 +634,7 @@ function functions.applyMovement(e, targetx, targety, velocity, dt)
 
     -- print("Target is " .. targetx, targety)
 
-    local distancemovedthisstep = velocity * dt
+    local distancemovedthisstep = velocity * dt * TIME_SCALE
     -- print(distancemovedthisstep, velocity, velocity * dt)
     --if e.isPerson.stamina < 1 then print("Hi") end
 
