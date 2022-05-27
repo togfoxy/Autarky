@@ -25,7 +25,9 @@ function constants.load()
     MAP = {}			-- a 2d table of tiles
     VILLAGERS = {}
     TREE = {}			-- a tree that holds all possible behaviours for a person
+    STOCK_HISTORY = {}  -- tracks actual transaction prices for each commodity
 
+    NUMBER_OF_STOCK_TYPES = 9   --## must equal the highest number (or more). It is NOT a count!!
 
     DEBUG = false
     NEW_VILLAGER_TIMER = 0
@@ -61,7 +63,7 @@ function constants.load()
     CARPENTER_WAGE = (FRUIT_SELL_PRICE * CARPENTER_INCOME_PER_JOB) / CARPENTER_BUILD_RATE      -- needs to be $5 for 5 seconds
 
     HOUSE_WEAR = CARPENTER_BUILD_RATE / 40       -- how fast a house wears down
-    HEALTH_GAIN_FROM_WOOD = 3.1
+    HEALTH_GAIN_FROM_WOOD = 3.1                     -- how much a house gains from a piece of wood
 
     WELFARE_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE
 

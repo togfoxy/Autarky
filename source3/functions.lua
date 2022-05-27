@@ -23,6 +23,18 @@ function functions.initialiseMap()
             -- MAP[row][col].tiletype = cf.round(love.math.noise(rowvalue, colvalue, terraintypeperlinseed) * 4)
 		end
 	end
+
+    -- put this here for convenience
+    for i = 1, NUMBER_OF_STOCK_TYPES do
+        STOCK_HISTORY[i] = {}
+    end
+    -- STOCK_HISTORY[enum.stockFruit][1] = 1
+    -- STOCK_HISTORY[enum.stockFruit][2] = 1.2
+    -- STOCK_HISTORY[enum.stockFruit][3] = 2.1
+    -- STOCK_HISTORY[enum.stockFruit][4] = 2.4
+    -- STOCK_HISTORY[enum.stockFruit][5] = 1.5
+    -- STOCK_HISTORY[enum.stockFruit][6] = 0.7
+
 end
 
 function functions.loadImages()
@@ -74,9 +86,6 @@ function functions.loadImages()
     -- farmer
     SPRITES[enum.spriteFarmerMan] = love.graphics.newImage("assets/images/Farmer Male Walk.png")
     QUADS[enum.spriteFarmerMan] = cf.fromImageToQuads(SPRITES[enum.spriteFarmerMan], 15, 32)
-
-
-
 end
 
 function functions.loadAudio()
@@ -188,7 +197,7 @@ local function getBlankTile()
         if row >= WELLS[1].row - 3 and row <= WELLS[1].row + 3 and
             col >= WELLS[1].col - 3 and col <= WELLS[1].col + 3 then
                 tilevalid = false
-                print("New improvement inside town square. Trying to find a new tile. " .. count, row, col)
+                -- print("New improvement inside town square. Trying to find a new tile. " .. count, row, col)
         end
 
         local cmap = convertToCollisionMap(MAP)
@@ -362,7 +371,7 @@ local function assignWorkplace(agent)
     elseif agent.occupation.stockType == enum.stockHealingHerbs then
         MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = HERB_SELL_PRICE
     end
-    print("Owner assigned to " .. workplacerow, workplacecol)
+    -- print("Owner assigned to " .. workplacerow, workplacecol)
 
 end
 
@@ -409,7 +418,7 @@ function functions.createActions(goal, agent)
         action.action = "rest"
 
         local time1 = ((100 - agent.isPerson.stamina) / 2) + love.math.random(5, 30)      -- some random formula. Please tweak!
-        local time2 = agent.isPerson.fullness
+        local time2 = agent.isPerson.fullness * 0.8
         action.timeleft = math.min(time1, time2)    -- rest as much as you want (time1) but don't starve doing it (time2)
         action.log = "Rested"
         table.insert(queue, action)
@@ -489,9 +498,12 @@ function functions.createActions(goal, agent)
                 workplacerow = agent.workplace.row
                 workplacecol = agent.workplace.col
                 addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+
+                local time1 = love.math.random(20, 45)
+                local time2 = agent.isPerson.fullness * 0.80
                 local action = {}
                 action.action = "work"
-                action.timeleft = love.math.random(30, 60)
+                action.timeleft = math.min(time1,time2)
                 action.log = "Provided welfare"
                 table.insert(queue, action)
             end
@@ -526,7 +538,7 @@ function functions.createActions(goal, agent)
             -- print("Added 'buy' goal")
             table.insert(queue, action)
             assert(action.stockType ~= nil)
-            print("move and buy fruit action added")
+            -- print("move and buy fruit action added")
         end
     end
     if goal == enum.goalBuyWood then
@@ -542,7 +554,7 @@ function functions.createActions(goal, agent)
             action.purchaseAmount = qtyneeded
             action.log = "Bought some wood"
             table.insert(queue, action)
-            print("move and buy wood action added")
+            -- print("move and buy wood action added")
             assert(action.stockType ~= nil)
         else
             -- print("No woodsman found")
@@ -552,30 +564,40 @@ function functions.createActions(goal, agent)
         local qtyneeded = (cf.round((100 - agent.isPerson.health) / 10)) + 1
         local ownsHealershop = false
         -- see if healer owns a healing shop
+        --! include this back in when tested
         if agent:has("workplace") and agent.isPerson.wealth <= 4 then
             if MAP[workplacerow][workplacecol].entity.isTile.stockLevel >= qtyneeded and
                 MAP[workplacerow][workplacecol].entity.isTile.stockType == enum.stockHealingHerbs then
                     ownsHealershop = true
             end
         end
+
         if ownsHealershop then
             addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+            action = {}
+            action.action = "buy"
+            action.stockType = enum.stockHealingHerbs
+            action.purchaseAmount = qtyneeded
+            action.log = "Bought some healing herbs"
+            table.insert(queue, action)
+            assert(action.stockType ~= nil)
         else
             -- not a farmer or rich or own farm has no stock
             local shoprow, shopcol = getClosestBuilding(enum.improvementHealer, qtyneeded, agentrow, agentcol)
             if shoprow ~= nil then
+                -- buy herbs
                 addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+
+                action = {}
+                action.action = "buy"
+                action.stockType = enum.stockHealingHerbs
+                action.purchaseAmount = qtyneeded
+                action.log = "Bought some healing herbs"
+                table.insert(queue, action)
+                assert(action.stockType ~= nil)
+                -- print("move and buy herbs action added")
             end
         end
-        -- buy herbs
-        action = {}
-        action.action = "buy"
-        action.stockType = enum.stockHealingHerbs
-        action.purchaseAmount = qtyneeded
-        action.log = "Bought some healing herbs"
-        table.insert(queue, action)
-        assert(action.stockType ~= nil)
-        print("move and buy herbs action added")
     end
     if goal == enum.goalStockHouse then
         -- establish, build, maintain or add to house
@@ -714,7 +736,7 @@ function functions.playAudio(audionumber, isMusic, isSound)
     if isSound and SOUND_TOGGLE then
         AUDIO[audionumber]:play()
     end
-    print("playing music/sound #" .. audionumber)
+    -- print("playing music/sound #" .. audionumber)
 
 end
 

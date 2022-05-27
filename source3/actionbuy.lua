@@ -12,27 +12,42 @@ local function tradeGoods(buyer, seller, stocktype, desiredQty, agreedprice)
         -- agent is buying from own shop. Waive the purchase price
         -- doing this allows farms with 0 wealth to still buy and survive
         purchaseamt = math.min(desiredQty, stockavail)
+        purchaseamt = math.floor(purchaseamt)       -- round down to nearest unit
+        if purchaseamt <= 0 then purchaseamt = 0 end
         shoptile.stockLevel = shoptile.stockLevel  - purchaseamt
     else
         local canafford = math.floor(buyer.isPerson.wealth / agreedprice)     -- units that can be afforded rounds down
         purchaseamt = math.min(stockavail, canafford, desiredQty)   -- limit transaction to what can be afforded, desired and provisioned
         purchaseamt = math.floor(purchaseamt)       -- round down to nearest unit
+        if purchaseamt <= 0 then purchaseamt = 0 end
+        if purchaseamt > 0 then
 
-        local transactionprice = purchaseamt * agreedprice
+if stocktype == enum.stockWood then
+    print("***************")
+    print("Wood inv is now " .. buyer.isPerson.stockInv[stocktype])
+end
 
-        shoptile.stockLevel = shoptile.stockLevel  - purchaseamt
-        buyer.isPerson.stockInv[stocktype] = buyer.isPerson.stockInv[stocktype] + purchaseamt
+            local transactionprice = purchaseamt * agreedprice
 
-        seller.isPerson.wealth = seller.isPerson.wealth + (transactionprice * (1-GST_RATE))
-        seller.isPerson.taxesOwed = seller.isPerson.taxesOwed + (transactionprice * GST_RATE)
-        buyer.isPerson.wealth = buyer.isPerson.wealth - transactionprice
+            shoptile.stockLevel = shoptile.stockLevel  - purchaseamt
+            buyer.isPerson.stockInv[stocktype] = buyer.isPerson.stockInv[stocktype] + purchaseamt
 
-        buyer.isPerson.stockBelief[stocktype][3] = buyer.isPerson.stockBelief[stocktype][3] + agreedprice
-        buyer.isPerson.stockBelief[stocktype][4] = buyer.isPerson.stockBelief[stocktype][4] + purchaseamt
+            seller.isPerson.wealth = seller.isPerson.wealth + (transactionprice * (1-GST_RATE))
+            seller.isPerson.taxesOwed = seller.isPerson.taxesOwed + (transactionprice * GST_RATE)
+            buyer.isPerson.wealth = buyer.isPerson.wealth - transactionprice
 
-        seller.isPerson.stockBelief[stocktype][3] = buyer.isPerson.stockBelief[stocktype][3] + agreedprice
-        seller.isPerson.stockBelief[stocktype][4] = buyer.isPerson.stockBelief[stocktype][4] + purchaseamt
+            buyer.isPerson.stockBelief[stocktype][3] = buyer.isPerson.stockBelief[stocktype][3] + agreedprice
+            buyer.isPerson.stockBelief[stocktype][4] = buyer.isPerson.stockBelief[stocktype][4] + purchaseamt
 
+            seller.isPerson.stockBelief[stocktype][3] = buyer.isPerson.stockBelief[stocktype][3] + agreedprice
+            seller.isPerson.stockBelief[stocktype][4] = buyer.isPerson.stockBelief[stocktype][4] + purchaseamt
+
+            if purchaseamt > 0 then
+                -- log the transaction for future graphing
+                local nextindex = #STOCK_HISTORY[stocktype] + 1
+                STOCK_HISTORY[stocktype][nextindex] = agreedprice
+            end
+        end
     end
     return purchaseamt
 end
@@ -59,6 +74,12 @@ local function adjustBuyersBelief(agent, stocktype, bidprice, askprice)
         local adjamount = overbid * 0.10
         agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] - adjamount
         agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] - adjamount
+    end
+
+    -- data checking
+    if agent.isPerson.stockBelief[stocktype][1] <= 0 then agent.isPerson.stockBelief[stocktype][1] = 0.5 end
+    if agent.isPerson.stockBelief[stocktype][2] < agent.isPerson.stockBelief[stocktype][1] then
+        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][1]
     end
 end
 
@@ -89,17 +110,24 @@ local function playPurchaseAudio(stocktype)
 end
 
 local function applyBuffs(agent, stocktype, amtbought)
-    if stocktype == enum.stockWelfare then agent.isPerson.wealth = agent.isPerson.wealth + 1 end
+    if stocktype == enum.stockWelfare then
+        agent.isPerson.wealth = agent.isPerson.wealth + 1
+        agent.isPerson.stockInv[stocktype] = 0       -- apply buff and wipe the inventory
+    end
 
-    if stocktype == enum.stockFruit then agent.isPerson.fullness = agent.isPerson.fullness + 100 end
+    if stocktype == enum.stockFruit then
+        agent.isPerson.fullness = agent.isPerson.fullness + 100
+        agent.isPerson.stockInv[stocktype] = 0       -- apply buff and wipe the inventory
+    end
 
-    if stocktype == enum.stockHealingHerbs then agent.isPerson.health = agent.isPerson.health + (amtbought * HERB_HEAL_AMOUNT) end
-
-    agent.isPerson.stockInv[stocktype] = 0       -- apply buff and wipe the inventory
+    if stocktype == enum.stockHealingHerbs then
+        agent.isPerson.health = agent.isPerson.health + (amtbought * HERB_HEAL_AMOUNT)
+        agent.isPerson.stockInv[stocktype] = 0       -- apply buff and wipe the inventory
+    end
 end
 
 function actionbuy.newbuy(e, currentaction)
-    print("Trying to buy stock type " .. currentaction.stockType)
+    -- print("Trying to buy stock type " .. currentaction.stockType)
     local agentrow = e.position.row
     local agentcol = e.position.col
     local desiredQty = currentaction.purchaseAmount
@@ -111,108 +139,86 @@ function actionbuy.newbuy(e, currentaction)
     local seller = MAP[agentrow][agentcol].entity.isTile.tileOwner
     local stocktype = currentaction.stockType
 
+    local bid, ask = 0, 99      -- default values
+
     assert(buyer ~= nil)
-    assert(seller ~= nil)
+    if (seller ~= nil) then
+        if stocktype == enum.stockWelfare then
+            bid = 0
+            ask = 0
+        else
+            -- determine the bid
+            local buyerlowestbelief = buyer.isPerson.stockBelief[stocktype][1]
+            local buyerhighestbelief = buyer.isPerson.stockBelief[stocktype][2]
+            assert(buyerlowestbelief <= buyerhighestbelief)
+            bid = love.math.random(buyerlowestbelief, buyerhighestbelief)
+            if bid <= 0 then bid = 0 end
 
-    -- determine the bid
-print("stocktype = " .. stocktype)
+            -- determine the ask
+            assert(buyer ~= nil)
+            assert(seller.isPerson ~= nil)
+            assert(seller.isPerson ~= {})
 
-    local buyerlowestbelief = buyer.isPerson.stockBelief[stocktype][1]
-    local buyerhighestbelief = buyer.isPerson.stockBelief[stocktype][2]
-    assert(buyerlowestbelief <= buyerhighestbelief)
-    local bid = love.math.random(buyerlowestbelief, buyerhighestbelief)
+            local sellerlowestbelief = seller.isPerson.stockBelief[stocktype][1]
+            local sellerhighestbelief = seller.isPerson.stockBelief[stocktype][2]
+            assert(sellerlowestbelief <= sellerhighestbelief)
+            ask = love.math.random(sellerlowestbelief, sellerhighestbelief)
+            if ask <= 0.1 then ask = 0.1 end
 
-    -- determine the ask
-    local sellerlowestbelief = seller.isPerson.stockBelief[stocktype][1]
-    local sellerhighestbelief = seller.isPerson.stockBelief[stocktype][2]
-    assert(sellerlowestbelief <= sellerhighestbelief)
-    local ask = love.math.random(sellerlowestbelief, sellerhighestbelief)
+            assert(buyer ~= nil)
+            assert(seller ~= nil)
 
-    local amtbought = 0
-    if bid >= ask then
-        -- transaction successful
-        -- do transaction
-        local agreedprice = (bid + ask ) / 2        -- average
-        amtbought = tradeGoods(buyer, seller, stocktype, desiredQty, agreedprice)
+            if MAP[agentrow][agentcol].entity.isTile.stockLevel >= 3 then
+                -- offer a discount due to too much supply
+                ask = ask * 0.8
+            end
+            if buyer == seller then
+                -- make bid same as ask just to ensure the transaction is successful
+                bid = 1
+                ask = 1
+            end
+        end
 
-        applyBuffs(buyer, stocktype, amtbought)        -- fruit and herbs have buffs
+        local amtbought = -1    -- 0 = can't afford; >0 means successful transaction, -1 = bid unsuccessful
+        if bid >= ask then
+            -- transaction successful
+            -- do transaction
+            local agreedprice = (bid + ask ) / 2        -- average
+            amtbought = tradeGoods(buyer, seller, stocktype, desiredQty, agreedprice)
 
-        print("Bought stocktype " .. stocktype .. " for $" .. agreedprice)
+            if amtbought >= 1 then
+                applyBuffs(buyer, stocktype, amtbought)        -- fruit and herbs have buffs
+                print("Bought stocktype " .. stocktype .. " for $" .. cf.round(agreedprice,2) .. " each.")
+
+                adjustBuyersBelief(buyer, stocktype, bid, ask)
+                adjustSellersBelief(seller, stocktype, bid, ask)
+            else
+                print("Agreed on a price but no wealth left")
+            end
+        else
+            print("Failed to agree on price for " .. stocktype .. ". Bid = " .. bid .. " / " .. cf.round(ask, 2))
+            adjustBuyersBelief(buyer, stocktype, bid, ask)
+            adjustSellersBelief(seller, stocktype, bid, ask)
+        end
+
+        if amtbought > 0 then
+            playPurchaseAudio(stocktype)
+
+            -- add a money bubble
+            local item = {}
+            item.imagenumber = enum.imagesEmoteCash
+            item.start = 0
+            item.stop = 3
+            item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+            table.insert(DRAWQUEUE, item)
+        end
+
+
     else
-        print("Failed to agree on price for " .. stocktype)
+        -- shop/tile has no owner. Probably died. Do nothing.
     end
-    adjustBuyersBelief(buyer, stocktype, bid, ask)
-    adjustSellersBelief(seller, stocktype, bid, ask)
-
-    if amtbought > 0 then
-        playPurchaseAudio(stocktype)
-
-        -- add a money bubble
-        local item = {}
-        item.imagenumber = enum.imagesEmoteCash
-        item.start = 0
-        item.stop = 3
-        item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
-        table.insert(DRAWQUEUE, item)
-    end
-
     table.remove(e.isPerson.queue, 1)
     fun.addLog(e, currentaction.log)
 end
-
-function actionbuy.buy(e, currentaction)
-
-    local agentrow = e.position.row
-    local agentcol = e.position.col
-    print("Buying stock type " .. currentaction.stockType)
-
-    local amtbought
-    if currentaction.stockType ~= enum.stockWelfare then    -- welfare has a special formula
-        amtbought = fun.buyStock(e, currentaction.stockType, currentaction.purchaseAmount)    -- this deducts stock from the shop
-        print("Bought " .. amtbought .. " of stock type " .. currentaction.stockType)
-        if currentaction.stockType == enum.stockFruit then
-            e.isPerson.fullness = e.isPerson.fullness + (amtbought * 100)   -- each food restores 100 fullness
-            if amtbought > 0 and love.math.random(1, 1000) == 1 then
-                fun.playAudio(enum.audioEat, false, true)
-            end
-        elseif currentaction.stockType == enum.stockHealingHerbs then
-            e.isPerson.health = e.isPerson.health + (amtbought * HERB_HEAL_AMOUNT)
-            if amtbought > 0 and love.math.random(1, 1000) == 1 then
-                fun.playAudio(enum.audioBandage, false, true)
-            end
-        else
-            e.isPerson.stockInv[currentaction.stockType] = e.isPerson.stockInv[currentaction.stockType] + amtbought
-        end
-        e.isPerson.stockBelief[currentaction.stockType][4] = e.isPerson.stockBelief[currentaction.stockType][4] + amtbought
-    else
-        -- handle welfare differently
-        local agentrow = e.position.row
-        local agentcol = e.position.col
-        local stockavail = math.floor(MAP[agentrow][agentcol].entity.isTile.stockLevel)
-        amtbought = math.min(stockavail, currentaction.purchaseAmount)
-        if stockavail >= amtbought then
-            MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - amtbought
-            e.isPerson.wealth = e.isPerson.wealth + amtbought
-        else
-            print("Tried to get welfare but no stock")
-        end
-    end
-
-    if amtbought > 0 then
-        -- add a money bubble
-        local item = {}
-        item.imagenumber = enum.imagesEmoteCash
-        item.start = 0
-        item.stop = 3
-        item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
-        table.insert(DRAWQUEUE, item)
-    end
-
-    table.remove(e.isPerson.queue, 1)
-    fun.addLog(e, currentaction.log)
-
-
-end
-
 
 return actionbuy
