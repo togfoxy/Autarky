@@ -189,11 +189,14 @@ function actionbuy.newbuy(e, currentaction)
             if amtbought >= 1 then
                 applyBuffs(buyer, stocktype, amtbought)        -- fruit and herbs have buffs
                 print("Bought stocktype " .. stocktype .. " for $" .. cf.round(agreedprice,2) .. " each.")
+
+                adjustBuyersBelief(buyer, stocktype, bid, ask)
+                adjustSellersBelief(seller, stocktype, bid, ask)
+            else
+                print("Agreed on a price but no wealth left")
             end
         else
-            print("Failed to agree on price for " .. stocktype .. ". Bid = " .. bid .. " / " .. cf.round(ask, 2)
-        end
-        if buyer ~= seller and amtbought ~= -1 then
+            print("Failed to agree on price for " .. stocktype .. ". Bid = " .. bid .. " / " .. cf.round(ask, 2))
             adjustBuyersBelief(buyer, stocktype, bid, ask)
             adjustSellersBelief(seller, stocktype, bid, ask)
         end
