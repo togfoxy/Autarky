@@ -55,11 +55,14 @@ jobTaxCollector = 202
 
 -- stock types
 -- NOTE: ensure this lines up with the improvement type that sells this stock
+-- NOTE: ensure you adjust NUMBER_OF_STOCK_TYPES in constants.lua
 stockFruit = 5
 stockWood = 6
 stockHouse = 7
 stockHealingHerbs = 8
 stockWelfare = 9
+
+
 
 -- occupation icons
 -- NOTE: ensure this lines up with the job + 30 for offset to avoid clashes
