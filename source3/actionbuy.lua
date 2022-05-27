@@ -21,12 +21,6 @@ local function tradeGoods(buyer, seller, stocktype, desiredQty, agreedprice)
         purchaseamt = math.floor(purchaseamt)       -- round down to nearest unit
         if purchaseamt <= 0 then purchaseamt = 0 end
         if purchaseamt > 0 then
-
-if stocktype == enum.stockWood then
-    print("***************")
-    print("Wood inv is now " .. buyer.isPerson.stockInv[stocktype])
-end
-
             local transactionprice = purchaseamt * agreedprice
 
             shoptile.stockLevel = shoptile.stockLevel  - purchaseamt
@@ -96,6 +90,12 @@ local function adjustSellersBelief(agent, stocktype, bidprice, askprice)
         local adjamount = overbid * 0.20
         agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] - adjamount
         agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] - adjamount
+    end
+
+    -- data checking
+    if agent.isPerson.stockBelief[stocktype][1] <= 0 then agent.isPerson.stockBelief[stocktype][1] = 0.5 end
+    if agent.isPerson.stockBelief[stocktype][2] < agent.isPerson.stockBelief[stocktype][1] then
+        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][1]
     end
 end
 
