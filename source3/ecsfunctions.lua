@@ -238,6 +238,7 @@ function ecsfunctions.init()
                     end
                 end
 
+                -- draw villager debug information
                 local txt = ""
                 if love.keyboard.isDown("lctrl") or love.keyboard.isDown("rctrl") then
                     -- display some debugging information
@@ -256,6 +257,12 @@ function ecsfunctions.init()
 
                     love.graphics.setColor(1,1,1,1)
                     love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 60)
+
+                    -- stock belief
+                    txt = cf.round(e.isPerson.stockBelief[enum.stockFruit][2], 1) .. "\n"
+                    txt = txt .. cf.round(e.isPerson.stockBelief[enum.stockFruit][1], 1) .. "\n"
+                    love.graphics.setColor(1,1,1,1)
+                    love.graphics.print(txt, drawx, drawy, 0, 1, 1, 30, 30)     -- positive x = move left
                 else
                     if e.isPerson.health < 25 then
                         txt = txt .. "health: " .. cf.round(e.isPerson.health) .. "\n"
@@ -352,7 +359,8 @@ function ecsfunctions.init()
             end
 
             if currentaction.action == "buy" then
-                actbuy.buy(e, currentaction)
+                -- actbuy.buy(e, currentaction)
+                actbuy.newbuy(e, currentaction)
             end
 
             if currentaction.action == "stockhouse" then
@@ -367,7 +375,7 @@ function ecsfunctions.init()
 
             -- add mud
             if MAP[row][col].entity.isTile.improvementType == nil then
-                MAP[row][col].entity.isTile.mudLevel = MAP[row][col].entity.isTile.mudLevel + (dt * 1.5 * TIME_SCALE)       --! make constants
+                MAP[row][col].entity.isTile.mudLevel = MAP[row][col].entity.isTile.mudLevel + (dt * 15 * TIME_SCALE)       --! make constants
             end
             if MAP[row][col].entity.isTile.mudLevel > 255 then MAP[row][col].entity.isTile.mudLevel = 255 end
 
