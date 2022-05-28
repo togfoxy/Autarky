@@ -2,9 +2,9 @@ constants = {}
 
 function constants.load()
 
-    NUMBER_OF_VILLAGERS = 2
+    NUMBER_OF_VILLAGERS = 7
     VILLAGE_WEALTH = 0
-    NEW_VILLAGER_THRESHOLD = 3000   --!        -- seconds it takes for a new villager
+    NEW_VILLAGER_THRESHOLD = 150   --!        -- seconds it takes for a new villager
 
     ZOOMFACTOR = 1
     MUSIC_TOGGLE = true
@@ -20,7 +20,8 @@ function constants.load()
 
     UPPER_TERRAIN_HEIGHT = 6
 
-    PERSON_DRAW_WIDTH = 10
+    PERSON_DRAW_WIDTH = 10          -- used to detect mouse clicks on villagers
+    DISPLAY_GRAPH = false
 
     MAP = {}			-- a 2d table of tiles
     VILLAGERS = {}
@@ -67,7 +68,7 @@ function constants.load()
 
     WELFARE_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE
 
-    TAXCOLLECTOR_INCOME_PER_JOB = 1     -- arbitrary. No such thing as a 'job'
+    TAXCOLLECTOR_INCOME_PER_JOB = 0.5     -- arbitrary. No such thing as a 'job'
 
     WELLFAREOFFICER_INCOME_PER_JOB = 1  -- arbitrary. No such thing as a 'job'
 end

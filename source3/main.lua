@@ -143,6 +143,13 @@ function love.mousepressed( x, y, button, istouch, presses )
 end
 
 function love.mousemoved( x, y, dx, dy, istouch )
+
+	if y <= 150 then
+		DISPLAY_GRAPH = true
+	else
+		DISPLAY_GRAPH = false
+	end
+
 	if love.mouse.isDown(3) then
 		TRANSLATEX = TRANSLATEX - dx
 		TRANSLATEY = TRANSLATEY - dy
