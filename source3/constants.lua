@@ -68,9 +68,9 @@ function constants.load()
 
     WELFARE_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE
 
-    TAXCOLLECTOR_INCOME_PER_JOB = 0.5     -- arbitrary. No such thing as a 'job'
+    TAXCOLLECTOR_INCOME_PER_JOB = 0.4     -- arbitrary. No such thing as a 'job'
 
-    WELLFAREOFFICER_INCOME_PER_JOB = 1  -- arbitrary. No such thing as a 'job'
+    WELLFAREOFFICER_INCOME_PER_JOB = 0.4  -- arbitrary. No such thing as a 'job'
 end
 
 

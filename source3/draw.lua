@@ -6,7 +6,7 @@ local function drawGraph()
 
     -- draw the initial price of fruit
     local drawy = 100 - ((FRUIT_SELL_PRICE / 3) * 50)
-    love.graphics.setColor(1,1,1,1)
+    love.graphics.setColor(143/255,135/255,255/255,1)
     love.graphics.line(200, drawy, 200 + 100 * dotsize, drawy)
 
     local maxindex = math.min(100, #STOCK_HISTORY[enum.stockFruit])

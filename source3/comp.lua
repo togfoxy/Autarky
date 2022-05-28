@@ -38,8 +38,8 @@ function comp.init()
         c.stockBelief[enum.stockHealingHerbs][2] = HERB_SELL_PRICE + 1
         if c.stockBelief[enum.stockHealingHerbs][1] < 0 then c.stockBelief[enum.stockHealingHerbs][1] = 0.5 end
 
-        c.wealth = 3          -- starting amount. 3 days worth of food.
-        c.stockInv[enum.stockWood] = 0
+        c.wealth = 3         -- starting amount. 3 days worth of food.
+        c.stockInv[enum.stockWood] = 1
         c.log = {}
         c.taxesOwed = 0
     end)
