@@ -121,7 +121,11 @@ local function applyBuffs(agent, stocktype, amtbought)
     end
 
     if stocktype == enum.stockHealingHerbs then
+print("Agent health was " .. agent.isPerson.health)
         agent.isPerson.health = agent.isPerson.health + (amtbought * HERB_HEAL_AMOUNT)
+print("Bought " .. amtbought .. " herbs that heal at " .. HERB_HEAL_AMOUNT .. " per unit." )
+print("Agent health is now " .. agent.isPerson.health)
+
         agent.isPerson.stockInv[stocktype] = 0       -- apply buff and wipe the inventory
     end
 end
@@ -151,7 +155,8 @@ function actionbuy.newbuy(e, currentaction)
             local buyerlowestbelief = buyer.isPerson.stockBelief[stocktype][1]
             local buyerhighestbelief = buyer.isPerson.stockBelief[stocktype][2]
             assert(buyerlowestbelief <= buyerhighestbelief)
-            bid = love.math.random(buyerlowestbelief, buyerhighestbelief)
+            bid = love.math.random(buyerlowestbelief * 10, buyerhighestbelief * 10)
+            bid = bid / 10
             if bid <= 0 then bid = 0 end
 
             -- determine the ask
@@ -162,7 +167,8 @@ function actionbuy.newbuy(e, currentaction)
             local sellerlowestbelief = seller.isPerson.stockBelief[stocktype][1]
             local sellerhighestbelief = seller.isPerson.stockBelief[stocktype][2]
             assert(sellerlowestbelief <= sellerhighestbelief)
-            ask = love.math.random(sellerlowestbelief, sellerhighestbelief)
+            ask = love.math.random(sellerlowestbelief * 10, sellerhighestbelief * 10)
+            ask = ask / 10
             if ask <= 0.1 then ask = 0.1 end
 
             assert(buyer ~= nil)
@@ -188,12 +194,13 @@ function actionbuy.newbuy(e, currentaction)
 
             if amtbought >= 1 then
                 applyBuffs(buyer, stocktype, amtbought)        -- fruit and herbs have buffs
-                print("Bought stocktype " .. stocktype .. " for $" .. cf.round(agreedprice,2) .. " each.")
-
-                adjustBuyersBelief(buyer, stocktype, bid, ask)
-                adjustSellersBelief(seller, stocktype, bid, ask)
+                if seller ~= buyer then
+                    adjustBuyersBelief(buyer, stocktype, bid, ask)
+                    adjustSellersBelief(seller, stocktype, bid, ask)
+                    print("Bought stocktype " .. stocktype .. " for $" .. cf.round(agreedprice,2) .. " each.")
+                end
             else
-                print("Agreed on a price but no wealth left")
+                -- print("Agreed on a price but no wealth left")
             end
         else
             print("Failed to agree on price for " .. stocktype .. ". Bid = " .. bid .. " / " .. cf.round(ask, 2))

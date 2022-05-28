@@ -2,11 +2,13 @@ draw = {}
 
 local function drawGraph()
 
+    local dotsize = 2       -- radiuss
+
     local maxindex = math.min(100, #STOCK_HISTORY[enum.stockFruit])
 
     for i = 1, maxindex do
 
-        local drawx = 250 + i
+        local drawx = 200 + (i * dotsize)
 
         -- scale the graph by making the transaction a % of the max expected range
         local percent = STOCK_HISTORY[enum.stockFruit][i] / 3
@@ -14,7 +16,7 @@ local function drawGraph()
         drawy = 100 - significance
 
         love.graphics.setColor(1,1,1,1)
-        love.graphics.circle("fill", drawx, drawy, 1)
+        love.graphics.circle("fill", drawx, drawy, dotsize)
     end
 end
 

@@ -309,6 +309,14 @@ function ecsfunctions.init()
                 end
                 local actionlist = {}
                 local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
+
+                if #e.isPerson.queue == 0 then
+                    -- queue is still empty for whatever reason
+                    -- go to work
+                    if e:has("occupation") then
+                        actionlist = fun.createActions(enum.goalWork, e)
+                    end
+                end
             end
 
             -- add 'idle' action if queue is still empty
@@ -390,6 +398,24 @@ function ecsfunctions.init()
             if e:has("residence") then
                 e.residence.health = e.residence.health - (dt * TIME_SCALE * HOUSE_WEAR)
                 if e.residence.health < 0 then e.residence.health = 0 end
+            end
+
+            -- pay public servants
+            if  e:has("occupation") then
+                if e.occupation.value == enum.jobTaxCollector then
+                    local amount = TAXCOLLECTOR_INCOME_PER_JOB * dt * TIME_SCALE
+                    if VILLAGE_WEALTH >= amount then
+                        e.isPerson.wealth = e.isPerson.wealth + amount
+                        VILLAGE_WEALTH = VILLAGE_WEALTH - amount
+                    end
+                end
+                if e.occupation.value == enum.jobWelfareOfficer then
+                    local amount = WELLFAREOFFICER_INCOME_PER_JOB * dt * TIME_SCALE
+                    if VILLAGE_WEALTH >= amount then
+                        e.isPerson.wealth = e.isPerson.wealth + amount
+                        VILLAGE_WEALTH = VILLAGE_WEALTH - amount
+                    end
+                end
             end
 
             -- do this last as it may nullify the entity

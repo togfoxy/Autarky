@@ -88,13 +88,9 @@ function actionwork.work(e, currentaction, dt)
 
         for k, villager in pairs(VILLAGERS) do
             if villager.position.row == row and villager.position.col == col and villager.isPerson.taxesOwed >= 1 then
-               local taxamount = cf.round(villager.isPerson.taxesOwed)
-               local collectorwage = cf.round(taxamount * TAXCOLLECTOR_WAGE,4)
-               local villageincome = cf.round(taxamount - collectorwage,4)
-
+               local taxamount = villager.isPerson.taxesOwed
                villager.isPerson.taxesOwed = villager.isPerson.taxesOwed - taxamount
-               VILLAGE_WEALTH = VILLAGE_WEALTH + villageincome
-               e.isPerson.wealth = e.isPerson.wealth + collectorwage
+               VILLAGE_WEALTH = VILLAGE_WEALTH + taxamount
             end
         end
     end
@@ -110,7 +106,7 @@ function actionwork.work(e, currentaction, dt)
                 VILLAGE_WEALTH = VILLAGE_WEALTH - amt
             end
         else
-            print("Too much welfare. Won't create more")
+            -- print("Too much welfare. Won't create more")
         end
     end
 

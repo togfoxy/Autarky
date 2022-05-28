@@ -2,9 +2,9 @@ constants = {}
 
 function constants.load()
 
-    NUMBER_OF_VILLAGERS = 7
+    NUMBER_OF_VILLAGERS = 2
     VILLAGE_WEALTH = 0
-    NEW_VILLAGER_THRESHOLD = 300   --!        -- seconds it takes for a new villager
+    NEW_VILLAGER_THRESHOLD = 3000   --!        -- seconds it takes for a new villager
 
     ZOOMFACTOR = 1
     MUSIC_TOGGLE = true
@@ -43,7 +43,7 @@ function constants.load()
 
     WALKING_SPEED = 900
     TIME_SCALE = 0.05          --0.025
-    GST_RATE = 0.10             -- 10%
+    GST_RATE = 0.25             -- 10%
     INJURY_RATE = 40             -- higher numbers = more injuries
     STAMINA_USE_RATE = 17
     STAMINA_RECOVERY_RATE = STAMINA_USE_RATE * 3
@@ -56,7 +56,7 @@ function constants.load()
 
     HERB_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 2
     HERB_SELL_PRICE = FRUIT_SELL_PRICE * 2
-    HERB_HEAL_AMOUNT = cf.round(HERB_SELL_PRICE / 4, 4)      -- heal 1 health per 4 wealth earned
+    HERB_HEAL_AMOUNT = 7
 
     CARPENTER_BUILD_RATE = FRUIT_PRODUCTION_RATE * 100    -- how much time the carpenter spends on one wood
     CARPENTER_INCOME_PER_JOB = 5
@@ -67,8 +67,9 @@ function constants.load()
 
     WELFARE_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE
 
-    TAXCOLLECTOR_WAGE = 0.10        -- they earn 10% of the taxes they collect
+    TAXCOLLECTOR_INCOME_PER_JOB = 1     -- arbitrary. No such thing as a 'job'
 
+    WELLFAREOFFICER_INCOME_PER_JOB = 1  -- arbitrary. No such thing as a 'job'
 end
 
 

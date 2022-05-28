@@ -500,7 +500,7 @@ function functions.createActions(goal, agent)
                 addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
 
                 local time1 = love.math.random(20, 45)
-                local time2 = agent.isPerson.fullness * 0.80
+                local time2 = agent.isPerson.fullness * 0.75
                 local action = {}
                 action.action = "work"
                 action.timeleft = math.min(time1,time2)
@@ -564,7 +564,6 @@ function functions.createActions(goal, agent)
         local qtyneeded = (cf.round((100 - agent.isPerson.health) / 10)) + 1
         local ownsHealershop = false
         -- see if healer owns a healing shop
-        --! include this back in when tested
         if agent:has("workplace") and agent.isPerson.wealth <= 4 then
             if MAP[workplacerow][workplacecol].entity.isTile.stockLevel >= qtyneeded and
                 MAP[workplacerow][workplacecol].entity.isTile.stockType == enum.stockHealingHerbs then
@@ -578,12 +577,15 @@ function functions.createActions(goal, agent)
             action.action = "buy"
             action.stockType = enum.stockHealingHerbs
             action.purchaseAmount = qtyneeded
-            action.log = "Bought some healing herbs"
+            action.log = "Trying to buy " .. qtyneeded .. " healing herbs"
             table.insert(queue, action)
             assert(action.stockType ~= nil)
         else
             -- not a farmer or rich or own farm has no stock
             local shoprow, shopcol = getClosestBuilding(enum.improvementHealer, qtyneeded, agentrow, agentcol)
+            if shoprow == nil then  -- if can't find the qty needed then find any shop with at least 1
+                shoprow, shopcol = getClosestBuilding(enum.improvementHealer, 1, agentrow, agentcol)
+            end
             if shoprow ~= nil then
                 -- buy herbs
                 addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
@@ -595,7 +597,7 @@ function functions.createActions(goal, agent)
                 action.log = "Bought some healing herbs"
                 table.insert(queue, action)
                 assert(action.stockType ~= nil)
-                -- print("move and buy herbs action added")
+                print("move and buy herbs action added")
             end
         end
     end
@@ -641,7 +643,7 @@ function functions.createActions(goal, agent)
                 table.insert(queue, action)
             end
         else
-            print("Looking for welfare but can't find an officer")
+            -- print("Looking for welfare but can't find an officer")
         end
     end
 

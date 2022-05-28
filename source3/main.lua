@@ -31,7 +31,6 @@ actwork = require 'actionwork'
 
 con.load()	-- load the constants
 
-
 function love.keyreleased( key, scancode )
 	if key == "escape" then
 		cf.RemoveScreen(SCREEN_STACK)
