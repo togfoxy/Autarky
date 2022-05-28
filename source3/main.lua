@@ -144,7 +144,7 @@ end
 
 function love.mousemoved( x, y, dx, dy, istouch )
 
-	if y <= 150 then
+	if y <= 150 then 
 		DISPLAY_GRAPH = true
 	else
 		DISPLAY_GRAPH = false
