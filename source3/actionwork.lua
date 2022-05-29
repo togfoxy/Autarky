@@ -70,10 +70,11 @@ function actionwork.work(e, currentaction, dt)
             owner.residence.health = 110
             table.remove(e.isPerson.queue, 1)
         end
-        print("House health is now " .. owner.residence.health)
+        -- print("House health is now " .. owner.residence.health)
         local wage = (dt * CARPENTER_WAGE)
         local taxamount = wage * 0.10
-        e.isPerson.wealth = e.isPerson.wealth + wage - taxamount          -- e = the carpenter
+        e.isPerson.wealth = e.isPerson.wealth + (wage - taxamount)          -- e = the carpenter
+        e.isPerson.taxesOwed = e.isPerson.taxesOwed + taxamount
         VILLAGE_WEALTH = VILLAGE_WEALTH + taxamount
         owner.isPerson.wealth = owner.isPerson.wealth - wage          -- is okay if goes negative
         if owner.isPerson.wealth <= 1.1 then
@@ -94,6 +95,7 @@ function actionwork.work(e, currentaction, dt)
             end
         end
     end
+    
     if e.occupation.value == enum.jobWelfareOfficer then
         -- convert coffer into payments
         local row = e.position.row

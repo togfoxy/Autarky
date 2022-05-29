@@ -80,17 +80,17 @@ function comp.init()
         c.tileHeight = tileheight
         c.tileOwner = {}
         c.improvementType = improvementtype or nil     -- an improvement = a building or structure
+        if love.math.random(0, 40) == 1 and improvementtype == nil then
+            c.decorationType = love.math.random(1,6)        -- sprite number
+        else
+            c.decorationType = nil
+        end
         c.stockType = nil
         c.stockLevel = 0            -- must never be nil
         c.stockSellPrice = 0
         c.mudLevel = 0              -- holds the alpha value for the mud (0 -> 255)
         c.timeToBuild = nil        -- how long to build this tile
     end)
-
-
 end
-
-
-
 
 return comp

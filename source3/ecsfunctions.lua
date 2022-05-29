@@ -44,6 +44,22 @@ function ecsfunctions.init()
                 love.graphics.setColor(1,1,1,mudalpha)
                 love.graphics.draw(IMAGES[enum.imagesMud], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
 
+                -- draw the random decoration - if there is one
+                if MAP[row][col].decoration ~= nil then
+                    local imagenum = MAP[row][col].decoration
+                    local sprite = SPRITES[enum.spriteRandomTree]
+                    local quad = QUADS[enum.spriteRandomTree][imagenum]
+                    local imagewidth, imageheight = 50,50       --! needs to line up with the size in LOADIMAGES()
+                    local drawscalex = (TILE_SIZE / imagewidth)
+                    local drawscaley = (TILE_SIZE / imageheight)
+
+                    local offsetx = imagewidth / 2
+                    local offsety = imageheight / 2
+
+                    love.graphics.setColor(1,1,1,1)
+                    love.graphics.draw(sprite, quad, drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
+                end
+
                 -- draw contour lines
 
                 -- check if top neighbour is different to current cell
@@ -149,6 +165,10 @@ function ecsfunctions.init()
                     love.graphics.setColor(0/255,0/255,115/255,1)
                     love.graphics.print(cf.round(MAP[row][col].entity.isTile.stockLevel,1), drawx, drawy, 0, 1, 1, 20, -10)
                 end
+
+
+
+
 
                 -- debugging
                 -- draw mud levels for each tile

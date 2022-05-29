@@ -21,6 +21,12 @@ function functions.initialiseMap()
             -- -- the noise function only works with numbers between 0 and 1
             -- MAP[row][col].height = cf.round(love.math.noise(rowvalue, colvalue, terrainheightperlinseed) * UPPER_TERRAIN_HEIGHT)
             -- MAP[row][col].tiletype = cf.round(love.math.noise(rowvalue, colvalue, terraintypeperlinseed) * 4)
+
+            -- add random trees
+            if love.math.random(0, 50) == 1 then
+                local random = love.math.random(1,6)        -- sprite number
+                MAP[row][col].decoration = random
+            end
 		end
 	end
 
@@ -35,6 +41,8 @@ function functions.initialiseMap()
     -- STOCK_HISTORY[enum.stockFruit][5] = 1.5
     -- STOCK_HISTORY[enum.stockFruit][6] = 0.7
 
+
+
 end
 
 function functions.loadImages()
@@ -42,9 +50,9 @@ function functions.loadImages()
 	IMAGES[enum.imagesGrassDry] = love.graphics.newImage("assets/images/grass_dry_block_256x.png")
 	IMAGES[enum.imagesGrassGreen] = love.graphics.newImage("assets/images/grass_green_block_256x.png")
 	IMAGES[enum.imagesGrassTeal] = love.graphics.newImage("assets/images/grass_teal_block_256x.png")
-    IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_alpha.png")
+    -- IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_alpha.png")
+    IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_50x45.png")
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
-
 
     IMAGES[enum.imagesHealingHouse] = love.graphics.newImage("assets/images/healerhouse.png")
     IMAGES[enum.imagesVillagerLog] = love.graphics.newImage("assets/images/villagerlog.png")
@@ -82,6 +90,9 @@ function functions.loadImages()
 
     SPRITES[enum.spriteRedWoman] = love.graphics.newImage("assets/images/Civilian Female Walk Red.png")
     QUADS[enum.spriteRedWoman] = cf.fromImageToQuads(SPRITES[enum.spriteRedWoman], 15, 32)
+
+    SPRITES[enum.spriteRandomTree] = love.graphics.newImage("assets/images/randomtrees_50x50.png")
+    QUADS[enum.spriteRandomTree] = cf.fromImageToQuads(SPRITES[enum.spriteRandomTree], 50, 50)
 
     -- farmer
     SPRITES[enum.spriteFarmerMan] = love.graphics.newImage("assets/images/Farmer Male Walk.png")
@@ -363,6 +374,7 @@ local function assignWorkplace(agent)
     MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
     MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stockType
     MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
+    MAP[workplacerow][workplacecol].entity.isTile.decorationType = nil          -- clear any tree or other decoration
 
     if agent.occupation.stockType == enum.stockFruit then
         MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = FRUIT_SELL_PRICE
@@ -614,6 +626,7 @@ function functions.createActions(goal, agent)
                 MAP[houserow][housecol].entity.isTile.stockType = enum.stockHouse
                 MAP[houserow][housecol].entity.isTile.stockLevel = 0
                 MAP[houserow][housecol].entity.isTile.tileOwner = agent
+                MAP[houserow][housecol].entity.isTile.decorationType = nil          -- clear tree or other decoration
 
                 print("House established on tile " .. houserow, housecol)
             end
