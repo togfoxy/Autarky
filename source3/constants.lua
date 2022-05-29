@@ -2,7 +2,7 @@ constants = {}
 
 function constants.load()
 
-    NUMBER_OF_VILLAGERS = 7
+    NUMBER_OF_VILLAGERS = 200
     VILLAGE_WEALTH = 0
     NEW_VILLAGER_THRESHOLD = 150   --!        -- seconds it takes for a new villager
 
@@ -65,12 +65,13 @@ function constants.load()
 
     HOUSE_WEAR = CARPENTER_BUILD_RATE / 40       -- how fast a house wears down
     HEALTH_GAIN_FROM_WOOD = 1.5                     -- how much a house gains from a piece of wood
+    HEALTH_GAIN_PER_WOOD = 25                       -- each wood adds at most this much health to each house
 
     WELFARE_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE
 
-    TAXCOLLECTOR_INCOME_PER_JOB = 0.3     -- arbitrary. No such thing as a 'job'. Public servants don't pay tax so keep this lower than normal
+    TAXCOLLECTOR_INCOME_PER_JOB = 0.2     -- arbitrary. No such thing as a 'job'. Public servants don't pay tax so keep this lower than normal
 
-    WELLFAREOFFICER_INCOME_PER_JOB = 0.3  -- arbitrary. No such thing as a 'job'. Public servants don't pay tax so keep this lower than normal
+    WELLFAREOFFICER_INCOME_PER_JOB = TAXCOLLECTOR_INCOME_PER_JOB + (TAXCOLLECTOR_INCOME_PER_JOB * GST_RATE)  -- arbitrary. No such thing as a 'job'. Public servants don't pay tax so keep this lower than normal
 end
 
 

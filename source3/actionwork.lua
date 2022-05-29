@@ -62,24 +62,44 @@ function actionwork.work(e, currentaction, dt)
     end
 
     if e.occupation.value == enum.jobCarpenter then
+        -- if wood is onsite then use the wood to increase max health
+        -- if health is less than maxhealth then increase the health for a wage
+
         local row = e.position.row
         local col = e.position.col
         local owner = MAP[row][col].entity.isTile.tileOwner
-        owner.residence.health = owner.residence.health + (dt * CARPENTER_BUILD_RATE * HEALTH_GAIN_FROM_WOOD)
-        if owner.residence.health > 110 then
-            owner.residence.health = 110
-            table.remove(e.isPerson.queue, 1)
+        local woodqty = MAP[row][col].entity.isTile.stockLevel
+-- print(MAP[row][col].entity.isTile.stockLevel, owner.residence.health, owner.residence.unbuiltMaxHealth)
+        if owner.residence.unbuiltMaxHealth < 100 and woodqty >= 1 then
+            -- okay to add more wood
+            owner.residence.unbuiltMaxHealth = owner.residence.unbuiltMaxHealth + HEALTH_GAIN_PER_WOOD
+            MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel - 1
+        else
+            -- max is already very high
+            --! ensure builders don't come here unnecessarily
         end
-        -- print("House health is now " .. owner.residence.health)
-        local wage = (dt * CARPENTER_WAGE)
-        local taxamount = wage * 0.10
-        e.isPerson.wealth = e.isPerson.wealth + (wage - taxamount)          -- e = the carpenter
-        e.isPerson.taxesOwed = e.isPerson.taxesOwed + taxamount
-        VILLAGE_WEALTH = VILLAGE_WEALTH + taxamount
-        owner.isPerson.wealth = owner.isPerson.wealth - wage          -- is okay if goes negative
-        if owner.isPerson.wealth <= 1.1 then
-            table.remove(e.isPerson.queue, 1)   -- stop the job when home owner runs low on money
+
+-- print(MAP[row][col].entity.isTile.stockLevel, owner.residence.health, owner.residence.unbuiltMaxHealth)
+        -- convert unbuilt health into real health
+        if owner.residence.health < owner.residence.unbuiltMaxHealth then
+            -- repair the house
+            owner.residence.health = owner.residence.health + (dt * CARPENTER_BUILD_RATE * HEALTH_GAIN_FROM_WOOD)
+
+            -- pay the builder
+            local wage = (dt * CARPENTER_WAGE)
+            local taxamount = wage * 0.10
+            e.isPerson.wealth = e.isPerson.wealth + (wage - taxamount)          -- e = the carpenter
+            e.isPerson.taxesOwed = e.isPerson.taxesOwed + taxamount
+            VILLAGE_WEALTH = VILLAGE_WEALTH + taxamount
+            owner.isPerson.wealth = owner.isPerson.wealth - wage          -- is okay if goes negative
+            if (owner.isPerson.wealth <= FRUIT_SELL_PRICE * 1.1) or (owner.residence.health >= owner.residence.unbuiltMaxHealth) then
+                table.remove(e.isPerson.queue, 1)   -- stop the job when home owner runs low on money
+            end
+        else
+            -- nothing to repair
         end
+-- print(MAP[row][col].entity.isTile.stockLevel, owner.residence.health, owner.residence.unbuiltMaxHealth)
+-- print("***")
     end
 
     if e.occupation.value == enum.jobTaxCollector then
@@ -95,7 +115,7 @@ function actionwork.work(e, currentaction, dt)
             end
         end
     end
-    
+
     if e.occupation.value == enum.jobWelfareOfficer then
         -- convert coffer into payments
         local row = e.position.row

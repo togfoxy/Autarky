@@ -259,6 +259,18 @@ local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, st
     return closestrow, closestcol
 end
 
+local function getRandomBuilding(buildingtype, requiredstocklevel)
+    -- keeps checking tiles randomly till it finds the building with the right stock level
+    for i = 1, 3000 do      -- check an arbitrary number of times
+        local row = love.math.random(1, NUMBER_OF_ROWS)
+        local col = love.math.random(1, NUMBER_OF_COLS)
+        if MAP[row][col].entity.isTile.improvementType == buildingtype and MAP[row][col].entity.isTile.stockLevel >= requiredstocklevel then
+            return row, col
+        end
+    end
+    return nil, nil
+end
+
 local function getClosestPerson(taxesOwed, startrow, startcol)
     -- gets closest person that meets the needed criteria
     local closestvalue = -1
@@ -466,24 +478,29 @@ function functions.createActions(goal, agent)
         if agent.occupation.isConverter then
             -- time to convert things
             if agent.occupation.value == enum.jobCarpenter then
-                local destrow, destcol = getClosestBuilding(enum.improvementHouse, 1, agentrow, agentcol)
+                -- local destrow, destcol = getClosestBuilding(enum.improvementHouse, 1, agentrow, agentcol)
+                local destrow, destcol = getRandomBuilding(enum.improvementHouse, 1)
+
                 if destrow ~= nil then
-                    if MAP[destrow][destcol].entity.isTile.stockLevel >= 1 then
+                    local owner = MAP[destrow][destcol].entity.isTile.tileOwner
+                    local woodqty = MAP[destrow][destcol].entity.isTile.stockLevel
+                    local househealth = owner.residence.health
+                    local housemaxhealth = owner.residence.unbuiltMaxHealth
+
+                    if (woodqty >= 1 and housemaxhealth < 100) or (househealth < housemaxhealth and owner.isPerson.wealth >= FRUIT_SELL_PRICE * 1.1) then
                         addMoveAction(queue, agentrow, agentcol, destrow, destcol)   -- will add as many 'move' actions as necessary
 
                         -- work out how long to work
-                        local woodqty = MAP[destrow][destcol].entity.isTile.stockLevel
                         local worktime = woodqty * CARPENTER_BUILD_RATE   -- seconds
-                        MAP[destrow][destcol].entity.isTile.stockLevel = MAP[destrow][destcol].entity.isTile.stockLevel - woodqty
 
                         local action = {}
                         action.action = "work"
                         action.timeleft = worktime
                         action.log = "Working on house"
                         table.insert(queue, action)
-                        print("Maintaining house. ".. (worktime) .. " seconds and " .. woodqty .. " wood used.")
+                        print("Maintaining house using at most ".. (worktime) .. " seconds and " .. woodqty .. " wood used.")
                     else
-                        print("House needs building but has no stock")
+                        print("Found a house with health " .. househealth .. " and max health " .. housemaxhealth .. ". Nothing to do.")
                     end
                 else
                     print("Carpenter has nothing to build")

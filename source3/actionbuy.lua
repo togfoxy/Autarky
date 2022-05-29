@@ -40,6 +40,9 @@ local function tradeGoods(buyer, seller, stocktype, desiredQty, agreedprice)
                 -- log the transaction for future graphing
                 local nextindex = #STOCK_HISTORY[stocktype] + 1
                 STOCK_HISTORY[stocktype][nextindex] = agreedprice
+                if #STOCK_HISTORY[stocktype] > 100 then
+                    table.remove(STOCK_HISTORY[stocktype], 1)
+                end
             end
         end
     end
@@ -121,11 +124,10 @@ local function applyBuffs(agent, stocktype, amtbought)
     end
 
     if stocktype == enum.stockHealingHerbs then
-print("Agent health was " .. agent.isPerson.health)
+        -- print("Agent health was " .. agent.isPerson.health)
         agent.isPerson.health = agent.isPerson.health + (amtbought * HERB_HEAL_AMOUNT)
-print("Bought " .. amtbought .. " herbs that heal at " .. HERB_HEAL_AMOUNT .. " per unit." )
-print("Agent health is now " .. agent.isPerson.health)
-
+        -- print("Bought " .. amtbought .. " herbs that heal at " .. HERB_HEAL_AMOUNT .. " per unit." )
+        -- print("Agent health is now " .. agent.isPerson.health)
         agent.isPerson.stockInv[stocktype] = 0       -- apply buff and wipe the inventory
     end
 end

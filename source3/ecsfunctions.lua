@@ -147,9 +147,21 @@ function ecsfunctions.init()
                         love.graphics.draw(IMAGES[imagenumber], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
                     end
 
+                    -- health bar
                     if imptype == enum.improvementHouse then
                         -- draw health bar after the house so that it sits on top of the house
                         -- draw the health of the improvement as a bar
+
+                        -- draw maxhealth first
+                        local maxhealth = MAP[row][col].entity.isTile.tileOwner.residence.unbuiltMaxHealth
+                        local barheight = TILE_SIZE * (maxhealth / 100)       -- can exceed 100!
+                        local drawx2 = drawx + (TILE_SIZE / 2)      -- The '5' avoids blocking by the house
+                        local drawy2 = drawy + (TILE_SIZE / 2)
+                        local drawy3 = drawy2 - barheight
+                        love.graphics.setColor(1,0,0,1)
+                        love.graphics.line(drawx2, drawy2, drawx2, drawy3)
+
+                        -- real house health
                         local househealth = MAP[row][col].entity.isTile.tileOwner.residence.health
                         local barheight = TILE_SIZE * (househealth / 100)       -- house health can exceed 100!
                         local drawx2 = drawx + (TILE_SIZE / 2)      -- The '5' avoids blocking by the house
@@ -410,7 +422,10 @@ function ecsfunctions.init()
 
             -- apply wear to house if they have one
             if e:has("residence") then
+                e.residence.unbuiltMaxHealth = e.residence.unbuiltMaxHealth - (dt * TIME_SCALE * HOUSE_WEAR)
                 e.residence.health = e.residence.health - (dt * TIME_SCALE * HOUSE_WEAR)
+
+                if e.residence.unbuiltMaxHealth < 0 then e.residence.unbuiltMaxHealth = 0 end
                 if e.residence.health < 0 then e.residence.health = 0 end
             end
 

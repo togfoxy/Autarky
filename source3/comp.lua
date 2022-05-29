@@ -39,7 +39,7 @@ function comp.init()
         if c.stockBelief[enum.stockHealingHerbs][1] < 0 then c.stockBelief[enum.stockHealingHerbs][1] = 0.5 end
 
         c.wealth = 3         -- starting amount. 3 days worth of food.
-        c.stockInv[enum.stockWood] = 1
+        c.stockInv[enum.stockWood] = 0
         c.log = {}
         c.taxesOwed = 0
     end)
@@ -63,6 +63,7 @@ function comp.init()
         c.col = col
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
         c.health = 0        -- starts off at zero
+        c.unbuiltMaxHealth = 0      -- how much can be build due to wood added
     end)
 
     concord.component("position", function(c, row, col)         -- exists on the map/grid
