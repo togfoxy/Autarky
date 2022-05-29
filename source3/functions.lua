@@ -317,23 +317,24 @@ local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
     local endx = stopcol
     local endy = stoprow
     local path = cf.findPath(cmap, TILEWALKABLE, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
-
-    assert(path ~= nil) -- not sure how this is possible
-
-    for index, node in ipairs(path) do
-        if index > 1 then   -- don't apply the first waypoint as it is too close to the agent
-            local action = {}
-            action.action = "move"
-            action.log = "Moved"
-            action.row = node.y
-            action.col = node.x
-            -- action.x, action.y = fun.getXYfromRowCol(action.row, action.col)    -- returns x and y (in that order)
-            local x, y = fun.getXYfromRowCol(action.row, action.col)    -- returns x and y (in that order)
-            x = x + love.math.random(-10, 10) -- add some randomness to movement
-            y = y + love.math.random(-10, 10)
-            action.x, action.y = x, y
-            table.insert(queue, action)
+    if path ~= nil then
+        for index, node in ipairs(path) do
+            if index > 1 then   -- don't apply the first waypoint as it is too close to the agent
+                local action = {}
+                action.action = "move"
+                action.log = "Moved"
+                action.row = node.y
+                action.col = node.x
+                -- action.x, action.y = fun.getXYfromRowCol(action.row, action.col)    -- returns x and y (in that order)
+                local x, y = fun.getXYfromRowCol(action.row, action.col)    -- returns x and y (in that order)
+                x = x + love.math.random(-10, 10) -- add some randomness to movement
+                y = y + love.math.random(-10, 10)
+                action.x, action.y = x, y
+                table.insert(queue, action)
+            end
         end
+    else
+        -- can't find a path. Probably too many buildings
     end
 end
 
