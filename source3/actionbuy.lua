@@ -21,7 +21,7 @@ local function tradeGoods(buyer, seller, stocktype, desiredQty, agreedprice)
         purchaseamt = math.floor(purchaseamt)       -- round down to nearest unit
         if purchaseamt <= 0 then purchaseamt = 0 end
         if purchaseamt > 0 then
-            local transactionprice = purchaseamt * agreedprice
+            local transactionprice = purchaseamt * agreedprice      -- purchaseamt is the quantity of stocks moved
 
             shoptile.stockLevel = shoptile.stockLevel  - purchaseamt
             buyer.isPerson.stockInv[stocktype] = buyer.isPerson.stockInv[stocktype] + purchaseamt
@@ -30,11 +30,11 @@ local function tradeGoods(buyer, seller, stocktype, desiredQty, agreedprice)
             seller.isPerson.taxesOwed = seller.isPerson.taxesOwed + (transactionprice * GST_RATE)
             buyer.isPerson.wealth = buyer.isPerson.wealth - transactionprice
 
-            buyer.isPerson.stockBelief[stocktype][3] = buyer.isPerson.stockBelief[stocktype][3] + agreedprice
+            buyer.isPerson.stockBelief[stocktype][3] = buyer.isPerson.stockBelief[stocktype][3] + transactionprice
             buyer.isPerson.stockBelief[stocktype][4] = buyer.isPerson.stockBelief[stocktype][4] + purchaseamt
 
-            seller.isPerson.stockBelief[stocktype][3] = buyer.isPerson.stockBelief[stocktype][3] + agreedprice
-            seller.isPerson.stockBelief[stocktype][4] = buyer.isPerson.stockBelief[stocktype][4] + purchaseamt
+            seller.isPerson.stockBelief[stocktype][3] = seller.isPerson.stockBelief[stocktype][3] + transactionprice
+            seller.isPerson.stockBelief[stocktype][4] = seller.isPerson.stockBelief[stocktype][4] + purchaseamt
 
             if purchaseamt > 0 then
                 -- log the transaction for future graphing
@@ -163,14 +163,17 @@ function actionbuy.newbuy(e, currentaction)
 
             -- determine the ask
             assert(buyer ~= nil)
-            assert(seller.isPerson ~= nil)
             assert(seller.isPerson ~= {})
 
-            local sellerlowestbelief = seller.isPerson.stockBelief[stocktype][1]
-            local sellerhighestbelief = seller.isPerson.stockBelief[stocktype][2]
-            assert(sellerlowestbelief <= sellerhighestbelief)
-            ask = love.math.random(sellerlowestbelief * 10, sellerhighestbelief * 10)
-            ask = ask / 10
+            if seller.isPerson ~= nil then  -- don't know how it can be nil but it happens somehow. Maybe villager dies?
+                local sellerlowestbelief = seller.isPerson.stockBelief[stocktype][1]
+                local sellerhighestbelief = seller.isPerson.stockBelief[stocktype][2]
+                assert(sellerlowestbelief <= sellerhighestbelief)
+                ask = love.math.random(sellerlowestbelief * 10, sellerhighestbelief * 10)
+                ask = ask / 10
+            else
+                ask = 999   -- nonsense value. Not sure if this is a good idea
+            end
             if ask <= 0.1 then ask = 0.1 end
 
             assert(buyer ~= nil)
@@ -205,7 +208,7 @@ function actionbuy.newbuy(e, currentaction)
                 -- print("Agreed on a price but no wealth left")
             end
         else
-            print("Failed to agree on price for " .. stocktype .. ". Bid = " .. bid .. " / " .. cf.round(ask, 2))
+            -- print("Failed to agree on price for " .. stocktype .. ". Bid = " .. bid .. " / " .. cf.round(ask, 2))
             adjustBuyersBelief(buyer, stocktype, bid, ask)
             adjustSellersBelief(seller, stocktype, bid, ask)
         end

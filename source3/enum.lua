@@ -12,7 +12,6 @@ imagesHealingHouse = 8
 imagesWelfareHouse = 9
 
 imagesMud = 101
-imagesHouseFrame = 102
 imagesVillagerLog = 104
 
 imagesEmoteSleeping = 121

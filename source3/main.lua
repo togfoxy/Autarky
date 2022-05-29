@@ -1,4 +1,4 @@
-GAME_VERSION = "0.12"
+GAME_VERSION = "0.13"
 
 inspect = require 'lib.inspect'
 -- https://github.com/kikito/inspect.lua
@@ -144,7 +144,7 @@ end
 
 function love.mousemoved( x, y, dx, dy, istouch )
 
-	if y <= 150 then 
+	if y <= 150 then
 		DISPLAY_GRAPH = true
 	else
 		DISPLAY_GRAPH = false
