@@ -83,13 +83,13 @@ function behaviortree.EstablishTree()
 	TREE.child[3].child[2] = {}
 	TREE.child[3].child[2].goal = enum.goalGetWelfare
 	TREE.child[3].child[2].priority = function(agent)
-										return 5
+										return 9
 									end
 	TREE.child[3].child[2].activate = function(agent)
-										if agent.isPerson.wealth >= FRUIT_SELL_PRICE then
-											return false
-										else
+										if agent.isPerson.wealth < getAvgSellPrice(enum.stockFruit) then
 											return true
+										else
+											return false
 										end
 									end
 

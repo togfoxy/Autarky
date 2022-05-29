@@ -202,7 +202,7 @@ local function getBlankTile()
 
         if MAP[row][col].entity.isTile.improvementType ~= nil then
             tilevalid = false
-            print("Selected tile is already improved." .. count)
+            -- print("Selected tile is already improved." .. count)
         end
 
         if row >= WELLS[1].row - 3 and row <= WELLS[1].row + 3 and
@@ -334,7 +334,8 @@ local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
             end
         end
     else
-        -- can't find a path. Probably too many buildings
+        -- can't find a path. Probably too many buildings.
+        -- can happen when a getBlankTile() returns a tile that blocks a street
     end
 end
 
@@ -627,7 +628,7 @@ function functions.createActions(goal, agent)
                 action.log = "Bought some healing herbs"
                 table.insert(queue, action)
                 assert(action.stockType ~= nil)
-                print("move and buy herbs action added")
+                -- print("move and buy herbs action added")
             end
         end
     end
@@ -840,6 +841,21 @@ function functions.getJobCount(jobID)
         end
     end
     return count
+end
+
+function getAvgSellPrice(commodity)
+    local totalspent
+    local numberpurchased
+    for k, villager in pairs(VILLAGERS) do
+        totalspent = totalspent + villager.isPerson.stockBelief[commodity][3]
+        numberpurchased = numberpurchased + villager.isPerson.stockBelief[commodity][4]
+    end
+
+    local retvalue = cf.round(totalspent / numberpurchased, 4)
+    if love.math.random(1, 100) == 1 then
+        print("Average price for stocktype " .. commodity .. " is " .. retvalue)
+    end
+    return retvalue
 end
 
 return functions
