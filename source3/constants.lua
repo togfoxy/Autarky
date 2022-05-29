@@ -4,7 +4,7 @@ function constants.load()
 
     NUMBER_OF_VILLAGERS = 7
     VILLAGE_WEALTH = 0
-    NEW_VILLAGER_THRESHOLD = 300   --!        -- seconds it takes for a new villager
+    NEW_VILLAGER_THRESHOLD = 150   --!        -- seconds it takes for a new villager
 
     ZOOMFACTOR = 1
     MUSIC_TOGGLE = true
@@ -20,7 +20,8 @@ function constants.load()
 
     UPPER_TERRAIN_HEIGHT = 6
 
-    PERSON_DRAW_WIDTH = 10
+    PERSON_DRAW_WIDTH = 10          -- used to detect mouse clicks on villagers
+    DISPLAY_GRAPH = false
 
     MAP = {}			-- a 2d table of tiles
     VILLAGERS = {}
@@ -43,7 +44,7 @@ function constants.load()
 
     WALKING_SPEED = 900
     TIME_SCALE = 0.05          --0.025
-    GST_RATE = 0.10             -- 10%
+    GST_RATE = 0.25             -- 10%
     INJURY_RATE = 40             -- higher numbers = more injuries
     STAMINA_USE_RATE = 17
     STAMINA_RECOVERY_RATE = STAMINA_USE_RATE * 3
@@ -56,7 +57,7 @@ function constants.load()
 
     HERB_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 2
     HERB_SELL_PRICE = FRUIT_SELL_PRICE * 2
-    HERB_HEAL_AMOUNT = cf.round(HERB_SELL_PRICE / 4, 4)      -- heal 1 health per 4 wealth earned
+    HERB_HEAL_AMOUNT = 7
 
     CARPENTER_BUILD_RATE = FRUIT_PRODUCTION_RATE * 100    -- how much time the carpenter spends on one wood
     CARPENTER_INCOME_PER_JOB = 5
@@ -64,11 +65,13 @@ function constants.load()
 
     HOUSE_WEAR = CARPENTER_BUILD_RATE / 40       -- how fast a house wears down
     HEALTH_GAIN_FROM_WOOD = 1.5                     -- how much a house gains from a piece of wood
+    HEALTH_GAIN_PER_WOOD = 25                       -- each wood adds at most this much health to each house
 
     WELFARE_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE
 
-    TAXCOLLECTOR_WAGE = 0.10        -- they earn 10% of the taxes they collect
+    TAXCOLLECTOR_INCOME_PER_JOB = 0.2     -- arbitrary. No such thing as a 'job'. Public servants don't pay tax so keep this lower than normal
 
+    WELLFAREOFFICER_INCOME_PER_JOB = TAXCOLLECTOR_INCOME_PER_JOB + (TAXCOLLECTOR_INCOME_PER_JOB * GST_RATE)  -- arbitrary. No such thing as a 'job'. Public servants don't pay tax so keep this lower than normal
 end
 
 

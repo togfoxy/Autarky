@@ -21,6 +21,12 @@ function functions.initialiseMap()
             -- -- the noise function only works with numbers between 0 and 1
             -- MAP[row][col].height = cf.round(love.math.noise(rowvalue, colvalue, terrainheightperlinseed) * UPPER_TERRAIN_HEIGHT)
             -- MAP[row][col].tiletype = cf.round(love.math.noise(rowvalue, colvalue, terraintypeperlinseed) * 4)
+
+            -- add random trees
+            if love.math.random(0, 50) == 1 then
+                local random = love.math.random(1,6)        -- sprite number
+                MAP[row][col].decoration = random
+            end
 		end
 	end
 
@@ -35,6 +41,8 @@ function functions.initialiseMap()
     -- STOCK_HISTORY[enum.stockFruit][5] = 1.5
     -- STOCK_HISTORY[enum.stockFruit][6] = 0.7
 
+
+
 end
 
 function functions.loadImages()
@@ -42,9 +50,9 @@ function functions.loadImages()
 	IMAGES[enum.imagesGrassDry] = love.graphics.newImage("assets/images/grass_dry_block_256x.png")
 	IMAGES[enum.imagesGrassGreen] = love.graphics.newImage("assets/images/grass_green_block_256x.png")
 	IMAGES[enum.imagesGrassTeal] = love.graphics.newImage("assets/images/grass_teal_block_256x.png")
-    IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_alpha.png")
+    -- IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_alpha.png")
+    IMAGES[enum.imagesWell] = love.graphics.newImage("assets/images/well_50x45.png")
     IMAGES[enum.imagesMud] = love.graphics.newImage("assets/images/mud.png")
-
 
     IMAGES[enum.imagesHealingHouse] = love.graphics.newImage("assets/images/healerhouse.png")
     IMAGES[enum.imagesVillagerLog] = love.graphics.newImage("assets/images/villagerlog.png")
@@ -82,6 +90,9 @@ function functions.loadImages()
 
     SPRITES[enum.spriteRedWoman] = love.graphics.newImage("assets/images/Civilian Female Walk Red.png")
     QUADS[enum.spriteRedWoman] = cf.fromImageToQuads(SPRITES[enum.spriteRedWoman], 15, 32)
+
+    SPRITES[enum.spriteRandomTree] = love.graphics.newImage("assets/images/randomtrees_50x50.png")
+    QUADS[enum.spriteRandomTree] = cf.fromImageToQuads(SPRITES[enum.spriteRandomTree], 50, 50)
 
     -- farmer
     SPRITES[enum.spriteFarmerMan] = love.graphics.newImage("assets/images/Farmer Male Walk.png")
@@ -248,6 +259,18 @@ local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, st
     return closestrow, closestcol
 end
 
+local function getRandomBuilding(buildingtype, requiredstocklevel)
+    -- keeps checking tiles randomly till it finds the building with the right stock level
+    for i = 1, 3000 do      -- check an arbitrary number of times
+        local row = love.math.random(1, NUMBER_OF_ROWS)
+        local col = love.math.random(1, NUMBER_OF_COLS)
+        if MAP[row][col].entity.isTile.improvementType == buildingtype and MAP[row][col].entity.isTile.stockLevel >= requiredstocklevel then
+            return row, col
+        end
+    end
+    return nil, nil
+end
+
 local function getClosestPerson(taxesOwed, startrow, startcol)
     -- gets closest person that meets the needed criteria
     local closestvalue = -1
@@ -363,6 +386,7 @@ local function assignWorkplace(agent)
     MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
     MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stockType
     MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
+    MAP[workplacerow][workplacecol].entity.isTile.decorationType = nil          -- clear any tree or other decoration
 
     if agent.occupation.stockType == enum.stockFruit then
         MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = FRUIT_SELL_PRICE
@@ -454,24 +478,29 @@ function functions.createActions(goal, agent)
         if agent.occupation.isConverter then
             -- time to convert things
             if agent.occupation.value == enum.jobCarpenter then
-                local destrow, destcol = getClosestBuilding(enum.improvementHouse, 1, agentrow, agentcol)
+                -- local destrow, destcol = getClosestBuilding(enum.improvementHouse, 1, agentrow, agentcol)
+                local destrow, destcol = getRandomBuilding(enum.improvementHouse, 1)
+
                 if destrow ~= nil then
-                    if MAP[destrow][destcol].entity.isTile.stockLevel >= 1 then
+                    local owner = MAP[destrow][destcol].entity.isTile.tileOwner
+                    local woodqty = MAP[destrow][destcol].entity.isTile.stockLevel
+                    local househealth = owner.residence.health
+                    local housemaxhealth = owner.residence.unbuiltMaxHealth
+
+                    if (woodqty >= 1 and housemaxhealth < 100) or (househealth < housemaxhealth and owner.isPerson.wealth >= FRUIT_SELL_PRICE * 1.1) then
                         addMoveAction(queue, agentrow, agentcol, destrow, destcol)   -- will add as many 'move' actions as necessary
 
                         -- work out how long to work
-                        local woodqty = MAP[destrow][destcol].entity.isTile.stockLevel
                         local worktime = woodqty * CARPENTER_BUILD_RATE   -- seconds
-                        MAP[destrow][destcol].entity.isTile.stockLevel = MAP[destrow][destcol].entity.isTile.stockLevel - woodqty
 
                         local action = {}
                         action.action = "work"
                         action.timeleft = worktime
                         action.log = "Working on house"
                         table.insert(queue, action)
-                        print("Maintaining house. ".. (worktime) .. " seconds and " .. woodqty .. " wood used.")
+                        print("Maintaining house using at most ".. (worktime) .. " seconds and " .. woodqty .. " wood used.")
                     else
-                        print("House needs building but has no stock")
+                        print("Found a house with health " .. househealth .. " and max health " .. housemaxhealth .. ". Nothing to do.")
                     end
                 else
                     print("Carpenter has nothing to build")
@@ -500,7 +529,7 @@ function functions.createActions(goal, agent)
                 addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
 
                 local time1 = love.math.random(20, 45)
-                local time2 = agent.isPerson.fullness * 0.80
+                local time2 = agent.isPerson.fullness * 0.75
                 local action = {}
                 action.action = "work"
                 action.timeleft = math.min(time1,time2)
@@ -564,7 +593,6 @@ function functions.createActions(goal, agent)
         local qtyneeded = (cf.round((100 - agent.isPerson.health) / 10)) + 1
         local ownsHealershop = false
         -- see if healer owns a healing shop
-        --! include this back in when tested
         if agent:has("workplace") and agent.isPerson.wealth <= 4 then
             if MAP[workplacerow][workplacecol].entity.isTile.stockLevel >= qtyneeded and
                 MAP[workplacerow][workplacecol].entity.isTile.stockType == enum.stockHealingHerbs then
@@ -578,12 +606,15 @@ function functions.createActions(goal, agent)
             action.action = "buy"
             action.stockType = enum.stockHealingHerbs
             action.purchaseAmount = qtyneeded
-            action.log = "Bought some healing herbs"
+            action.log = "Trying to buy " .. qtyneeded .. " healing herbs"
             table.insert(queue, action)
             assert(action.stockType ~= nil)
         else
             -- not a farmer or rich or own farm has no stock
             local shoprow, shopcol = getClosestBuilding(enum.improvementHealer, qtyneeded, agentrow, agentcol)
+            if shoprow == nil then  -- if can't find the qty needed then find any shop with at least 1
+                shoprow, shopcol = getClosestBuilding(enum.improvementHealer, 1, agentrow, agentcol)
+            end
             if shoprow ~= nil then
                 -- buy herbs
                 addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
@@ -595,7 +626,7 @@ function functions.createActions(goal, agent)
                 action.log = "Bought some healing herbs"
                 table.insert(queue, action)
                 assert(action.stockType ~= nil)
-                -- print("move and buy herbs action added")
+                print("move and buy herbs action added")
             end
         end
     end
@@ -612,6 +643,7 @@ function functions.createActions(goal, agent)
                 MAP[houserow][housecol].entity.isTile.stockType = enum.stockHouse
                 MAP[houserow][housecol].entity.isTile.stockLevel = 0
                 MAP[houserow][housecol].entity.isTile.tileOwner = agent
+                MAP[houserow][housecol].entity.isTile.decorationType = nil          -- clear tree or other decoration
 
                 print("House established on tile " .. houserow, housecol)
             end
@@ -641,7 +673,7 @@ function functions.createActions(goal, agent)
                 table.insert(queue, action)
             end
         else
-            print("Looking for welfare but can't find an officer")
+            -- print("Looking for welfare but can't find an officer")
         end
     end
 

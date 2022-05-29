@@ -2,25 +2,33 @@ draw = {}
 
 local function drawGraph()
 
-    local maxindex = math.min(100, #STOCK_HISTORY[enum.stockFruit])
+    local dotsize = 2       -- radiuss
 
+    -- draw the initial price of fruit
+    local drawy = 100 - ((FRUIT_SELL_PRICE / 3) * 50)
+    love.graphics.setColor(143/255,135/255,255/255,1)
+    love.graphics.line(200, drawy, 200 + 100 * dotsize, drawy)
+
+    local maxindex = math.min(100, #STOCK_HISTORY[enum.stockFruit])
     for i = 1, maxindex do
 
-        local drawx = 250 + i
+        local drawx = 200 + (i * dotsize)
 
         -- scale the graph by making the transaction a % of the max expected range
         local percent = STOCK_HISTORY[enum.stockFruit][i] / 3
-        significance = percent * 50
+        significance = percent * 50 -- graph is 50 pixels high
         drawy = 100 - significance
 
         love.graphics.setColor(1,1,1,1)
-        love.graphics.circle("fill", drawx, drawy, 1)
+        love.graphics.circle("fill", drawx, drawy, dotsize)
     end
 end
 
 function draw.HUD()
 
-    drawGraph()
+    if DISPLAY_GRAPH then
+        drawGraph()
+    end
 
     local count = 0
     local totalfullness, avgfullness = 0,0

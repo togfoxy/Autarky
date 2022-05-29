@@ -35,6 +35,7 @@ function ecsfunctions.init()
                 local offsetx = imagewidth / 2
                 local offsety = imageheight / 2
 
+                -- draw the tile
 				love.graphics.setColor(1,1,1,1)
                 love.graphics.draw(img, drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
 
@@ -42,6 +43,22 @@ function ecsfunctions.init()
                 local mudalpha = cf.round((e.isTile.mudLevel / 255),3)
                 love.graphics.setColor(1,1,1,mudalpha)
                 love.graphics.draw(IMAGES[enum.imagesMud], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
+
+                -- draw the random decoration - if there is one
+                if MAP[row][col].decoration ~= nil then
+                    local imagenum = MAP[row][col].decoration
+                    local sprite = SPRITES[enum.spriteRandomTree]
+                    local quad = QUADS[enum.spriteRandomTree][imagenum]
+                    local imagewidth, imageheight = 50,50       --! needs to line up with the size in LOADIMAGES()
+                    local drawscalex = (TILE_SIZE / imagewidth)
+                    local drawscaley = (TILE_SIZE / imageheight)
+
+                    local offsetx = imagewidth / 2
+                    local offsety = imageheight / 2
+
+                    love.graphics.setColor(1,1,1,1)
+                    love.graphics.draw(sprite, quad, drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
+                end
 
                 -- draw contour lines
 
@@ -86,23 +103,6 @@ function ecsfunctions.init()
                     local imagenumber = imptype
                     local imagewidth, imageheight
 
-                    -- -- draw house or house frame depending on house health
-                    -- if imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health < 80 then
-                    --     imagenumber = enum.imagesHouseFrame
-                    --
-                    --     -- take this opportunity to draw the health bar
-                    --     local x1, y1, x2, y2
-                    --     x1 = drawx + (TILE_SIZE / 2)
-                    --     y1 = drawy + (TILE_SIZE / 2)
-                    --     x2 = x1
-                    --     y2 = y1 - (MAP[row][col].entity.isTile.tileOwner.residence.health / 100) * TILE_SIZE
-                    --     love.graphics.setColor(0,1,0,1)
-                    --     love.graphics.line(x1,y1,x2,y2)
-                    --
-                    --
-                    -- elseif imptype == enum.improvementHouse and MAP[row][col].entity.isTile.tileOwner.residence.health >= 80 then
-                    --     imagenumber = enum.imagesHouse
-                    -- end
                     if imptype == enum.improvementFarm then
                         -- determine which image from spritesheet
                         imagenum = cf.round(e.isTile.stockLevel * 4) + 1
@@ -146,7 +146,30 @@ function ecsfunctions.init()
                     else
                         love.graphics.draw(IMAGES[imagenumber], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
                     end
-                    -- draw the health of the improvement as a bar
+
+                    -- health bar
+                    if imptype == enum.improvementHouse then
+                        -- draw health bar after the house so that it sits on top of the house
+                        -- draw the health of the improvement as a bar
+
+                        -- draw maxhealth first
+                        local maxhealth = MAP[row][col].entity.isTile.tileOwner.residence.unbuiltMaxHealth
+                        local barheight = TILE_SIZE * (maxhealth / 100)       -- can exceed 100!
+                        local drawx2 = drawx + (TILE_SIZE / 2)      -- The '5' avoids blocking by the house
+                        local drawy2 = drawy + (TILE_SIZE / 2)
+                        local drawy3 = drawy2 - barheight
+                        love.graphics.setColor(1,0,0,1)
+                        love.graphics.line(drawx2, drawy2, drawx2, drawy3)
+
+                        -- real house health
+                        local househealth = MAP[row][col].entity.isTile.tileOwner.residence.health
+                        local barheight = TILE_SIZE * (househealth / 100)       -- house health can exceed 100!
+                        local drawx2 = drawx + (TILE_SIZE / 2)      -- The '5' avoids blocking by the house
+                        local drawy2 = drawy + (TILE_SIZE / 2)
+                        local drawy3 = drawy2 - barheight
+                        love.graphics.setColor(0,1,0,1)
+                        love.graphics.line(drawx2, drawy2, drawx2, drawy3)
+                    end
                 end
 
                 -- draw stocklevels for each tile
@@ -154,6 +177,10 @@ function ecsfunctions.init()
                     love.graphics.setColor(0/255,0/255,115/255,1)
                     love.graphics.print(cf.round(MAP[row][col].entity.isTile.stockLevel,1), drawx, drawy, 0, 1, 1, 20, -10)
                 end
+
+
+
+
 
                 -- debugging
                 -- draw mud levels for each tile
@@ -192,7 +219,6 @@ function ecsfunctions.init()
                 local imagenum = fun.getImageNumberFromFacing(facing)
                 local imagenumoffset = cf.round(e.position.movementDelta / 0.5)
                 imagenum = imagenum + imagenumoffset
-
 
                 local sprite, quad
                 if e.isPerson.gender == enum.genderMale and e:has("occupation") then
@@ -295,7 +321,7 @@ function ecsfunctions.init()
             -- determine new action for queue (or none)
             if #e.isPerson.queue == 0 then
                 local goal
-                if e.isPerson.fullness < 30 then
+                if e.isPerson.fullness < 45 then
                     -- force agent to eat
                     goal = enum.goalEatFruit
                 elseif e.isPerson.stamina < 30 then
@@ -309,6 +335,14 @@ function ecsfunctions.init()
                 end
                 local actionlist = {}
                 local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
+
+                if #e.isPerson.queue == 0 then
+                    -- queue is still empty for whatever reason
+                    -- go to work
+                    if e:has("occupation") then
+                        actionlist = fun.createActions(enum.goalWork, e)
+                    end
+                end
             end
 
             -- add 'idle' action if queue is still empty
@@ -388,8 +422,29 @@ function ecsfunctions.init()
 
             -- apply wear to house if they have one
             if e:has("residence") then
+                e.residence.unbuiltMaxHealth = e.residence.unbuiltMaxHealth - (dt * TIME_SCALE * HOUSE_WEAR)
                 e.residence.health = e.residence.health - (dt * TIME_SCALE * HOUSE_WEAR)
+
+                if e.residence.unbuiltMaxHealth < 0 then e.residence.unbuiltMaxHealth = 0 end
                 if e.residence.health < 0 then e.residence.health = 0 end
+            end
+
+            -- pay public servants
+            if  e:has("occupation") then
+                if e.occupation.value == enum.jobTaxCollector then
+                    local amount = TAXCOLLECTOR_INCOME_PER_JOB * dt * TIME_SCALE
+                    if VILLAGE_WEALTH >= amount then
+                        e.isPerson.wealth = e.isPerson.wealth + amount
+                        VILLAGE_WEALTH = VILLAGE_WEALTH - amount
+                    end
+                end
+                if e.occupation.value == enum.jobWelfareOfficer then
+                    local amount = WELLFAREOFFICER_INCOME_PER_JOB * dt * TIME_SCALE
+                    if VILLAGE_WEALTH >= amount then
+                        e.isPerson.wealth = e.isPerson.wealth + amount
+                        VILLAGE_WEALTH = VILLAGE_WEALTH - amount
+                    end
+                end
             end
 
             -- do this last as it may nullify the entity

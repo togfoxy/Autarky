@@ -38,7 +38,7 @@ function comp.init()
         c.stockBelief[enum.stockHealingHerbs][2] = HERB_SELL_PRICE + 1
         if c.stockBelief[enum.stockHealingHerbs][1] < 0 then c.stockBelief[enum.stockHealingHerbs][1] = 0.5 end
 
-        c.wealth = 3          -- starting amount. 3 days worth of food.
+        c.wealth = 3         -- starting amount. 3 days worth of food.
         c.stockInv[enum.stockWood] = 0
         c.log = {}
         c.taxesOwed = 0
@@ -63,6 +63,7 @@ function comp.init()
         c.col = col
         c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
         c.health = 0        -- starts off at zero
+        c.unbuiltMaxHealth = 0      -- how much can be build due to wood added
     end)
 
     concord.component("position", function(c, row, col)         -- exists on the map/grid
@@ -80,17 +81,17 @@ function comp.init()
         c.tileHeight = tileheight
         c.tileOwner = {}
         c.improvementType = improvementtype or nil     -- an improvement = a building or structure
+        if love.math.random(0, 40) == 1 and improvementtype == nil then
+            c.decorationType = love.math.random(1,6)        -- sprite number
+        else
+            c.decorationType = nil
+        end
         c.stockType = nil
         c.stockLevel = 0            -- must never be nil
         c.stockSellPrice = 0
         c.mudLevel = 0              -- holds the alpha value for the mud (0 -> 255)
         c.timeToBuild = nil        -- how long to build this tile
     end)
-
-
 end
-
-
-
 
 return comp
