@@ -271,6 +271,11 @@ function love.update(dt)
 
 	fun.PlayAmbientMusic()
 
+	-- if love.math.random(0,100) == 1 then
+	-- 	AVERAGE_STOCK_PRICE[enum.stockFruit] = fun.getAvgSellPrice(enum.stockFruit)
+	-- 	AVERAGE_STOCK_PRICE[enum.stockHealingHerbs] = fun.getAvgSellPrice(enum.stockHealingHerbs)
+	-- end
+
 	cam:setPos(TRANSLATEX,	TRANSLATEY)
 	cam:setZoom(ZOOMFACTOR)
 	res.update()

@@ -29,6 +29,7 @@ function constants.load()
     STOCK_HISTORY = {}  -- tracks actual transaction prices for each commodity
 
     NUMBER_OF_STOCK_TYPES = 9   --## must equal the highest number (or more). It is NOT a count!!
+    AVERAGE_STOCK_PRICE = {}
 
     DEBUG = false
     NEW_VILLAGER_TIMER = 0
@@ -45,7 +46,7 @@ function constants.load()
     WALKING_SPEED = 900
     TIME_SCALE = 0.05          --0.025
     GST_RATE = 0.25             -- 10%
-    INJURY_RATE = 40             -- higher numbers = more injuries
+    INJURY_RATE = 30             -- higher numbers = more injuries
     STAMINA_USE_RATE = 17
     STAMINA_RECOVERY_RATE = STAMINA_USE_RATE * 3
 

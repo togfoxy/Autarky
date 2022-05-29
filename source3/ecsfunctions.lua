@@ -350,7 +350,7 @@ function ecsfunctions.init()
                 -- add an 'idle' action
                 action = {}
                 action.action = "idle"      -- idle is same as rest but idle means "nothing else to do" but rest was chosen from btree
-                action.timeleft = love.math.random(10, 20)
+                action.timeleft = love.math.random(5, 10)
                 action.log = "Idle"
                 table.insert(e.isPerson.queue, action)
 

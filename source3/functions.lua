@@ -130,7 +130,7 @@ function functions.loadAudio()
     AUDIO[enum.audioEat]:setVolume(0.2)
     AUDIO[enum.musicBirdsinForest]:setVolume(1)
     AUDIO[enum.audioSawWood]:setVolume(0.2)
-    AUDIO[enum.audioSawWood]:setVolume(0.2)
+    AUDIO[enum.audioBandage]:setVolume(0.2)
 
 end
 
@@ -444,7 +444,7 @@ function functions.createActions(goal, agent)
         action.action = "rest"
 
         local time1 = ((100 - agent.isPerson.stamina) / 2) + love.math.random(5, 30)      -- some random formula. Please tweak!
-        local time2 = agent.isPerson.fullness * 0.8
+        local time2 = agent.isPerson.fullness * 0.5
         action.timeleft = math.min(time1, time2)    -- rest as much as you want (time1) but don't starve doing it (time2)
         action.log = "Rested"
         table.insert(queue, action)
@@ -505,7 +505,7 @@ function functions.createActions(goal, agent)
                         print("Found a house with health " .. househealth .. " and max health " .. housemaxhealth .. ". Nothing to do.")
                     end
                 else
-                    print("Carpenter has nothing to build")
+                    -- print("Carpenter has nothing to build")
                 end
             end
             if agent.occupation.value == enum.jobTaxCollector then
@@ -647,7 +647,7 @@ function functions.createActions(goal, agent)
                 MAP[houserow][housecol].entity.isTile.tileOwner = agent
                 MAP[houserow][housecol].entity.isTile.decorationType = nil          -- clear tree or other decoration
 
-                print("House established on tile " .. houserow, housecol)
+                -- print("House established on tile " .. houserow, housecol)
             end
         end
 
@@ -655,9 +655,11 @@ function functions.createActions(goal, agent)
         local housecol = agent.residence.col
 
         addMoveAction(queue, agentrow, agentcol, houserow, housecol)   -- will add as many 'move' actions as necessary
+        local time1 = love.math.random(10, 30)
+        local time2 = agent.isPerson.fullness * 0.5
         local action = {}
         action.action = "stockhouse"
-        action.timeleft = love.math.random(30, 60)
+        action.timeleft = math.min(time1, time2)
         action.log = "Brought wood to house"
         table.insert(queue, action)
     end
@@ -843,9 +845,9 @@ function functions.getJobCount(jobID)
     return count
 end
 
-function getAvgSellPrice(commodity)
-    local totalspent
-    local numberpurchased
+function functions.getAvgSellPrice(commodity)
+    local totalspent = 0
+    local numberpurchased = 0
     for k, villager in pairs(VILLAGERS) do
         totalspent = totalspent + villager.isPerson.stockBelief[commodity][3]
         numberpurchased = numberpurchased + villager.isPerson.stockBelief[commodity][4]
