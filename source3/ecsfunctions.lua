@@ -321,12 +321,12 @@ function ecsfunctions.init()
             -- determine new action for queue (or none)
             if #e.isPerson.queue == 0 then
                 local goal
-                if e.isPerson.fullness < 45 then
+                if e.isPerson.fullness < 45 and e.isPerson.wealth >= fun.getAvgSellPrice(enum.stockFruit) then
                     -- force agent to eat
                     goal = enum.goalEatFruit
                 elseif e.isPerson.stamina < 30 then
                     goal = enum.goalRest
-                elseif e.isPerson.health < 30 then
+                elseif e.isPerson.health < 30 and e.isPerson.wealth >= fun.getAvgSellPrice(enum.stockHealingHerbs) then
                     goal = enum.goalHeal
                 else
                     goal = ft.DetermineAction(TREE, e)

@@ -86,7 +86,7 @@ function behaviortree.EstablishTree()
 										return 9
 									end
 	TREE.child[3].child[2].activate = function(agent)
-										if agent.isPerson.wealth < getAvgSellPrice(enum.stockFruit) then
+										if agent.isPerson.wealth < fun.getAvgSellPrice(enum.stockFruit) then
 											return true
 										else
 											return false
