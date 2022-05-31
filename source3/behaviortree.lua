@@ -70,8 +70,9 @@ function behaviortree.EstablishTree()
 	TREE.child[3].child[1].activate = function(agent)
  										if agent.isPerson.wealth >= FRUIT_SELL_PRICE then
 											return true
-										elseif agent.isPerson.wealth < FRUIT_SELL_PRICE and agent:has("occupation") and agent.occupation.value == enum.jobFarmer then
+										elseif agent.isPerson.wealth < (FRUIT_SELL_PRICE * 1.5) and agent:has("occupation") and agent.occupation.value == enum.jobFarmer then
 											if agent.occupation.value == enum.jobFarmer then	-- this is nested to avoid error with nils
+												-- the 1.5 is simply a margin/buffer
 												return true
 											else
 												return false
@@ -83,7 +84,7 @@ function behaviortree.EstablishTree()
 	TREE.child[3].child[2] = {}
 	TREE.child[3].child[2].goal = enum.goalGetWelfare
 	TREE.child[3].child[2].priority = function(agent)
-										return 9
+										return 5
 									end
 	TREE.child[3].child[2].activate = function(agent)
 										-- if agent.isPerson.wealth < AVERAGE_STOCK_PRICE[enum.stockFruit] then

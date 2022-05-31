@@ -34,15 +34,7 @@ function functions.initialiseMap()
     for i = 1, NUMBER_OF_STOCK_TYPES do
         STOCK_HISTORY[i] = {}
     end
-    -- STOCK_HISTORY[enum.stockFruit][1] = 1
-    -- STOCK_HISTORY[enum.stockFruit][2] = 1.2
-    -- STOCK_HISTORY[enum.stockFruit][3] = 2.1
-    -- STOCK_HISTORY[enum.stockFruit][4] = 2.4
-    -- STOCK_HISTORY[enum.stockFruit][5] = 1.5
-    -- STOCK_HISTORY[enum.stockFruit][6] = 0.7
-
-
-
+    STOCK_HISTORY[enum.stockFruit][1] = FRUIT_SELL_PRICE        -- ensure this history is not empty because logic breaks when it is
 end
 
 function functions.loadImages()
@@ -295,7 +287,7 @@ local function getClosestPerson(taxesOwed, startrow, startcol)
     if closestrow == nil then
         -- print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
     else
-        print("found villager at row/col: ".. closestvillager.position.row, closestvillager.position.col)
+        -- print("found villager at row/col: ".. closestvillager.position.row, closestvillager.position.col)
     end
     return closestrow, closestcol
 end
@@ -337,43 +329,6 @@ local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
         -- can't find a path. Probably too many buildings.
         -- can happen when a getBlankTile() returns a tile that blocks a street
     end
-end
-
-function functions.buyStock(agent, stocktype, maxqty)
-    -- returns the amount of stock purchased
-    -- assumes agent is in the correct location
-    local agentrow = agent.position.row
-    local agentcol = agent.position.col
-    local sellprice
-    local purchaseamt = 0
-    local stockavail = math.floor(MAP[agentrow][agentcol].entity.isTile.stockLevel)
-
-    if MAP[agentrow][agentcol].entity.isTile.tileOwner == agent then
-        -- agent is buying from own shop. Waive the purchase price
-        -- doing this allows farms with 0 wealth to still buy and survive
-        purchaseamt = math.min(maxqty, stockavail)
-        MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
-    else
-        -- normal purchase transaction
-        if MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson ~= nil then
-            sellprice = MAP[agentrow][agentcol].entity.isTile.stockSellPrice
-            local canafford = math.floor(agent.isPerson.wealth / sellprice)     -- rounds down
-            purchaseamt = math.min(stockavail, canafford)
-            purchaseamt = math.min(purchaseamt, maxqty)       -- limit purchase to the requested amount
-            purchaseamt = math.floor(purchaseamt)
-            local funds = purchaseamt * sellprice
-
-            MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
-            MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + (funds * (1-GST_RATE))
-            MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.taxesOwed = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.taxesOwed + (funds * (GST_RATE))
-            agent.isPerson.wealth = agent.isPerson.wealth - funds
-        else
-            -- print(inspect(MAP[agentrow][agentcol].entity.isTile.tileOwner))
-            -- print(agentrow, agentcol, stocktype, stockavail)
-            -- error("Agent tried to buy stock from tile that has no owner.")
-        end
-    end
-    return purchaseamt
 end
 
 local function assignWorkplace(agent)
@@ -543,7 +498,7 @@ function functions.createActions(goal, agent)
     if goal == enum.goalEatFruit then
         local qtyneeded = 1
         local ownsFruitshop = false
-        if agent:has("workplace") and agent.isPerson.wealth < (qtyneeded * FRUIT_SELL_PRICE) then
+        if agent:has("workplace") and agent.isPerson.wealth < (qtyneeded * FRUIT_SELL_PRICE * 1.5) then -- the 1.5 provides a generous buffer
             if MAP[workplacerow][workplacecol].entity.isTile.stockLevel >= qtyneeded and
                 MAP[workplacerow][workplacecol].entity.isTile.stockType == enum.stockFruit then
                     ownsFruitshop = true
@@ -853,9 +808,14 @@ function functions.getAvgSellPrice(commodity)
         numberpurchased = numberpurchased + villager.isPerson.stockBelief[commodity][4]
     end
 
-    local retvalue = cf.round(totalspent / numberpurchased, 4)
-    if love.math.random(1, 100) == 1 then
-        -- print("Average price for stocktype " .. commodity .. " is " .. retvalue)
+    local retvalue
+    if numberpurchased > 0 then
+        retvalue = cf.round(totalspent / numberpurchased, 4)
+        if love.math.random(1, 100) == 1 then
+            -- print("Average price for stocktype " .. commodity .. " is " .. retvalue)
+        end
+    else
+        retvalue = FRUIT_SELL_PRICE
     end
     return retvalue
 end

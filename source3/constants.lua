@@ -28,6 +28,7 @@ function constants.load()
     TREE = {}			-- a tree that holds all possible behaviours for a person
     STOCK_HISTORY = {}  -- tracks actual transaction prices for each commodity
 
+
     NUMBER_OF_STOCK_TYPES = 9   --## must equal the highest number (or more). It is NOT a count!!
     AVERAGE_STOCK_PRICE = {}
 
@@ -53,6 +54,7 @@ function constants.load()
 
     FRUIT_PRODUCTION_RATE = 1 * TIME_SCALE   -- produce 1 per time period
     FRUIT_SELL_PRICE = 1
+
 
     WOOD_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 3
     WOOD_SELL_PRICE = FRUIT_SELL_PRICE * 3

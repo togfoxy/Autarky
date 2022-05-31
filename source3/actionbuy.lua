@@ -202,13 +202,13 @@ function actionbuy.newbuy(e, currentaction)
                 if seller ~= buyer then
                     adjustBuyersBelief(buyer, stocktype, bid, ask)
                     adjustSellersBelief(seller, stocktype, bid, ask)
-                    -- print("Bought stocktype " .. stocktype .. " for $" .. cf.round(agreedprice,2) .. " each.")
+                    print("Bought stocktype " .. stocktype .. " for $" .. cf.round(agreedprice,2) .. " each.")
                 end
             else
-                -- print("Agreed on a price but no wealth left")
+                print("Agreed on a price but no wealth left")
             end
         else
-            -- print("Failed to agree on price for " .. stocktype .. ". Bid = " .. bid .. " / " .. cf.round(ask, 2))
+            print("Failed to agree on price for " .. stocktype .. ". Bid = " .. bid .. " / " .. cf.round(ask, 2))
             adjustBuyersBelief(buyer, stocktype, bid, ask)
             adjustSellersBelief(seller, stocktype, bid, ask)
         end

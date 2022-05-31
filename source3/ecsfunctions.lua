@@ -330,9 +330,8 @@ function ecsfunctions.init()
                     goal = enum.goalHeal
                 else
                     goal = ft.DetermineAction(TREE, e)
-                    -- if e:has("occupation") then print("Occupation: " .. e.occupation.value) end
-                    -- if goal ~= nil then print("Goal is number " .. goal) end
                 end
+
                 local actionlist = {}
                 local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
 
