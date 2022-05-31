@@ -37,7 +37,7 @@ function behaviortree.EstablishTree()
  								return 5
  							end
  	TREE.child[2].activate = function(agent)
-								if agent:has("occupation") then
+								if agent:has("occupation") and agent.isPerson.health >= 25 then
 									return true
 								else
 									return false

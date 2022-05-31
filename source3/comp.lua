@@ -88,7 +88,7 @@ function comp.init()
         end
         c.stockType = nil
         c.stockLevel = 0            -- must never be nil
-        c.stockSellPrice = 0
+        -- c.stockSellPrice = 0     -- old code
         c.mudLevel = 0              -- holds the alpha value for the mud (0 -> 255)
         c.timeToBuild = nil        -- how long to build this tile
     end)

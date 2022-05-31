@@ -338,20 +338,23 @@ local function assignWorkplace(agent)
     local workplacecol
 
     workplacerow, workplacecol = getBlankTile()
-    assert(workplacerow ~= nil)
+    assert(workplacerow ~= nil)     --! what happens when all tiles are full?
     agent:give("workplace", workplacerow, workplacecol)
     MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
     MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stockType
     MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
     MAP[workplacerow][workplacecol].entity.isTile.decorationType = nil          -- clear any tree or other decoration
+    print("Decoration type is now:")
+    print(MAP[workplacerow][workplacecol].entity.isTile.decorationType)
 
-    if agent.occupation.stockType == enum.stockFruit then
-        MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = FRUIT_SELL_PRICE
-    elseif agent.occupation.stockType == enum.stockWood then
-        MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = WOOD_SELL_PRICE
-    elseif agent.occupation.stockType == enum.stockHealingHerbs then
-        MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = HERB_SELL_PRICE
-    end
+    -- old code that was never used
+    -- if agent.occupation.stockType == enum.stockFruit then
+    --     MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = FRUIT_SELL_PRICE
+    -- elseif agent.occupation.stockType == enum.stockWood then
+    --     MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = WOOD_SELL_PRICE
+    -- elseif agent.occupation.stockType == enum.stockHealingHerbs then
+    --     MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = HERB_SELL_PRICE
+    -- end
     -- print("Owner assigned to " .. workplacerow, workplacecol)
 
 end
