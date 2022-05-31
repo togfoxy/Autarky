@@ -144,7 +144,7 @@ end
 
 function love.mousemoved( x, y, dx, dy, istouch )
 
-	if y <= 150 then
+	if y <= 150 and x <= 450 then
 		DISPLAY_GRAPH = true
 	else
 		DISPLAY_GRAPH = false
@@ -261,6 +261,18 @@ function love.update(dt)
 		fun.playAudio(enum.audioNewVillager, false, true)
 	end
 
+	PRICE_UPDATE_TIMER = PRICE_UPDATE_TIMER + dt
+	if PRICE_UPDATE_TIMER > 15 then
+		PRICE_UPDATE_TIMER = 0
+	    -- log the transaction for future graphing
+	    local nextindex = #STOCK_HISTORY[enum.stockFruit] + 1
+	    STOCK_HISTORY[enum.stockFruit][nextindex] = fun.getAvgSellPrice(enum.stockFruit)
+	    if #STOCK_HISTORY[enum.stockFruit] > 100 then
+	        table.remove(STOCK_HISTORY[enum.stockFruit], 1)
+	    end
+
+	end
+
 	for i = #DRAWQUEUE, 1, -1 do
 		DRAWQUEUE[i].start = DRAWQUEUE[i].start - dt
 		DRAWQUEUE[i].stop = DRAWQUEUE[i].stop - dt
@@ -270,6 +282,11 @@ function love.update(dt)
 	end
 
 	fun.PlayAmbientMusic()
+
+	-- if love.math.random(0,100) == 1 then
+	-- 	AVERAGE_STOCK_PRICE[enum.stockFruit] = fun.getAvgSellPrice(enum.stockFruit)
+	-- 	AVERAGE_STOCK_PRICE[enum.stockHealingHerbs] = fun.getAvgSellPrice(enum.stockHealingHerbs)
+	-- end
 
 	cam:setPos(TRANSLATEX,	TRANSLATEY)
 	cam:setZoom(ZOOMFACTOR)

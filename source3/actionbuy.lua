@@ -36,14 +36,14 @@ local function tradeGoods(buyer, seller, stocktype, desiredQty, agreedprice)
             seller.isPerson.stockBelief[stocktype][3] = seller.isPerson.stockBelief[stocktype][3] + transactionprice
             seller.isPerson.stockBelief[stocktype][4] = seller.isPerson.stockBelief[stocktype][4] + purchaseamt
 
-            if purchaseamt > 0 then
-                -- log the transaction for future graphing
-                local nextindex = #STOCK_HISTORY[stocktype] + 1
-                STOCK_HISTORY[stocktype][nextindex] = agreedprice
-                if #STOCK_HISTORY[stocktype] > 100 then
-                    table.remove(STOCK_HISTORY[stocktype], 1)
-                end
-            end
+            -- if purchaseamt > 0 then
+            --     -- log the transaction for future graphing
+            --     local nextindex = #STOCK_HISTORY[stocktype] + 1
+            --     STOCK_HISTORY[stocktype][nextindex] = agreedprice
+            --     if #STOCK_HISTORY[stocktype] > 100 then
+            --         table.remove(STOCK_HISTORY[stocktype], 1)
+            --     end
+            -- end
         end
     end
     return purchaseamt
@@ -107,7 +107,7 @@ local function playPurchaseAudio(stocktype)
     if stockType == enum.stockFruit and love.math.random(1, 1000) == 1 then
         fun.playAudio(enum.audioEat, false, true)   -- stocktype, is music, is sound
     end
-    if stocktype == enum.stockHealingHerbs and love.math.random(1, 1000) == 1 then
+    if stocktype == enum.stockHealingHerbs and love.math.random(1, 500) == 1 then
         fun.playAudio(enum.audioBandage, false, true)
     end
 end
@@ -205,10 +205,10 @@ function actionbuy.newbuy(e, currentaction)
                     print("Bought stocktype " .. stocktype .. " for $" .. cf.round(agreedprice,2) .. " each.")
                 end
             else
-                -- print("Agreed on a price but no wealth left")
+                print("Agreed on a price but no wealth left")
             end
         else
-            -- print("Failed to agree on price for " .. stocktype .. ". Bid = " .. bid .. " / " .. cf.round(ask, 2))
+            print("Failed to agree on price for " .. stocktype .. ". Bid = " .. bid .. " / " .. cf.round(ask, 2))
             adjustBuyersBelief(buyer, stocktype, bid, ask)
             adjustSellersBelief(seller, stocktype, bid, ask)
         end

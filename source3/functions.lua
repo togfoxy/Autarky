@@ -34,15 +34,7 @@ function functions.initialiseMap()
     for i = 1, NUMBER_OF_STOCK_TYPES do
         STOCK_HISTORY[i] = {}
     end
-    -- STOCK_HISTORY[enum.stockFruit][1] = 1
-    -- STOCK_HISTORY[enum.stockFruit][2] = 1.2
-    -- STOCK_HISTORY[enum.stockFruit][3] = 2.1
-    -- STOCK_HISTORY[enum.stockFruit][4] = 2.4
-    -- STOCK_HISTORY[enum.stockFruit][5] = 1.5
-    -- STOCK_HISTORY[enum.stockFruit][6] = 0.7
-
-
-
+    STOCK_HISTORY[enum.stockFruit][1] = FRUIT_SELL_PRICE        -- ensure this history is not empty because logic breaks when it is
 end
 
 function functions.loadImages()
@@ -130,7 +122,7 @@ function functions.loadAudio()
     AUDIO[enum.audioEat]:setVolume(0.2)
     AUDIO[enum.musicBirdsinForest]:setVolume(1)
     AUDIO[enum.audioSawWood]:setVolume(0.2)
-    AUDIO[enum.audioSawWood]:setVolume(0.2)
+    AUDIO[enum.audioBandage]:setVolume(0.2)
 
 end
 
@@ -295,7 +287,7 @@ local function getClosestPerson(taxesOwed, startrow, startcol)
     if closestrow == nil then
         -- print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
     else
-        print("found villager at row/col: ".. closestvillager.position.row, closestvillager.position.col)
+        -- print("found villager at row/col: ".. closestvillager.position.row, closestvillager.position.col)
     end
     return closestrow, closestcol
 end
@@ -339,43 +331,6 @@ local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
     end
 end
 
-function functions.buyStock(agent, stocktype, maxqty)
-    -- returns the amount of stock purchased
-    -- assumes agent is in the correct location
-    local agentrow = agent.position.row
-    local agentcol = agent.position.col
-    local sellprice
-    local purchaseamt = 0
-    local stockavail = math.floor(MAP[agentrow][agentcol].entity.isTile.stockLevel)
-
-    if MAP[agentrow][agentcol].entity.isTile.tileOwner == agent then
-        -- agent is buying from own shop. Waive the purchase price
-        -- doing this allows farms with 0 wealth to still buy and survive
-        purchaseamt = math.min(maxqty, stockavail)
-        MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
-    else
-        -- normal purchase transaction
-        if MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson ~= nil then
-            sellprice = MAP[agentrow][agentcol].entity.isTile.stockSellPrice
-            local canafford = math.floor(agent.isPerson.wealth / sellprice)     -- rounds down
-            purchaseamt = math.min(stockavail, canafford)
-            purchaseamt = math.min(purchaseamt, maxqty)       -- limit purchase to the requested amount
-            purchaseamt = math.floor(purchaseamt)
-            local funds = purchaseamt * sellprice
-
-            MAP[agentrow][agentcol].entity.isTile.stockLevel = MAP[agentrow][agentcol].entity.isTile.stockLevel - purchaseamt
-            MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.wealth + (funds * (1-GST_RATE))
-            MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.taxesOwed = MAP[agentrow][agentcol].entity.isTile.tileOwner.isPerson.taxesOwed + (funds * (GST_RATE))
-            agent.isPerson.wealth = agent.isPerson.wealth - funds
-        else
-            -- print(inspect(MAP[agentrow][agentcol].entity.isTile.tileOwner))
-            -- print(agentrow, agentcol, stocktype, stockavail)
-            -- error("Agent tried to buy stock from tile that has no owner.")
-        end
-    end
-    return purchaseamt
-end
-
 local function assignWorkplace(agent)
     -- print("beta")
     -- create a workplace
@@ -383,20 +338,23 @@ local function assignWorkplace(agent)
     local workplacecol
 
     workplacerow, workplacecol = getBlankTile()
-    assert(workplacerow ~= nil)
+    assert(workplacerow ~= nil)     --! what happens when all tiles are full?
     agent:give("workplace", workplacerow, workplacecol)
     MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
     MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stockType
     MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
     MAP[workplacerow][workplacecol].entity.isTile.decorationType = nil          -- clear any tree or other decoration
+    print("Decoration type is now:")
+    print(MAP[workplacerow][workplacecol].entity.isTile.decorationType)
 
-    if agent.occupation.stockType == enum.stockFruit then
-        MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = FRUIT_SELL_PRICE
-    elseif agent.occupation.stockType == enum.stockWood then
-        MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = WOOD_SELL_PRICE
-    elseif agent.occupation.stockType == enum.stockHealingHerbs then
-        MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = HERB_SELL_PRICE
-    end
+    -- old code that was never used
+    -- if agent.occupation.stockType == enum.stockFruit then
+    --     MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = FRUIT_SELL_PRICE
+    -- elseif agent.occupation.stockType == enum.stockWood then
+    --     MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = WOOD_SELL_PRICE
+    -- elseif agent.occupation.stockType == enum.stockHealingHerbs then
+    --     MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = HERB_SELL_PRICE
+    -- end
     -- print("Owner assigned to " .. workplacerow, workplacecol)
 
 end
@@ -444,7 +402,7 @@ function functions.createActions(goal, agent)
         action.action = "rest"
 
         local time1 = ((100 - agent.isPerson.stamina) / 2) + love.math.random(5, 30)      -- some random formula. Please tweak!
-        local time2 = agent.isPerson.fullness * 0.8
+        local time2 = agent.isPerson.fullness * 0.5
         action.timeleft = math.min(time1, time2)    -- rest as much as you want (time1) but don't starve doing it (time2)
         action.log = "Rested"
         table.insert(queue, action)
@@ -505,7 +463,7 @@ function functions.createActions(goal, agent)
                         print("Found a house with health " .. househealth .. " and max health " .. housemaxhealth .. ". Nothing to do.")
                     end
                 else
-                    print("Carpenter has nothing to build")
+                    -- print("Carpenter has nothing to build")
                 end
             end
             if agent.occupation.value == enum.jobTaxCollector then
@@ -543,7 +501,7 @@ function functions.createActions(goal, agent)
     if goal == enum.goalEatFruit then
         local qtyneeded = 1
         local ownsFruitshop = false
-        if agent:has("workplace") and agent.isPerson.wealth < (qtyneeded * FRUIT_SELL_PRICE) then
+        if agent:has("workplace") and agent.isPerson.wealth < (qtyneeded * FRUIT_SELL_PRICE * 1.5) then -- the 1.5 provides a generous buffer
             if MAP[workplacerow][workplacecol].entity.isTile.stockLevel >= qtyneeded and
                 MAP[workplacerow][workplacecol].entity.isTile.stockType == enum.stockFruit then
                     ownsFruitshop = true
@@ -647,7 +605,7 @@ function functions.createActions(goal, agent)
                 MAP[houserow][housecol].entity.isTile.tileOwner = agent
                 MAP[houserow][housecol].entity.isTile.decorationType = nil          -- clear tree or other decoration
 
-                print("House established on tile " .. houserow, housecol)
+                -- print("House established on tile " .. houserow, housecol)
             end
         end
 
@@ -655,9 +613,11 @@ function functions.createActions(goal, agent)
         local housecol = agent.residence.col
 
         addMoveAction(queue, agentrow, agentcol, houserow, housecol)   -- will add as many 'move' actions as necessary
+        local time1 = love.math.random(10, 30)
+        local time2 = agent.isPerson.fullness * 0.5
         local action = {}
         action.action = "stockhouse"
-        action.timeleft = love.math.random(30, 60)
+        action.timeleft = math.min(time1, time2)
         action.log = "Brought wood to house"
         table.insert(queue, action)
     end
@@ -843,17 +803,22 @@ function functions.getJobCount(jobID)
     return count
 end
 
-function getAvgSellPrice(commodity)
-    local totalspent
-    local numberpurchased
+function functions.getAvgSellPrice(commodity)
+    local totalspent = 0
+    local numberpurchased = 0
     for k, villager in pairs(VILLAGERS) do
         totalspent = totalspent + villager.isPerson.stockBelief[commodity][3]
         numberpurchased = numberpurchased + villager.isPerson.stockBelief[commodity][4]
     end
 
-    local retvalue = cf.round(totalspent / numberpurchased, 4)
-    if love.math.random(1, 100) == 1 then
-        print("Average price for stocktype " .. commodity .. " is " .. retvalue)
+    local retvalue
+    if numberpurchased > 0 then
+        retvalue = cf.round(totalspent / numberpurchased, 4)
+        if love.math.random(1, 100) == 1 then
+            -- print("Average price for stocktype " .. commodity .. " is " .. retvalue)
+        end
+    else
+        retvalue = FRUIT_SELL_PRICE
     end
     return retvalue
 end
