@@ -87,7 +87,8 @@ function behaviortree.EstablishTree()
 									end
 	TREE.child[3].child[2].activate = function(agent)
 										-- if agent.isPerson.wealth < AVERAGE_STOCK_PRICE[enum.stockFruit] then
-										if agent.isPerson.wealth < fun.getAvgSellPrice[enum.stockFruit] then
+										local lastindex = #STOCK_HISTORY[enum.stockFruit]
+										if agent.isPerson.wealth < STOCK_HISTORY[enum.stockFruit][lastindex] then
 											return true
 										else
 											return false

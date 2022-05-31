@@ -36,14 +36,14 @@ local function tradeGoods(buyer, seller, stocktype, desiredQty, agreedprice)
             seller.isPerson.stockBelief[stocktype][3] = seller.isPerson.stockBelief[stocktype][3] + transactionprice
             seller.isPerson.stockBelief[stocktype][4] = seller.isPerson.stockBelief[stocktype][4] + purchaseamt
 
-            if purchaseamt > 0 then
-                -- log the transaction for future graphing
-                local nextindex = #STOCK_HISTORY[stocktype] + 1
-                STOCK_HISTORY[stocktype][nextindex] = agreedprice
-                if #STOCK_HISTORY[stocktype] > 100 then
-                    table.remove(STOCK_HISTORY[stocktype], 1)
-                end
-            end
+            -- if purchaseamt > 0 then
+            --     -- log the transaction for future graphing
+            --     local nextindex = #STOCK_HISTORY[stocktype] + 1
+            --     STOCK_HISTORY[stocktype][nextindex] = agreedprice
+            --     if #STOCK_HISTORY[stocktype] > 100 then
+            --         table.remove(STOCK_HISTORY[stocktype], 1)
+            --     end
+            -- end
         end
     end
     return purchaseamt

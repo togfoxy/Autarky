@@ -144,7 +144,7 @@ end
 
 function love.mousemoved( x, y, dx, dy, istouch )
 
-	if y <= 150 then
+	if y <= 150 and x <= 300 then
 		DISPLAY_GRAPH = true
 	else
 		DISPLAY_GRAPH = false
@@ -259,6 +259,18 @@ function love.update(dt)
 		table.insert(VILLAGERS, villager)
 		AUDIO[enum.audioNewVillager]:play()
 		fun.playAudio(enum.audioNewVillager, false, true)
+	end
+
+	PRICE_UPDATE_TIMER = PRICE_UPDATE_TIMER + dt
+	if PRICE_UPDATE_TIMER > 15 then
+		PRICE_UPDATE_TIMER = 0
+	    -- log the transaction for future graphing
+	    local nextindex = #STOCK_HISTORY[enum.stockFruit] + 1
+	    STOCK_HISTORY[enum.stockFruit][nextindex] = fun.getAvgSellPrice(enum.stockFruit)
+	    if #STOCK_HISTORY[enum.stockFruit] > 100 then
+	        table.remove(STOCK_HISTORY[enum.stockFruit], 1)
+	    end
+
 	end
 
 	for i = #DRAWQUEUE, 1, -1 do

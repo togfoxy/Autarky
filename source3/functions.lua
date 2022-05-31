@@ -855,7 +855,7 @@ function functions.getAvgSellPrice(commodity)
 
     local retvalue = cf.round(totalspent / numberpurchased, 4)
     if love.math.random(1, 100) == 1 then
-        print("Average price for stocktype " .. commodity .. " is " .. retvalue)
+        -- print("Average price for stocktype " .. commodity .. " is " .. retvalue)
     end
     return retvalue
 end
