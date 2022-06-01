@@ -37,6 +37,11 @@ function draw.HUD()
     local HUDText = {}
 
     txt = {}
+    txt.label = "Population: "
+    txt.value = #VILLAGERS
+    table.insert(HUDText, txt)
+
+    txt = {}
     txt.label = "Coffers: "
     txt.value = cf.round(VILLAGE_WEALTH)
     table.insert(HUDText, txt)
