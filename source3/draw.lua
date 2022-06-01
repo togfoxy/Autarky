@@ -2,22 +2,31 @@ draw = {}
 
 local function drawGraph()
 
-    local dotsize = 2       -- radiuss
+    local dotsize = 3       -- radius
+    local topx = 200
+    local topy = 50
+    local graphheight = 75
+    local bottomy = topy + graphheight
+    local bottomx = topx
+    local bluex = topx
+    local bluey = bottomy - (graphheight / 2)
 
-    -- draw the initial price of fruit
-    local drawy = 100 - ((FRUIT_SELL_PRICE / 3) * 50)
-    love.graphics.setColor(143/255,135/255,255/255,1)
-    love.graphics.line(200, drawy, 200 + 100 * dotsize, drawy)
+    local memorylength = 100    -- how many dots
+    local graphlength = memorylength * dotsize
 
-    local maxindex = math.min(100, #STOCK_HISTORY[enum.stockFruit])
+    love.graphics.setColor(1,1,1,1)
+    love.graphics.line(topx,topy,bottomx,bottomy,bottomx + graphlength, bottomy)
+
+    love.graphics.setColor(0,0,1,1)
+    love.graphics.line(bluex, bluey, bluex + graphlength, bluey)
+
+    local maxindex = math.min(memorylength, #STOCK_HISTORY[enum.stockFruit])
     for i = 1, maxindex do
-
-        local drawx = 200 + (i * dotsize)
-
+        local drawx = topx + (i * dotsize)
         -- scale the graph by making the transaction a % of the max expected range
-        local percent = STOCK_HISTORY[enum.stockFruit][i] / 3
-        significance = percent * 50 -- graph is 50 pixels high
-        drawy = 100 - significance
+        local percent = STOCK_HISTORY[enum.stockFruit][i] / 2       -- this is assuming the blue bar is half way. See bluey up above.
+        significance = percent * graphheight
+        drawy = bottomy - significance
 
         love.graphics.setColor(1,1,1,1)
         love.graphics.circle("fill", drawx, drawy, dotsize)
