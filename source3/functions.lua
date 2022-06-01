@@ -21,12 +21,6 @@ function functions.initialiseMap()
             -- -- the noise function only works with numbers between 0 and 1
             -- MAP[row][col].height = cf.round(love.math.noise(rowvalue, colvalue, terrainheightperlinseed) * UPPER_TERRAIN_HEIGHT)
             -- MAP[row][col].tiletype = cf.round(love.math.noise(rowvalue, colvalue, terraintypeperlinseed) * 4)
-
-            -- add random trees
-            if love.math.random(0, 50) == 1 then
-                local random = love.math.random(1,6)        -- sprite number
-                MAP[row][col].decoration = random
-            end
 		end
 	end
 
@@ -334,10 +328,21 @@ end
 local function assignWorkplace(agent)
     -- print("beta")
     -- create a workplace
+    local agentrow = agent.position.row
+    local agentcol = agent.position.col
     local workplacerow
     local workplacecol
 
-    workplacerow, workplacecol = getBlankTile()
+    if agent.occupation.value == enum.jobWelfareOfficer then
+        workplacerow, workplacecol = getClosestBuilding(enum.improvementWelfare, 0, agentrow, agentcol)      -- row/col is actually not used
+        if workplacerow == nil then
+            -- no building exists yet - create one
+            workplacerow, workplacecol = getBlankTile()
+        end
+    else
+        workplacerow, workplacecol = getBlankTile()
+    end
+
     assert(workplacerow ~= nil)     --! what happens when all tiles are full?
     agent:give("workplace", workplacerow, workplacecol)
     MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
@@ -356,6 +361,7 @@ local function assignWorkplace(agent)
     --     MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = HERB_SELL_PRICE
     -- end
     -- print("Owner assigned to " .. workplacerow, workplacecol)
+
 
 end
 
