@@ -21,12 +21,6 @@ function functions.initialiseMap()
             -- -- the noise function only works with numbers between 0 and 1
             -- MAP[row][col].height = cf.round(love.math.noise(rowvalue, colvalue, terrainheightperlinseed) * UPPER_TERRAIN_HEIGHT)
             -- MAP[row][col].tiletype = cf.round(love.math.noise(rowvalue, colvalue, terraintypeperlinseed) * 4)
-
-            -- add random trees
-            if love.math.random(0, 50) == 1 then
-                local random = love.math.random(1,6)        -- sprite number
-                MAP[row][col].decoration = random
-            end
 		end
 	end
 
