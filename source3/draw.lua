@@ -42,7 +42,7 @@ function draw.HUD()
     table.insert(HUDText, txt)
 
     txt = {}
-    txt.label = "Coffers: "
+    txt.label = "Treasury: "
     txt.value = cf.round(VILLAGE_WEALTH)
     table.insert(HUDText, txt)
 
