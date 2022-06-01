@@ -30,7 +30,6 @@ function constants.load()
 
 
     NUMBER_OF_STOCK_TYPES = 9   --## must equal the highest number (or more). It is NOT a count!!
-    AVERAGE_STOCK_PRICE = {}
 
     DEBUG = false
     NEW_VILLAGER_TIMER = 0

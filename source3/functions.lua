@@ -829,4 +829,32 @@ function functions.getAvgSellPrice(commodity)
     return retvalue
 end
 
+function functions.saveGame()
+	-- uses the globals because too hard to pass params
+    --! will want to save global timers as well
+
+
+    -- print(inspect(VILLAGERS[1].isPerson))
+
+
+    -- local savefile
+    -- local contents
+    -- local success, message
+    -- local savedir = love.filesystem.getSource()
+    --
+    -- savefile = savedir .. "/savedata/" .. "villagers.dat"
+    -- serialisedString = bitser.dumps(VILLAGERS[1].isPerson)
+    -- success, message = nativefs.write(savefile, serialisedString )
+    --
+    -- savefile = savedir .. "/savedata/" .. "map.dat"
+    -- serialisedString = Bitser.dumps(MAP)
+    -- success, message = Nativefs.write(savefile, serialisedString )
+    --
+    -- savefile = savedir .. "/savedata/" .. "stockhistory.dat"
+    -- serialisedString = Bitser.dumps(STOCK_HISTORY)
+    -- success, message = Nativefs.write(savefile, serialisedString )
+    --
+	-- LovelyToasts.show("Game saved",3, "middle")
+end
+
 return functions
