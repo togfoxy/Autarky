@@ -9,8 +9,18 @@ concord = require 'lib.concord'
 res = require 'lib.resolution_solution'
 -- https://github.com/Vovkiv/resolution_solution
 
-Camera = require 'lib.cam11.cam11'	-- Returns the Camera class.
+Camera = require 'lib.cam11.cam11'
 -- https://notabug.org/pgimeno/cam11
+
+bitser = require 'lib.bitser'
+-- https://github.com/gvx/bitser
+
+
+nativefs = require 'lib.nativefs'
+-- https://github.com/megagrump/nativefs
+
+lovelyToasts = require 'lib.lovelyToasts'
+-- https://github.com/Loucee/Lovely-Toasts
 
 ft = require 'lib.foxtree'		-- foxtree
 
@@ -283,12 +293,11 @@ function love.update(dt)
 
 	fun.PlayAmbientMusic()
 
-	-- if love.math.random(0,100) == 1 then
-	-- 	AVERAGE_STOCK_PRICE[enum.stockFruit] = fun.getAvgSellPrice(enum.stockFruit)
-	-- 	AVERAGE_STOCK_PRICE[enum.stockHealingHerbs] = fun.getAvgSellPrice(enum.stockHealingHerbs)
-	-- end
-
 	cam:setPos(TRANSLATEX,	TRANSLATEY)
 	cam:setZoom(ZOOMFACTOR)
 	res.update()
+
+	-- if love.math.random(1,100) == 1 then
+	-- 	fun.saveGame()
+	-- end
 end
