@@ -334,10 +334,21 @@ end
 local function assignWorkplace(agent)
     -- print("beta")
     -- create a workplace
+    local agentrow = agent.position.row
+    local agentcol = agent.position.col
     local workplacerow
     local workplacecol
 
-    workplacerow, workplacecol = getBlankTile()
+    if agent.occupation.value == enum.jobWelfareOfficer then
+        workplacerow, workplacecol = getClosestBuilding(enum.improvementWelfare, 0, agentrow, agentcol)      -- row/col is actually not used
+        if workplacerow == nil then
+            -- no building exists yet - create one
+            workplacerow, workplacecol = getBlankTile()
+        end
+    else
+        workplacerow, workplacecol = getBlankTile()
+    end
+
     assert(workplacerow ~= nil)     --! what happens when all tiles are full?
     agent:give("workplace", workplacerow, workplacecol)
     MAP[workplacerow][workplacecol].entity.isTile.improvementType = agent.occupation.value
@@ -356,6 +367,7 @@ local function assignWorkplace(agent)
     --     MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = HERB_SELL_PRICE
     -- end
     -- print("Owner assigned to " .. workplacerow, workplacecol)
+
 
 end
 
