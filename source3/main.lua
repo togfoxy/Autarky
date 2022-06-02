@@ -297,7 +297,7 @@ function love.update(dt)
 	cam:setZoom(ZOOMFACTOR)
 	res.update()
 
-	-- if love.math.random(1,100) == 1 then
-	-- 	fun.saveGame()
-	-- end
+	if love.math.random(1,100) == 1 then
+		fun.saveGame()
+	end
 end
