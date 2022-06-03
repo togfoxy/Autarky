@@ -252,7 +252,6 @@ function love.draw()
 
 end
 
-
 function love.update(dt)
 
     WORLD:emit("update", dt)
@@ -297,7 +296,8 @@ function love.update(dt)
 	cam:setZoom(ZOOMFACTOR)
 	res.update()
 
-	-- if love.math.random(1,100) == 1 then
-	-- 	fun.saveGame()
-	-- end
+	if love.math.random(1,200) == 1 then
+		-- fun.saveGame()
+		fun.LoadGame()
+	end
 end

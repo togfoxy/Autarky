@@ -479,7 +479,7 @@ function ecsfunctions.init()
         self.pool.onEntityAdded = function(_, entity)
             local row = entity.position.row
             local col = entity.position.col
-            MAP[row][col].entity = entity
+            MAP[row][col].entity = entity       -- this assigns isTile amongst other things
         end
     end
 
@@ -527,7 +527,7 @@ function ecsfunctions.init()
             -- the noise function only works with numbers between 0 and 1
             MAP[row][col].height = cf.round(love.math.noise(rowvalue, colvalue, terrainheightperlinseed) * UPPER_TERRAIN_HEIGHT)
             MAP[row][col].tileType = cf.round(love.math.noise(rowvalue, colvalue, terraintypeperlinseed) * 4)
-            local tiles = concord.entity(WORLD)
+            local tiles = concord.entity(WORLD)     -- this calls tile:init() which then loads the entity into MAP
             :give("drawable")
             :give("position", row, col)
             :give("uid")

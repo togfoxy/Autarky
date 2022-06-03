@@ -182,6 +182,7 @@ function actionbuy.newbuy(e, currentaction)
             if MAP[agentrow][agentcol].entity.isTile.stockLevel >= 3 then
                 -- offer a discount due to too much supply
                 ask = ask * 0.8
+                print("Offering discount due to excess stock")
             end
             if buyer == seller then
                 -- make bid same as ask just to ensure the transaction is successful

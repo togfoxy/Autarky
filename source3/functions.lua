@@ -829,32 +829,190 @@ function functions.getAvgSellPrice(commodity)
     return retvalue
 end
 
+local function prepTiles()
+    -- create a temporory table to hold tiles for saving
+    local tilestable = {}
+
+    local item = {}
+
+    --! uid
+
+    for col = 1, NUMBER_OF_COLS do
+        for row = 1, NUMBER_OF_ROWS do
+            item = {}
+            e = MAP[row][col].entity
+
+            -- do the isTile
+            item.row = row
+            item.col = col
+            item.uid = e.isTile.uid
+            item.tileType = e.isTile.tileType
+            item.tileHeight = e.isTile.tileHeight
+            item.tileOwner = e.isTile.tileOwner     -- probably won't serialise
+            item.improvementType = e.isTile.improvementType
+            item.decorationType = e.isTile.decorationType
+            item.stockType = e.isTile.stockType
+            item.mudLevel = e.isTile.mudLevel
+            item.timeToBuild = e.isTile.timeToBuild
+
+            table.insert(tilestable, item)
+
+            -- print(inspect(item))
+        end
+    end
+    -- print(inspect(tilestable))
+    return tilestable
+end
+
+local function prepPerson()
+    local persontable = {}
+    local item = {}
+
+    --! uid
+    for k, v in pairs(VILLAGERS) do
+        item = {}
+        item.uid = v.isPerson.uid
+        item.gender = v.isPerson.gender
+        item.health = v.isPerson.health
+        item.stamina = v.isPerson.stamina
+        item.fullness = v.isPerson.fullness
+        item.stockinv = v.isPerson.stockInv
+        item.stockbelief = v.isPerson.stockBelief
+        item.wealth = v.isPerson.wealth
+        item.log = v.isPerson.log
+        item.taxesowed = v.isPerson.taxesOwed
+        item.positionrow = v.position.row
+        item.positioncol = v.position.col
+        item.positionx = v.position.x
+        item.positiony = v.position.y
+        item.positionpreviousx = v.position.previousx
+        item.positionpreviousy = v.position.previousy
+        item.positionmovementdelta = v.position.movementDelta
+        if v:has("occupation") then
+            item.occupation = v.occupation.value
+            item.occupationstocktype = v.occupation.stockType
+            item.occupationisproducer = v.occupation.isProducer
+            item.occupationisservice = v.occupation.isService
+            item.occupationisconverter = v.occupation.isConverter
+        end
+        if v:has("workplace") then
+            item.workplacerow = v.workplace.row
+            item.workplacecol = v.workplace.col
+            item.x = v.workplace.x
+            item.y = v.workplace.y
+        end
+        if v:has("residence") then
+            item.residencerow = v.residence.row
+            item.residencecol = v.residence.col
+            item.residencex = v.residence.x
+            item.residencey = v.residence.y
+            item.residencehealth = v.residence.health
+            item.residenceunbuiltmaxhealth = v.residence.unbuiltMaxHealth
+        end
+        table.insert(persontable, item)
+    end
+    -- print(inspect(persontable))
+    return persontable
+end
+
+local function loadTile(tilestable)
+    VILLAGERS = {}
+    MAP = {}
+    WELLS = {}
+
+    fun.initialiseMap()     -- initialises 2d map with nils
+
+    for i = 1, #tilestable do
+        local row = tilestable[i].row
+        local col = tilestable[i].col
+        MAP[row][col].row = row
+        MAP[row][col].col = col
+
+        local tiles = concord.entity(WORLD)
+        :give("drawable")
+        :give("position", tilestable[i].row, tilestable[i].col)
+        :give("uid")
+        tiles:give("isTile", tilestable[i].tileType, tilestable[i].height)
+
+        tiles.uid.value = tilestable[i].uid
+        tiles.isTile.tileType = tilestable[i].tileType
+        tiles.isTile.tileHeight = tilestable[i].tileHeight
+        tiles.isTile.tileOwner = tilestable[i].tileOwner    --!test this on a map with improvements
+        tiles.isTile.improvementType = tilestable[i].improvementType
+        tiles.isTile.decorationType = tilestable[i].decorationType
+        tiles.isTile.stockType = tilestable[i].stockType
+        tiles.isTile.mudLevel = tilestable[i].mudLevel
+        tiles.isTile.timeToBuild = tilestable[i].timeToBuild
+
+        if tilestable[i].improvementType == enum.improvementWell then
+            local nextindex = #WELLS + 1
+            WELLS[nextindex] = {}
+            WELLS[nextindex].row = row
+            WELLS[nextindex].col = col
+        end
+
+        MAP[row][col].entity = tiles
+    end
+end
+
+local function loadPerson(persontable)
+
+    -- for i = 1, NUMBER_OF_VILLAGERS do
+    --     local villager = concord.entity(WORLD)
+    --     :give("drawable")
+    --     :give("position")
+    --     :give("uid")
+    --     :give("isPerson")
+    --     table.insert(VILLAGERS, villager)
+    -- end
+end
+
+
 function functions.saveGame()
 	-- uses the globals because too hard to pass params
     --! will want to save global timers as well
 
+    local isTileTable = prepTiles()
+    local savefile
+    local contents
+    local success, message
+    local savedir = love.filesystem.getSource()
 
-    -- print(inspect(VILLAGERS[1].isPerson))
+    savefile = savedir .. "/savedata/" .. "tiles.dat"
+    serialisedString = bitser.dumps(isTileTable)
+    success, message = nativefs.write(savefile, serialisedString)
 
+    local isPersonTable = prepPerson()
+    savefile = savedir .. "/savedata/" .. "person.dat"
+    serialisedString = bitser.dumps(isPersonTable)
+    success, message = nativefs.write(savefile, serialisedString)
+end
 
-    -- local savefile
-    -- local contents
-    -- local success, message
-    -- local savedir = love.filesystem.getSource()
-    --
-    -- savefile = savedir .. "/savedata/" .. "villagers.dat"
-    -- serialisedString = bitser.dumps(VILLAGERS[1].isPerson)
-    -- success, message = nativefs.write(savefile, serialisedString )
-    --
-    -- savefile = savedir .. "/savedata/" .. "map.dat"
-    -- serialisedString = Bitser.dumps(MAP)
-    -- success, message = Nativefs.write(savefile, serialisedString )
-    --
-    -- savefile = savedir .. "/savedata/" .. "stockhistory.dat"
-    -- serialisedString = Bitser.dumps(STOCK_HISTORY)
-    -- success, message = Nativefs.write(savefile, serialisedString )
-    --
-	-- LovelyToasts.show("Game saved",3, "middle")
+function functions.LoadGame()
+
+    local tilestable
+    local persontable
+
+    local savedir = love.filesystem.getSource()
+    love.filesystem.setIdentity(savedir)
+
+    local savefile
+    local contents
+	local size
+	local error = false
+
+    --! STOCK_HISTORY??
+
+    -- NOTE: ensure tiles are loaded before people
+	savefile = savedir .. "/savedata/" .. "tiles.dat"
+	if nativefs.getInfo(savefile) then
+		contents, size = nativefs.read(savefile)
+	    tilestable = bitser.loads(contents)
+        loadTile(tilestable)
+	else
+		error = true
+	end
+
 end
 
 return functions
