@@ -898,8 +898,8 @@ local function prepPerson()
         if v:has("workplace") then
             item.workplacerow = v.workplace.row
             item.workplacecol = v.workplace.col
-            item.x = v.workplace.x
-            item.y = v.workplace.y
+            item.workplacex = v.workplace.x
+            item.workplacey = v.workplace.y
         end
         if v:has("residence") then
             item.residencerow = v.residence.row
@@ -916,7 +916,7 @@ local function prepPerson()
 end
 
 local function loadTile(tilestable)
-    VILLAGERS = {}
+
     MAP = {}
     WELLS = {}
 
@@ -956,15 +956,52 @@ local function loadTile(tilestable)
 end
 
 local function loadPerson(persontable)
+    VILLAGERS = {}
 
-    -- for i = 1, NUMBER_OF_VILLAGERS do
-    --     local villager = concord.entity(WORLD)
-    --     :give("drawable")
-    --     :give("position")
-    --     :give("uid")
-    --     :give("isPerson")
-    --     table.insert(VILLAGERS, villager)
-    -- end
+    for i = 1, #persontable do
+
+        local v = concord.entity(WORLD)
+        :give("drawable")
+        :give("position")
+        :give("uid")
+        :give("isPerson")
+
+        item = {}
+        v.isPerson.uid = persontable[i].uid
+        v.isPerson.gender = persontable[i].gender
+        v.isPerson.health = persontable[i].health
+        v.isPerson.stamina = persontable[i].stamina
+        v.isPerson.fullness = persontable[i].fullness
+        v.isPerson.stockInv = persontable[i].stockinv
+        v.isPerson.stockBelief = persontable[i].stockbelief
+        v.isPerson.wealth = persontable[i].wealth
+        v.isPerson.log = persontable[i].log
+        v.isPerson.taxesOwed = persontable[i].taxesowed
+        v.position.row = persontable[i].positionrow
+        v.position.col = persontable[i].positioncol
+        v.position.x = persontable[i].positionx
+        v.position.y = persontable[i].positiony
+        v.position.previousx = persontable[i].positionpreviousx
+        v.position.previousy = persontable[i].positionpreviousy
+        v.position.movementDelta = persontable[i].positionmovementdelta
+
+        if persontable[i].occupation ~= nil then
+            v:give("occupation",persontable[i].occupation, persontable[i].occupationstocktype, persontable[i].occupationisproducer, persontable[i].occupationisservice, persontable[i].occupationisconverter)
+        end
+        if persontable[i].workplacerow ~= nil then
+            v:give("workplace", persontable[i].workplacerow, persontable[i].workplacecol)
+            v.workplace.x = persontable[i].workplacex
+            v.workplace.y = persontable[i].workplacey
+        end
+        if persontable[i].residencerow ~= nil then
+            v:give("residence", persontable[i].residencerow, persontable[i].residencecol)
+            v.residence.x = persontable[i].residencex
+            v.residence.y = persontable[i].residencey
+            v.residence.health = persontable[i].residencehealth
+            v.residence.unbuiltMaxHealth = persontable[i].residenceunbuiltmaxhealth
+        end
+        table.insert(VILLAGERS, v)
+    end
 end
 
 
@@ -1009,6 +1046,16 @@ function functions.LoadGame()
 		contents, size = nativefs.read(savefile)
 	    tilestable = bitser.loads(contents)
         loadTile(tilestable)
+	else
+		error = true
+	end
+
+    -- NOTE: ensure tiles are loaded before people
+	savefile = savedir .. "/savedata/" .. "person.dat"
+	if nativefs.getInfo(savefile) then
+		contents, size = nativefs.read(savefile)
+	    persontable = bitser.loads(contents)
+        loadPerson(persontable)
 	else
 		error = true
 	end
