@@ -899,11 +899,6 @@ end
 
 local function loadTile(tilestable)
 
-    MAP = {}        --! need to destroy all tiles from world before doing this
-    WELLS = {}
-
-    fun.initialiseMap()     -- initialises 2d map with nils
-
     for i = 1, #tilestable do
         local row = tilestable[i].row
         local col = tilestable[i].col
@@ -939,15 +934,6 @@ local function loadTile(tilestable)
 end
 
 local function loadPerson(persontable)
-
-    -- destroy all the villager entities
-    for i = #VILLAGERS, 1, -1 do
-        local villager = VILLAGERS[i]       -- get the entity
-        villager:destroy()
-        table.remove(VILLAGERS, i)
-    end
-
-    VILLAGERS = {}
 
     for i = 1, #persontable do
         local v = concord.entity(WORLD)
@@ -998,12 +984,13 @@ function functions.saveGame()
 	-- uses the globals because too hard to pass params
     --! will want to save global timers as well
 
-    local isTileTable = prepTiles()
+
     local savefile
     local contents
     local success, message
     local savedir = love.filesystem.getSource()
 
+    local isTileTable = prepTiles()
     savefile = savedir .. "/savedata/" .. "tiles.dat"
     serialisedString = bitser.dumps(isTileTable)
     success, message = nativefs.write(savefile, serialisedString)
@@ -1015,6 +1002,29 @@ function functions.saveGame()
 end
 
 function functions.LoadGame()
+
+    -- destroy all the villager entities
+    for i = #VILLAGERS, 1, -1 do
+        local villager = VILLAGERS[i]       -- get the entity
+        villager:destroy()
+        table.remove(VILLAGERS, i)
+    end
+
+    VILLAGERS = {}
+    
+    for col = 1, NUMBER_OF_COLS do
+        for row = 1,NUMBER_OF_ROWS do
+            local e = MAP[row][col].entity
+            e:destroy()
+            MAP[row][col] = nil
+        end
+    end
+
+    MAP = {}        --! need to destroy all tiles from world before doing this
+    WELLS = {}
+
+    fun.initialiseMap()     -- initialises 2d map with nils
+
 
     DRAWQUEUE = {}      -- erase this and start fresh. Holds bubbles
 
