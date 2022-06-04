@@ -122,11 +122,19 @@ function love.keyreleased( key, scancode )
 		end
 		VILLAGERS_SELECTED = 0
 	end
+
 	if key == "m" then
 		MUSIC_TOGGLE = not MUSIC_TOGGLE
 	end
-	if key == "s" then
+	if key == "e" then
 		SOUND_TOGGLE = not SOUND_TOGGLE
+	end
+
+	if key == "c" then
+		fun.LoadGame()
+	end
+	if key == "s" then
+		fun.saveGame()
 	end
 end
 
@@ -136,8 +144,10 @@ function love.mousepressed( x, y, button, istouch, presses )
 	if button == 1 then
 		-- select the villager if clicked, else select the tile (further down)
 		for k, v in pairs(VILLAGERS) do
+
 			x2 = v.position.x
 			y2 = v.position.y
+
 			local dist = cf.GetDistance(wx - LEFT_MARGIN, wy - TOP_MARGIN, x2, y2)
 			if dist <= PERSON_DRAW_WIDTH then
 				if v.isSelected then
@@ -235,27 +245,18 @@ function love.load()
 end
 
 function love.draw()
-
     res.start()
-
-
 	cam:attach()
     WORLD:emit("draw")
 	draw.Animations()
 	cam:detach()
-
 	draw.HUD()
-
-
     res.stop()
-
-
 end
 
 function love.update(dt)
 
     WORLD:emit("update", dt)
-
 
 	NEW_VILLAGER_TIMER = NEW_VILLAGER_TIMER + dt
 	if NEW_VILLAGER_TIMER > NEW_VILLAGER_THRESHOLD then
@@ -279,7 +280,6 @@ function love.update(dt)
 	    if #STOCK_HISTORY[enum.stockFruit] > 100 then
 	        table.remove(STOCK_HISTORY[enum.stockFruit], 1)
 	    end
-
 	end
 
 	for i = #DRAWQUEUE, 1, -1 do
@@ -295,9 +295,4 @@ function love.update(dt)
 	cam:setPos(TRANSLATEX,	TRANSLATEY)
 	cam:setZoom(ZOOMFACTOR)
 	res.update()
-
-	if love.math.random(1,200) == 1 then
-		-- fun.saveGame()
-		fun.LoadGame()
-	end
 end

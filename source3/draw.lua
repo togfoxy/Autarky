@@ -33,6 +33,14 @@ local function drawGraph()
     end
 end
 
+local function addDrawItem(drawTable, label, value, red)
+    local item = {}
+    item.label = label
+    item.value = value
+    item.red = red      -- true/false value
+    table.insert(drawTable, item)
+end
+
 function draw.HUD()
 
     if DISPLAY_GRAPH then
@@ -45,15 +53,8 @@ function draw.HUD()
     local totalstamina, avgstamina = 0,0
     local HUDText = {}
 
-    txt = {}
-    txt.label = "Population: "
-    txt.value = #VILLAGERS
-    table.insert(HUDText, txt)
-
-    txt = {}
-    txt.label = "Treasury: "
-    txt.value = cf.round(VILLAGE_WEALTH)
-    table.insert(HUDText, txt)
+    addDrawItem(HUDText, "Population: ", #VILLAGERS)
+    addDrawItem(HUDText, "Treasury: ", cf.round(VILLAGE_WEALTH))
 
     for k, v in pairs(VILLAGERS) do
         count = count + 1
@@ -63,31 +64,28 @@ function draw.HUD()
     end
     if count > 0 then
         avgwealth = cf.round(totalwealth/count, 1)
-        txt = {}
-        txt.label = "Avg wealth: "
-        txt.value = avgwealth
-        if avgwealth <= 2 then txt.red = true else txt.red = false end
-        table.insert(HUDText, txt)
+        if avgwealth >= 2 then
+            addDrawItem(HUDText, "Avg wealth: ", avgwealth)
+        else
+            addDrawItem(HUDText, "Avg wealth: ", avgwealth, true)
+        end
 
         avgfullness = cf.round(totalfullness/count)
-        txt = {}
-        txt.label = "Avg fullness: "
-        txt.value = avgfullness
-        if avgfullness <= 30 then txt.red = true else txt.red = false end
-        table.insert(HUDText, txt)
+        if avgfullness >= 30 then
+            addDrawItem(HUDText, "Avg fullness: ", avgfullness)
+        else
+            addDrawItem(HUDText, "Avg fullness: ", avgfullness, true)
+        end
 
         avgstamina = cf.round(totalstamina/count)
-        txt = {}
-        txt.label = "Avg stamina: "
-        txt.value = avgstamina
-        if avgstamina <= 30 then txt.red = true else txt.red = false end
-        table.insert(HUDText, txt)
+        if avgstamina >= 30 then
+            -- addDrawItem(HUDText, "Avg stamina: ", avgwealth)
+        else
+            addDrawItem(HUDText, "Avg stamina: ", avgstamina, true)
+        end
     end
 
-    txt = {}
-    txt.label = "---"
-    txt.value = nil
-    table.insert(HUDText, txt)
+    addDrawItem(HUDText, "---", nil)
 
     -- determine average stocklevels for food
     local count = 0
@@ -101,13 +99,12 @@ function draw.HUD()
         end
     end
     if count > 0 then
-        -- avgstocklevel = cf.round(totalstocklevel / count, 1)
         avgstocklevel = cf.round(totalstocklevel / #VILLAGERS, 1)
-        txt = {}
-        txt.label = "Avg food: "
-        txt.value = avgstocklevel
-        if avgstocklevel < 1 then txt.red = true else txt.red = false end
-        table.insert(HUDText, txt)
+        if avgstocklevel >= 1 then
+            addDrawItem(HUDText, "Avg food: ", avgstocklevel)
+        else
+            addDrawItem(HUDText, "Avg food: ", avgstocklevel, true)
+        end
     end
 
     -- determine average stocklevels for wood
@@ -123,106 +120,49 @@ function draw.HUD()
     end
     if count > 0 then
         avgstocklevel = cf.round(totalstocklevel / count, 1)
-        txt = {}
-        txt.label = "Avg wood: "
-        txt.value = avgstocklevel
-        if avgstocklevel < 1 then txt.red = true else txt.red = false end
-        table.insert(HUDText, txt)
+        if avgstocklevel >= 1 then
+            addDrawItem(HUDText, "Avg wood: ", avgstocklevel)
+        else
+            addDrawItem(HUDText, "Avg wood: ", avgstocklevel, red)
+        end
     end
 
-    txt = {}
-    txt.label = "\n"
-    txt.value = nil
-    table.insert(HUDText, txt)
-
-    txt = {}
-    txt.label = "Key commands:"
-    txt.value = nil
-    table.insert(HUDText, txt)
-    txt = {}
-    txt.label = "(select red person first)"
-    txt.value = nil
-    table.insert(HUDText, txt)
+    addDrawItem(HUDText, "\n", nil)
+    addDrawItem(HUDText, "Key commands:", nil)
+    addDrawItem(HUDText, "(select red person first)", nil)
     if VILLAGERS_SELECTED > 0 then
-        txt = {}
-        txt.label = "\n"
-        txt.value = nil
-        table.insert(HUDText, txt)
-        txt = {}
-        txt.label = "f = farmer"
-        txt.value = nil
-        table.insert(HUDText, txt)
-        txt = {}
-        txt.label = "l = lumberjack"
-        txt.value = nil
-        table.insert(HUDText, txt)
-        txt = {}
-        txt.label = "b = builder"
-        txt.value = nil
-        table.insert(HUDText, txt)
-        txt = {}
-        txt.label = "h = healer"
-        txt.value = nil
-        table.insert(HUDText, txt)
-        txt = {}
-        txt.label = "t = tax collector"
-        txt.value = nil
-        table.insert(HUDText, txt)
-        txt = {}
-        txt.label = "w = welfare officer"
-        txt.value = nil
-        table.insert(HUDText, txt)
+        addDrawItem(HUDText, "\n", nil)
+        addDrawItem(HUDText, "f = farmer", nil)
+        addDrawItem(HUDText, "l = lumberjack", nil)
+        addDrawItem(HUDText, "b = builder", nil)
+        addDrawItem(HUDText, "h = healer", nil)
+        addDrawItem(HUDText, "t = tax collector", nil)
+        addDrawItem(HUDText, "w = welfare officer", nil)
     end
 
-    txt = {}
-    txt.label = "\n"
-    txt.value = nil
-    table.insert(HUDText, txt)
-    txt = {}
-    txt.label = "Camera:"
-    txt.value = nil
-    table.insert(HUDText, txt)
-    txt = {}
-    txt.label = "mouse wheel = zoom"
-    txt.value = nil
-    table.insert(HUDText, txt)
-    txt = {}
-    txt.label = "middle mouse button = pan"
-    txt.value = nil
-    table.insert(HUDText, txt)
+    addDrawItem(HUDText, "\n", nil)
+    addDrawItem(HUDText, "Camera:", nil)
+    addDrawItem(HUDText, "mouse wheel = zoom", nil)
+    addDrawItem(HUDText, "middle mouse button = pan", nil)
+    addDrawItem(HUDText, "arrow keys = pan", nil)
+    addDrawItem(HUDText, "keypad 5 = reset camera", nil)
+    addDrawItem(HUDText, "---", nil)
 
-    txt = {}
-    txt.label = "arrow keys = pan"
-    txt.value = nil
-    table.insert(HUDText, txt)
-
-    txt = {}
-    txt.label = "keypad 5 = reset camera"
-    txt.value = nil
-    table.insert(HUDText, txt)
-
-    txt = {}
-    txt.label = "---"
-    txt.value = nil
-    table.insert(HUDText, txt)
-
-    txt = {}
     if MUSIC_TOGGLE then
-        txt.label = "'M'usic is on"
+        addDrawItem(HUDText, "'M'usic is on'", nil)
     else
-        txt.label = "'M'usic is off"
+        addDrawItem(HUDText, "'M'usic is off", nil)
     end
-    txt.value = nil
-    table.insert(HUDText, txt)
 
-    txt = {}
     if SOUND_TOGGLE then
-        txt.label = "'S'ound is on"
+        addDrawItem(HUDText, "'E'fects are on", nil)
     else
-        txt.label = "'S'ound is off"
+        addDrawItem(HUDText, "'E'fects are off", nil)
     end
-    txt.value = nil
-    table.insert(HUDText, txt)
+
+    addDrawItem(HUDText, "---", nil)
+    addDrawItem(HUDText, "'c'ontinue game (load)'", nil)
+    addDrawItem(HUDText, "'s'ave game'", nil)
 
     -- print to screen
     local yvalue = 35
