@@ -349,20 +349,6 @@ local function assignWorkplace(agent)
     MAP[workplacerow][workplacecol].entity.isTile.stockType = agent.occupation.stockType
     MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
     MAP[workplacerow][workplacecol].entity.isTile.decorationType = nil          -- clear any tree or other decoration
-    print("Decoration type is now:")
-    print(MAP[workplacerow][workplacecol].entity.isTile.decorationType)
-
-    -- old code that was never used
-    -- if agent.occupation.stockType == enum.stockFruit then
-    --     MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = FRUIT_SELL_PRICE
-    -- elseif agent.occupation.stockType == enum.stockWood then
-    --     MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = WOOD_SELL_PRICE
-    -- elseif agent.occupation.stockType == enum.stockHealingHerbs then
-    --     MAP[workplacerow][workplacecol].entity.isTile.stockSellPrice = HERB_SELL_PRICE
-    -- end
-    -- print("Owner assigned to " .. workplacerow, workplacecol)
-
-
 end
 
 function functions.createActions(goal, agent)
@@ -718,7 +704,7 @@ function functions.killAgent(uniqueid)
     end
     print("deadid: " .. deadID)
     assert(deadID ~= nil)
-    table.remove(VILLAGERS, deadID)
+    table.remove(VILLAGERS, deadID)     --! need to kill entity from WORLD before removing from table
     print("There are now " .. #VILLAGERS .. " villagers.")
 end
 
@@ -832,16 +818,12 @@ end
 local function prepTiles()
     -- create a temporory table to hold tiles for saving
     local tilestable = {}
-
     local item = {}
-
-    --! uid
 
     for col = 1, NUMBER_OF_COLS do
         for row = 1, NUMBER_OF_ROWS do
             item = {}
             e = MAP[row][col].entity
-
             -- do the isTile
             item.row = row
             item.col = col
@@ -852,11 +834,11 @@ local function prepTiles()
             item.improvementType = e.isTile.improvementType
             item.decorationType = e.isTile.decorationType
             item.stockType = e.isTile.stockType
+            item.stockLevel = e.isTile.stockLevel
             item.mudLevel = e.isTile.mudLevel
             item.timeToBuild = e.isTile.timeToBuild
 
             table.insert(tilestable, item)
-
             -- print(inspect(item))
         end
     end
@@ -917,11 +899,6 @@ end
 
 local function loadTile(tilestable)
 
-    MAP = {}
-    WELLS = {}
-
-    fun.initialiseMap()     -- initialises 2d map with nils
-
     for i = 1, #tilestable do
         local row = tilestable[i].row
         local col = tilestable[i].col
@@ -941,6 +918,7 @@ local function loadTile(tilestable)
         tiles.isTile.improvementType = tilestable[i].improvementType
         tiles.isTile.decorationType = tilestable[i].decorationType
         tiles.isTile.stockType = tilestable[i].stockType
+        tiles.isTile.stockLevel = tilestable[i].stockLevel
         tiles.isTile.mudLevel = tilestable[i].mudLevel
         tiles.isTile.timeToBuild = tilestable[i].timeToBuild
 
@@ -956,17 +934,14 @@ local function loadTile(tilestable)
 end
 
 local function loadPerson(persontable)
-    VILLAGERS = {}
 
     for i = 1, #persontable do
-
         local v = concord.entity(WORLD)
         :give("drawable")
         :give("position")
         :give("uid")
         :give("isPerson")
 
-        item = {}
         v.isPerson.uid = persontable[i].uid
         v.isPerson.gender = persontable[i].gender
         v.isPerson.health = persontable[i].health
@@ -979,8 +954,8 @@ local function loadPerson(persontable)
         v.isPerson.taxesOwed = persontable[i].taxesowed
         v.position.row = persontable[i].positionrow
         v.position.col = persontable[i].positioncol
-        v.position.x = persontable[i].positionx
-        v.position.y = persontable[i].positiony
+        v.position.x = cf.round(persontable[i].positionx)
+        v.position.y = cf.round(persontable[i].positiony)
         v.position.previousx = persontable[i].positionpreviousx
         v.position.previousy = persontable[i].positionpreviousy
         v.position.movementDelta = persontable[i].positionmovementdelta
@@ -1009,12 +984,13 @@ function functions.saveGame()
 	-- uses the globals because too hard to pass params
     --! will want to save global timers as well
 
-    local isTileTable = prepTiles()
+
     local savefile
     local contents
     local success, message
     local savedir = love.filesystem.getSource()
 
+    local isTileTable = prepTiles()
     savefile = savedir .. "/savedata/" .. "tiles.dat"
     serialisedString = bitser.dumps(isTileTable)
     success, message = nativefs.write(savefile, serialisedString)
@@ -1026,6 +1002,31 @@ function functions.saveGame()
 end
 
 function functions.LoadGame()
+
+    -- destroy all the villager entities
+    for i = #VILLAGERS, 1, -1 do
+        local villager = VILLAGERS[i]       -- get the entity
+        villager:destroy()
+        table.remove(VILLAGERS, i)
+    end
+
+    VILLAGERS = {}
+    
+    for col = 1, NUMBER_OF_COLS do
+        for row = 1,NUMBER_OF_ROWS do
+            local e = MAP[row][col].entity
+            e:destroy()
+            MAP[row][col] = nil
+        end
+    end
+
+    MAP = {}        --! need to destroy all tiles from world before doing this
+    WELLS = {}
+
+    fun.initialiseMap()     -- initialises 2d map with nils
+
+
+    DRAWQUEUE = {}      -- erase this and start fresh. Holds bubbles
 
     local tilestable
     local persontable

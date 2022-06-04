@@ -19,7 +19,6 @@ function ecsfunctions.init()
         love.graphics.setColor(1,1,1,1)
         for _, e in ipairs(self.pool) do
             if e.isTile then
-
                 local row, col = e.position.row, e.position.col
                 -- draw tile image
                 local img
