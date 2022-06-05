@@ -862,10 +862,9 @@ local function prepPerson()
     local persontable = {}
     local item = {}
 
-    --! uid
     for k, v in pairs(VILLAGERS) do
         item = {}
-        item.queue = v.isPerson.queue
+        --! item.queue = v.isPerson.queue
         item.uid = v.isPerson.uid
         item.gender = v.isPerson.gender
         item.health = v.isPerson.health
@@ -973,8 +972,10 @@ local function loadPerson(persontable)
             v.isPerson.stockBelief[i][4] = 0       -- total count transacted
         end
 
+        --! v.isPerson.queue = {}
+
         v.isPerson.uid = persontable[i].uid
-        v.isPerson.queue = persontable[i].queue
+        --! v.isPerson.queue = persontable[i].queue
         v.isPerson.gender = persontable[i].gender
         v.isPerson.health = persontable[i].health
         v.isPerson.stamina = persontable[i].stamina

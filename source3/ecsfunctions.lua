@@ -471,20 +471,19 @@ function ecsfunctions.init()
                 elseif e.isPerson.health < 0 then
                     txt = txt .. "poor health."
                 end
-                txt = txt .. "\n"
+                fun.addGameLog(txt)
                 if e:has("residence") then
-                    txt = txt .. "\n \nIt's house has been demolished."
+                    txt = "\n \nIt's house has been demolished."
+                    fun.addGameLog(txt)
                 end
                 if e:has("occupation") then
-                    txt = txt .. "\n \nIt's workplace has been demolished."
+                    txt = "\n \nIt's workplace has been demolished."
+                    --! add the occupation
+                    fun.addGameLog(txt)
                 end
-                fun.addGameLog(txt)
 
                 fun.killAgent(e.uid.value)  -- removes the agent from the VILLAGERS table
                 e:destroy()                 -- destroys the entity from the world
-
-
-
             end
         end
     end

@@ -48,8 +48,13 @@ local function drawInstructions()
     local totalstamina, avgstamina = 0,0
     local HUDText = {}
 
-    addDrawItem(HUDText, "Population: ", #VILLAGERS)
     addDrawItem(HUDText, "Treasury: ", cf.round(VILLAGE_WEALTH))
+    addDrawItem(HUDText, "---", nil)
+    addDrawItem(HUDText, "Population: ", #VILLAGERS)
+    addDrawItem(HUDText, "#Farmers: ", fun.getJobCount(enum.jobFarmer))
+    addDrawItem(HUDText, "#Lumberjacks: ", fun.getJobCount(enum.jobWoodsman))
+    addDrawItem(HUDText, "#healers: ", fun.getJobCount(enum.jobHealer))
+    addDrawItem(HUDText, "---", nil)
 
     for k, v in pairs(VILLAGERS) do
         count = count + 1
@@ -79,8 +84,6 @@ local function drawInstructions()
             addDrawItem(HUDText, "Avg stamina: ", avgstamina, true)
         end
     end
-
-    addDrawItem(HUDText, "---", nil)
 
     -- determine average stocklevels for food
     local count = 0
@@ -122,6 +125,7 @@ local function drawInstructions()
         end
     end
 
+    addDrawItem(HUDText, "---", nil)
     addDrawItem(HUDText, "\n", nil)
     addDrawItem(HUDText, "Key commands:", nil)
     addDrawItem(HUDText, "(select red person first)", nil)
