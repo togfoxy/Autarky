@@ -17,7 +17,7 @@ function comp.init()
         c.fullness = 125        -- hunger. Start a little topped up so they have a chance to establish themselves.
         c.stockInv = {}         -- track how much of each stock is owned
         c.stockBelief = {}
-        for i = 1, 30 do
+        for i = 1, NUMBER_OF_STOCK_TYPES do
             c.stockInv[i] = 0
             c.stockBelief[i] = {}
             c.stockBelief[i][1] = 0       -- lowest belief for stock item 'i'

@@ -41,20 +41,20 @@ local function addDrawItem(drawTable, label, value, red)
     table.insert(drawTable, item)
 end
 
-function draw.HUD()
-
-    if DISPLAY_GRAPH then
-        drawGraph()
-    end
-
+local function drawInstructions()
     local count = 0
     local totalfullness, avgfullness = 0,0
     local totalwealth, avgwealth = 0,0
     local totalstamina, avgstamina = 0,0
     local HUDText = {}
 
-    addDrawItem(HUDText, "Population: ", #VILLAGERS)
     addDrawItem(HUDText, "Treasury: ", cf.round(VILLAGE_WEALTH))
+    addDrawItem(HUDText, "---", nil)
+    addDrawItem(HUDText, "Population: ", #VILLAGERS)
+    addDrawItem(HUDText, "#Farmers: ", fun.getJobCount(enum.jobFarmer))
+    addDrawItem(HUDText, "#Lumberjacks: ", fun.getJobCount(enum.jobWoodsman))
+    addDrawItem(HUDText, "#healers: ", fun.getJobCount(enum.jobHealer))
+    addDrawItem(HUDText, "---", nil)
 
     for k, v in pairs(VILLAGERS) do
         count = count + 1
@@ -84,8 +84,6 @@ function draw.HUD()
             addDrawItem(HUDText, "Avg stamina: ", avgstamina, true)
         end
     end
-
-    addDrawItem(HUDText, "---", nil)
 
     -- determine average stocklevels for food
     local count = 0
@@ -127,6 +125,7 @@ function draw.HUD()
         end
     end
 
+    addDrawItem(HUDText, "---", nil)
     addDrawItem(HUDText, "\n", nil)
     addDrawItem(HUDText, "Key commands:", nil)
     addDrawItem(HUDText, "(select red person first)", nil)
@@ -179,6 +178,38 @@ function draw.HUD()
             love.graphics.print(str.label, 30, yvalue)
         end
         yvalue = yvalue + 20
+    end
+
+end
+
+local function drawGameLog()
+
+    local drawx = GAME_LOG_DRAWX
+    if #GAME_LOG > 20 then
+        j = #GAME_LOG - 20
+    else
+        j = 1
+    end
+    local drawy = 30
+    for i = j, #GAME_LOG do
+        love.graphics.print(GAME_LOG[i], drawx, drawy)
+        drawy = drawy + 20
+    end
+
+end
+
+function draw.HUD()
+
+    if DISPLAY_GRAPH then
+        drawGraph()
+    end
+
+    if DISPLAY_INSTRUCTIONS or VILLAGERS_SELECTED >= 1 then
+        drawInstructions()
+    end
+
+    if DISPLAY_GAME_LOG then
+        drawGameLog()
     end
 end
 
