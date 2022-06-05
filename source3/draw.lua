@@ -41,12 +41,7 @@ local function addDrawItem(drawTable, label, value, red)
     table.insert(drawTable, item)
 end
 
-function draw.HUD()
-
-    if DISPLAY_GRAPH then
-        drawGraph()
-    end
-
+local function drawInstructions()
     local count = 0
     local totalfullness, avgfullness = 0,0
     local totalwealth, avgwealth = 0,0
@@ -180,6 +175,20 @@ function draw.HUD()
         end
         yvalue = yvalue + 20
     end
+
+end
+
+function draw.HUD()
+
+    if DISPLAY_GRAPH then
+        drawGraph()
+    end
+
+    if DISPLAY_INSTRUCTIONS then
+        drawInstructions()
+    end
+
+
 end
 
 function draw.Animations()

@@ -830,7 +830,6 @@ local function prepTiles()
             item.uid = e.isTile.uid
             item.tileType = e.isTile.tileType
             item.tileHeight = e.isTile.tileHeight
-            item.tileOwner = e.isTile.tileOwner     -- probably won't serialise
             item.improvementType = e.isTile.improvementType
             item.decorationType = e.isTile.decorationType
             item.stockType = e.isTile.stockType
@@ -838,6 +837,11 @@ local function prepTiles()
             item.mudLevel = e.isTile.mudLevel
             item.timeToBuild = e.isTile.timeToBuild
 
+            if e.isTile.tileOwner ~= nil then
+                if e.isTile.tileOwner.uid ~= nil then
+                    item.tileOwnerUID = e.isTile.tileOwner.uid.value     -- probably won't serialise
+                end
+            end
             table.insert(tilestable, item)
             -- print(inspect(item))
         end
@@ -1011,7 +1015,7 @@ function functions.LoadGame()
     end
 
     VILLAGERS = {}
-    
+
     for col = 1, NUMBER_OF_COLS do
         for row = 1,NUMBER_OF_ROWS do
             local e = MAP[row][col].entity

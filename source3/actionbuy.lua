@@ -35,28 +35,19 @@ local function tradeGoods(buyer, seller, stocktype, desiredQty, agreedprice)
 
             seller.isPerson.stockBelief[stocktype][3] = seller.isPerson.stockBelief[stocktype][3] + transactionprice
             seller.isPerson.stockBelief[stocktype][4] = seller.isPerson.stockBelief[stocktype][4] + purchaseamt
-
-            -- if purchaseamt > 0 then
-            --     -- log the transaction for future graphing
-            --     local nextindex = #STOCK_HISTORY[stocktype] + 1
-            --     STOCK_HISTORY[stocktype][nextindex] = agreedprice
-            --     if #STOCK_HISTORY[stocktype] > 100 then
-            --         table.remove(STOCK_HISTORY[stocktype], 1)
-            --     end
-            -- end
         end
     end
     return purchaseamt
 end
 
-local function adjustBuyersBelief(agent, stocktype, bidprice, askprice)
-    -- success = boolean = true if transaction proceeded
+local function adjustBelief(agent, stocktype, bidprice, askprice)
 
     local adjamount = agent.isPerson.stockBelief[stocktype][2] * 0.10        -- 10% of upper belief
-    if bidprice > askprice then -- succcess
+    if bidprice >= askprice then -- succcess
         -- move the lower and upper closer together
-        agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] + adjamount
-        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] - adjamount
+        agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] * 1.1   -- increase by 10%
+        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] * 0.9   -- decrease by 10%
+        -- check that the bottom belief is less than upper belief
         if agent.isPerson.stockBelief[stocktype][1] > agent.isPerson.stockBelief[stocktype][2] then
             local avgvalue = (agent.isPerson.stockBelief[stocktype][1] + agent.isPerson.stockBelief[stocktype][2])  / 2
             agent.isPerson.stockBelief[stocktype][1] = avgvalue
@@ -64,20 +55,12 @@ local function adjustBuyersBelief(agent, stocktype, bidprice, askprice)
         end
     else    -- no success
         -- move upper belief up a bit
-        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] + adjamount
-
-        -- move the range down by 10% of the overbid
-        local overbid = bidprice - askprice
-        local adjamount = overbid * 0.10
-        agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] - adjamount
-        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] - adjamount
+        agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] * 1.1   -- increase by 10%
+        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] * 1.1   -- increase by 10%
     end
 
     -- data checking
-    if agent.isPerson.stockBelief[stocktype][1] <= 0 then agent.isPerson.stockBelief[stocktype][1] = 0.5 end
-    if agent.isPerson.stockBelief[stocktype][2] < agent.isPerson.stockBelief[stocktype][1] then
-        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][1]
-    end
+    if agent.isPerson.stockBelief[stocktype][1] <= 0 then agent.isPerson.stockBelief[stocktype][1] = 0.1 end
 end
 
 local function adjustSellersBelief(agent, stocktype, bidprice, askprice)
@@ -104,10 +87,10 @@ end
 
 local function playPurchaseAudio(stocktype)
 
-    if stockType == enum.stockFruit and love.math.random(1, 1000) == 1 then
+    if stockType == enum.stockFruit and love.math.random(1, 500) == 1 then
         fun.playAudio(enum.audioEat, false, true)   -- stocktype, is music, is sound
     end
-    if stocktype == enum.stockHealingHerbs and love.math.random(1, 500) == 1 then
+    if stocktype == enum.stockHealingHerbs and love.math.random(1, 300) == 1 then
         fun.playAudio(enum.audioBandage, false, true)
     end
 end
@@ -132,6 +115,27 @@ local function applyBuffs(agent, stocktype, amtbought)
     end
 end
 
+local function determineBid(buyer, stocktype)
+    -- determine the bid
+    local buyerlowestbelief = buyer.isPerson.stockBelief[stocktype][1]
+    local buyerhighestbelief = buyer.isPerson.stockBelief[stocktype][2]
+    assert(buyerlowestbelief <= buyerhighestbelief)
+    local bid = love.math.random(buyerlowestbelief * 10, buyerhighestbelief * 10)
+    bid = bid / 10
+    if bid <= 0 then bid = 0 end
+    return bid
+end
+
+local function determineAsk(seller, stocktype)
+    local sellerlowestbelief = seller.isPerson.stockBelief[stocktype][1]
+    local sellerhighestbelief = seller.isPerson.stockBelief[stocktype][2]
+    assert(sellerlowestbelief <= sellerhighestbelief)
+    local ask = love.math.random(sellerlowestbelief * 10, sellerhighestbelief * 10)
+    ask = ask / 10
+    if ask <= 0.1 then ask = 0.1 end
+    return ask
+end
+
 function actionbuy.newbuy(e, currentaction)
     -- print("Trying to buy stock type " .. currentaction.stockType)
     local agentrow = e.position.row
@@ -153,35 +157,24 @@ function actionbuy.newbuy(e, currentaction)
             bid = 0
             ask = 0
         else
-            -- determine the bid
-            local buyerlowestbelief = buyer.isPerson.stockBelief[stocktype][1]
-            local buyerhighestbelief = buyer.isPerson.stockBelief[stocktype][2]
-            assert(buyerlowestbelief <= buyerhighestbelief)
-            bid = love.math.random(buyerlowestbelief * 10, buyerhighestbelief * 10)
-            bid = bid / 10
-            if bid <= 0 then bid = 0 end
+            bid = determineBid(buyer, stocktype)
 
-            -- determine the ask
             assert(buyer ~= nil)
             assert(seller.isPerson ~= {})
 
+            -- determine the ask
             if seller.isPerson ~= nil then  -- don't know how it can be nil but it happens somehow. Maybe villager dies?
-                local sellerlowestbelief = seller.isPerson.stockBelief[stocktype][1]
-                local sellerhighestbelief = seller.isPerson.stockBelief[stocktype][2]
-                assert(sellerlowestbelief <= sellerhighestbelief)
-                ask = love.math.random(sellerlowestbelief * 10, sellerhighestbelief * 10)
-                ask = ask / 10
+                ask = determineAsk(seller, stocktype)
             else
                 ask = 999   -- nonsense value. Not sure if this is a good idea
             end
-            if ask <= 0.1 then ask = 0.1 end
 
             assert(buyer ~= nil)
             assert(seller ~= nil)
 
             if MAP[agentrow][agentcol].entity.isTile.stockLevel >= 3 then
                 -- offer a discount due to too much supply
-                ask = ask * 0.8
+                ask = ask * 0.6
                 print("Offering discount due to excess stock")
             end
             if buyer == seller then
@@ -201,8 +194,6 @@ function actionbuy.newbuy(e, currentaction)
             if amtbought >= 1 then
                 applyBuffs(buyer, stocktype, amtbought)        -- fruit and herbs have buffs
                 if seller ~= buyer then
-                    adjustBuyersBelief(buyer, stocktype, bid, ask)
-                    adjustSellersBelief(seller, stocktype, bid, ask)
                     print("Bought stocktype " .. stocktype .. " for $" .. cf.round(agreedprice,2) .. " each.")
                 end
             else
@@ -210,9 +201,9 @@ function actionbuy.newbuy(e, currentaction)
             end
         else
             print("Failed to agree on price for " .. stocktype .. ". Bid = " .. bid .. " / " .. cf.round(ask, 2))
-            adjustBuyersBelief(buyer, stocktype, bid, ask)
-            adjustSellersBelief(seller, stocktype, bid, ask)
         end
+        adjustBelief(buyer, stocktype, bid, ask)
+        adjustBelief(seller, stocktype, bid, ask)
 
         if amtbought > 0 then
             playPurchaseAudio(stocktype)

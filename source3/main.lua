@@ -1,4 +1,4 @@
-GAME_VERSION = "0.13"
+GAME_VERSION = "0.14"
 
 inspect = require 'lib.inspect'
 -- https://github.com/kikito/inspect.lua
@@ -14,7 +14,6 @@ Camera = require 'lib.cam11.cam11'
 
 bitser = require 'lib.bitser'
 -- https://github.com/gvx/bitser
-
 
 nativefs = require 'lib.nativefs'
 -- https://github.com/megagrump/nativefs
@@ -168,6 +167,12 @@ function love.mousemoved( x, y, dx, dy, istouch )
 		DISPLAY_GRAPH = true
 	else
 		DISPLAY_GRAPH = false
+	end
+
+	if x <= 150 then
+		DISPLAY_INSTRUCTIONS = true
+	else
+		DISPLAY_INSTRUCTIONS = false
 	end
 
 	if love.mouse.isDown(3) then

@@ -2,7 +2,7 @@ constants = {}
 
 function constants.load()
 
-    NUMBER_OF_VILLAGERS = 1
+    NUMBER_OF_VILLAGERS = 7
     VILLAGE_WEALTH = 0
     NEW_VILLAGER_THRESHOLD = 150   --!        -- seconds it takes for a new villager
 
@@ -22,6 +22,7 @@ function constants.load()
 
     PERSON_DRAW_WIDTH = 10          -- used to detect mouse clicks on villagers
     DISPLAY_GRAPH = false
+    DISPLAY_INSTRUCTIONS = false
 
     MAP = {}			-- a 2d table of tiles
     VILLAGERS = {}
@@ -53,22 +54,25 @@ function constants.load()
 
     FRUIT_PRODUCTION_RATE = 1 * TIME_SCALE   -- produce 1 per time period
     FRUIT_SELL_PRICE = 1
-
+    FRUIT_INCOME_PER_SECOND = FRUIT_SELL_PRICE / (1/FRUIT_PRODUCTION_RATE)  -- farmer makes this much income per second
 
     WOOD_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 3
-    WOOD_SELL_PRICE = FRUIT_SELL_PRICE * 3
+    WOOD_SELL_PRICE = FRUIT_SELL_PRICE * 3.1        -- intentionally a touch higher
+    WOOD_INCOME_PER_SECOND = WOOD_SELL_PRICE / (1/WOOD_PRODUCTION_RATE)
 
     HERB_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 2
-    HERB_SELL_PRICE = FRUIT_SELL_PRICE * 2
+    HERB_SELL_PRICE = FRUIT_SELL_PRICE * 2.1        -- intentionally a bit higher
+    HERB_INCOME_PER_SECOND = HERB_SELL_PRICE / (1/HERB_PRODUCTION_RATE)
     HERB_HEAL_AMOUNT = 7
 
     CARPENTER_BUILD_RATE = FRUIT_PRODUCTION_RATE * 100    -- how much time the carpenter spends on one wood
-    CARPENTER_INCOME_PER_JOB = 5
+    CARPENTER_INCOME_PER_JOB = 1.5
     CARPENTER_WAGE = (FRUIT_SELL_PRICE * CARPENTER_INCOME_PER_JOB) / CARPENTER_BUILD_RATE      -- needs to be $5 for 5 seconds
+    CARPENTER_INCOME_PER_SECOND = CARPENTER_WAGE / CARPENTER_BUILD_RATE
 
-    HOUSE_WEAR = CARPENTER_BUILD_RATE / 40       -- how fast a house wears down
+    HOUSE_WEAR = CARPENTER_BUILD_RATE / 50          -- how fast a house wears down. Larger number = slower wear
     HEALTH_GAIN_FROM_WOOD = 1.5                     -- how much a house gains from a piece of wood
-    HEALTH_GAIN_PER_WOOD = 25                       -- each wood adds at most this much health to each house
+    HEALTH_GAIN_PER_WOOD = 25                       -- this is maxhealth, not current health
 
     WELFARE_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE
 
