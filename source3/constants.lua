@@ -23,6 +23,7 @@ function constants.load()
     PERSON_DRAW_WIDTH = 10          -- used to detect mouse clicks on villagers
     DISPLAY_GRAPH = false
     DISPLAY_INSTRUCTIONS = false
+    DISPLAY_GAME_LOG = false
 
     MAP = {}			-- a 2d table of tiles
     VILLAGERS = {}

@@ -175,6 +175,12 @@ function love.mousemoved( x, y, dx, dy, istouch )
 		DISPLAY_INSTRUCTIONS = false
 	end
 
+	if x >= GAME_LOG_DRAWX then
+		DISPLAY_GAME_LOG = true
+	else
+		DISPLAY_GAME_LOG = false
+	end
+
 	if love.mouse.isDown(3) then
 		TRANSLATEX = TRANSLATEX - dx
 		TRANSLATEY = TRANSLATEY - dy
@@ -229,6 +235,7 @@ function love.load()
 
 	LEFT_MARGIN = TILE_SIZE / 2
     TOP_MARGIN = TILE_SIZE / 2
+	GAME_LOG_DRAWX = SCREEN_WIDTH - 325
 
 	print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
 
@@ -282,9 +289,17 @@ function love.update(dt)
 	    -- log the transaction for future graphing
 	    local nextindex = #STOCK_HISTORY[enum.stockFruit] + 1
 	    STOCK_HISTORY[enum.stockFruit][nextindex] = fun.getAvgSellPrice(enum.stockFruit)
-	    if #STOCK_HISTORY[enum.stockFruit] > 100 then
-	        table.remove(STOCK_HISTORY[enum.stockFruit], 1)
-	    end
+		fun.addGameLog("Fruit now sells for $" .. STOCK_HISTORY[enum.stockFruit][nextindex])
+		if #STOCK_HISTORY[enum.stockFruit] > 100 then
+			table.remove(STOCK_HISTORY[enum.stockFruit], 1)
+		end
+
+		nextindex = #STOCK_HISTORY[enum.stockWood] + 1
+		STOCK_HISTORY[enum.stockWood][nextindex] = fun.getAvgSellPrice(enum.stockWood)
+		fun.addGameLog("Wood now sells for $" .. STOCK_HISTORY[enum.stockWood][nextindex])
+		if #STOCK_HISTORY[enum.stockWood] > 100 then
+			table.remove(STOCK_HISTORY[enum.stockWood], 1)
+		end
 	end
 
 	for i = #DRAWQUEUE, 1, -1 do

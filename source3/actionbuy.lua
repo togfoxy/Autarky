@@ -151,8 +151,11 @@ function actionbuy.newbuy(e, currentaction)
 
             if MAP[agentrow][agentcol].entity.isTile.stockLevel >= 3 then
                 -- offer a discount due to too much supply
-                ask = ask * 0.6
+                ask = ask * 0.8
                 print("Offering discount due to excess stock")
+            elseif MAP[agentrow][agentcol].entity.isTile.stockLevel < 2 then
+                ask = ask * 1.2
+                print("Charging more for limited stock")
             end
             if buyer == seller then
                 -- make bid same as ask just to ensure the transaction is successful
@@ -172,15 +175,18 @@ function actionbuy.newbuy(e, currentaction)
                 applyBuffs(buyer, stocktype, amtbought)        -- fruit and herbs have buffs
                 if seller ~= buyer then
                     print("Bought stocktype " .. stocktype .. " for $" .. cf.round(agreedprice,2) .. " each.")
+                    adjustBelief(buyer, stocktype, bid, ask)
+                    adjustBelief(seller, stocktype, bid, ask)
+
                 end
             else
                 print("Agreed on a price but no wealth left")
             end
         else
             print("Failed to agree on price for " .. stocktype .. ". Bid = " .. bid .. " / " .. cf.round(ask, 2))
+            adjustBelief(buyer, stocktype, bid, ask)        -- Note: do not execute if agreed on price but no wealth left
+            adjustBelief(seller, stocktype, bid, ask)
         end
-        adjustBelief(buyer, stocktype, bid, ask)
-        adjustBelief(seller, stocktype, bid, ask)
 
         if amtbought > 0 then
             playPurchaseAudio(stocktype)

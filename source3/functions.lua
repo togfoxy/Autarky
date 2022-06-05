@@ -207,7 +207,9 @@ local function getBlankTile()
         local path = cf.findPath(cmap, 0, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
         if path == nil then
             tilevalid = false
-            print("Can't find path to new tile. Trying to find a new tile. " .. count)
+            if count == 10000 then
+                print("Can't find path to new tile. Trying to find a new tile.")
+            end
         end
     until tilevalid or count > 10000
 
@@ -805,12 +807,18 @@ function functions.getAvgSellPrice(commodity)
 
     local retvalue
     if numberpurchased > 0 then
-        retvalue = cf.round(totalspent / numberpurchased, 4)
+        retvalue = cf.round(totalspent / numberpurchased, 2)
         if love.math.random(1, 100) == 1 then
             -- print("Average price for stocktype " .. commodity .. " is " .. retvalue)
         end
     else
-        retvalue = FRUIT_SELL_PRICE
+        if commodity == enum.stockFruit then
+            retvalue = FRUIT_SELL_PRICE
+        elseif commodity == enum.stockWood then
+            retvalue = WOOD_SELL_PRICE
+        else
+            error()
+        end
     end
     return retvalue
 end
@@ -1078,5 +1086,10 @@ function functions.LoadGame()
 	end
 
 end
+
+function functions.addGameLog(txt)
+    table.insert(GAME_LOG, txt)
+end
+
 
 return functions

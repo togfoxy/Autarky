@@ -178,17 +178,35 @@ local function drawInstructions()
 
 end
 
+local function drawGameLog()
+
+    local drawx = GAME_LOG_DRAWX
+    if #GAME_LOG > 20 then
+        j = #GAME_LOG - 20
+    else
+        j = 1
+    end
+    local drawy = 30
+    for i = j, #GAME_LOG do
+        love.graphics.print(GAME_LOG[i], drawx, drawy)
+        drawy = drawy + 20
+    end
+
+end
+
 function draw.HUD()
 
     if DISPLAY_GRAPH then
         drawGraph()
     end
 
-    if DISPLAY_INSTRUCTIONS then
+    if DISPLAY_INSTRUCTIONS or VILLAGERS_SELECTED >= 1 then
         drawInstructions()
     end
 
-
+    if DISPLAY_GAME_LOG then
+        drawGameLog()
+    end
 end
 
 function draw.Animations()

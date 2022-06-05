@@ -471,21 +471,14 @@ function ecsfunctions.init()
                 elseif e.isPerson.health < 0 then
                     txt = txt .. "poor health."
                 end
+                txt = txt .. "\n"
                 if e:has("residence") then
-                    txt = txt .. "It's house has been demolished."
+                    txt = txt .. "\n \nIt's house has been demolished."
                 end
-                -- if e:has("workplace") then
-                --     local oc = e.occupation.value
-                --
-                --
-                --      jobFarmer = 5
-                --      jobWoodsman = 6
-                --      jobCarpenter = 201      -- this is a service - not a primary producer
-                --      jobHealer = 8           -- produces healing herbs
-                --      jobWelfareOfficer = 9
-                --      jobTaxCollector = 202
-                --
-                -- fun.addGameLog("")
+                if e:has("occupation") then
+                    txt = txt .. "\n \nIt's workplace has been demolished."
+                end
+                fun.addGameLog(txt)
 
                 fun.killAgent(e.uid.value)  -- removes the agent from the VILLAGERS table
                 e:destroy()                 -- destroys the entity from the world
