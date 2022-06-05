@@ -296,9 +296,16 @@ function love.update(dt)
 
 		nextindex = #STOCK_HISTORY[enum.stockWood] + 1
 		STOCK_HISTORY[enum.stockWood][nextindex] = fun.getAvgSellPrice(enum.stockWood)
-		fun.addGameLog("Wood now sells for $" .. STOCK_HISTORY[enum.stockWood][nextindex])
+		fun.addGameLog(" Wood now sells for $" .. STOCK_HISTORY[enum.stockWood][nextindex])
 		if #STOCK_HISTORY[enum.stockWood] > 100 then
 			table.remove(STOCK_HISTORY[enum.stockWood], 1)
+		end
+
+		nextindex = #STOCK_HISTORY[enum.stockHealingHerbs] + 1
+		STOCK_HISTORY[enum.stockHealingHerbs][nextindex] = fun.getAvgSellPrice(enum.stockHealingHerbs)
+		fun.addGameLog("  Herbs now sells for $" .. STOCK_HISTORY[enum.stockHealingHerbs][nextindex])
+		if #STOCK_HISTORY[enum.stockHealingHerbs] > 100 then
+			table.remove(STOCK_HISTORY[enum.stockHealingHerbs], 1)
 		end
 	end
 

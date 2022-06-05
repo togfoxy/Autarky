@@ -816,8 +816,11 @@ function functions.getAvgSellPrice(commodity)
             retvalue = FRUIT_SELL_PRICE
         elseif commodity == enum.stockWood then
             retvalue = WOOD_SELL_PRICE
+        elseif commodity == enum.stockHealingHerbs then
+            retvalue = HERB_SELL_PRICE
         else
-            error()
+            print("error: can't get average price for stocktype :" .. commodity)
+            -- error()
         end
     end
     return retvalue
@@ -848,6 +851,7 @@ local function prepTiles()
             if e.isTile.tileOwner ~= nil then
                 if e.isTile.tileOwner.uid ~= nil then
                     item.tileOwnerUID = e.isTile.tileOwner.uid.value
+                    print("Saving tile that has an owner with UID " .. item.tileOwnerUID)
                 end
             end
             table.insert(tilestable, item)
@@ -865,7 +869,7 @@ local function prepPerson()
     for k, v in pairs(VILLAGERS) do
         item = {}
         --! item.queue = v.isPerson.queue
-        item.uid = v.isPerson.uid
+        item.uid = v.uid.value
         item.gender = v.isPerson.gender
         item.health = v.isPerson.health
         item.stamina = v.isPerson.stamina
@@ -936,9 +940,8 @@ local function loadTile(tilestable)
         if tilestable[i].tileOwnerUID ~= nil then
             -- find the villager with this UID
             for k, vill in pairs(VILLAGERS) do
-                if vill.isPerson.uid == tilestable[i].tileOwnerUID then
+                if vill.uid.value == tilestable[i].tileOwnerUID then
                     e.isTile.tileOwner = vill
-                    break
                 end
             end
         end
@@ -974,7 +977,7 @@ local function loadPerson(persontable)
 
         --! v.isPerson.queue = {}
 
-        v.isPerson.uid = persontable[i].uid
+        v.uid.value = persontable[i].uid
         --! v.isPerson.queue = persontable[i].queue
         v.isPerson.gender = persontable[i].gender
         v.isPerson.health = persontable[i].health

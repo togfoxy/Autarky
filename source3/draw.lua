@@ -126,7 +126,6 @@ local function drawInstructions()
     end
 
     addDrawItem(HUDText, "---", nil)
-    addDrawItem(HUDText, "\n", nil)
     addDrawItem(HUDText, "Key commands:", nil)
     addDrawItem(HUDText, "(select red person first)", nil)
     if VILLAGERS_SELECTED > 0 then

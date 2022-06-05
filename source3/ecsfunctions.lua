@@ -473,11 +473,11 @@ function ecsfunctions.init()
                 end
                 fun.addGameLog(txt)
                 if e:has("residence") then
-                    txt = "\n \nIt's house has been demolished."
+                    txt = "It's house has been demolished."
                     fun.addGameLog(txt)
                 end
                 if e:has("occupation") then
-                    txt = "\n \nIt's workplace has been demolished."
+                    txt = "It's workplace has been demolished."
                     --! add the occupation
                     fun.addGameLog(txt)
                 end

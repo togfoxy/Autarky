@@ -181,7 +181,7 @@ function actionbuy.newbuy(e, currentaction)
                 print("Agreed on a price but no wealth left")
             end
         else
-            print("Failed to agree on price for stocktype " .. stocktype .. ". Bid = " .. bid .. " / " .. cf.round(ask, 2))
+            print("Failed to agree on price for stocktype " .. stocktype .. ". Bid = " .. cf.float(bid,2) .. " / " .. cf.round(ask, 2))
             adjustBelief(buyer, stocktype, bid, ask)        -- Note: do not execute if agreed on price but no wealth left
             adjustBelief(seller, stocktype, bid, ask)
         end
