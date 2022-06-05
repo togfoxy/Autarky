@@ -464,9 +464,34 @@ function ecsfunctions.init()
                     MAP[wprow][wpcol].entity.isTile.stockLevel = 0
                 end
 
+                -- create game log
+                local txt = "A villager has left due to "
+                if e.isPerson.fullness < 0 then
+                    txt = txt .. "lack of food."
+                elseif e.isPerson.health < 0 then
+                    txt = txt .. "poor health."
+                end
+                if e:has("residence") then
+                    txt = txt .. "It's house has been demolished."
+                end
+                -- if e:has("workplace") then
+                --     local oc = e.occupation.value
+                --
+                --
+                --      jobFarmer = 5
+                --      jobWoodsman = 6
+                --      jobCarpenter = 201      -- this is a service - not a primary producer
+                --      jobHealer = 8           -- produces healing herbs
+                --      jobWelfareOfficer = 9
+                --      jobTaxCollector = 202
+                --
+                -- fun.addGameLog("")
+
                 fun.killAgent(e.uid.value)  -- removes the agent from the VILLAGERS table
                 e:destroy()                 -- destroys the entity from the world
-                --! add a graveyard somewhere
+
+
+
             end
         end
     end

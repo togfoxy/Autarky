@@ -988,7 +988,6 @@ function functions.saveGame()
 	-- uses the globals because too hard to pass params
     --! will want to save global timers as well
 
-
     local savefile
     local contents
     local success, message
@@ -1002,6 +1001,10 @@ function functions.saveGame()
     local isPersonTable = prepPerson()
     savefile = savedir .. "/savedata/" .. "person.dat"
     serialisedString = bitser.dumps(isPersonTable)
+    success, message = nativefs.write(savefile, serialisedString)
+
+    savefile = savedir .. "/savedata/" .. "stockhistory.dat"
+    serialisedString = bitser.dumps(STOCK_HISTORY)
     success, message = nativefs.write(savefile, serialisedString)
 end
 
@@ -1031,6 +1034,7 @@ function functions.LoadGame()
 
 
     DRAWQUEUE = {}      -- erase this and start fresh. Holds bubbles
+    STOCK_HISTORY = {}
 
     local tilestable
     local persontable
@@ -1042,8 +1046,6 @@ function functions.LoadGame()
     local contents
 	local size
 	local error = false
-
-    --! STOCK_HISTORY??
 
     -- NOTE: ensure tiles are loaded before people
 	savefile = savedir .. "/savedata/" .. "tiles.dat"
@@ -1060,6 +1062,16 @@ function functions.LoadGame()
 	if nativefs.getInfo(savefile) then
 		contents, size = nativefs.read(savefile)
 	    persontable = bitser.loads(contents)
+        loadPerson(persontable)
+	else
+		error = true
+	end
+
+    -- NOTE: ensure tiles are loaded before people
+	savefile = savedir .. "/savedata/" .. "stockhistory.dat"
+	if nativefs.getInfo(savefile) then
+		contents, size = nativefs.read(savefile)
+	    STOCK_HISTORY = bitser.loads(contents)
         loadPerson(persontable)
 	else
 		error = true

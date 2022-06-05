@@ -54,35 +54,12 @@ local function adjustBelief(agent, stocktype, bidprice, askprice)
             agent.isPerson.stockBelief[stocktype][2] = avgvalue
         end
     else    -- no success
-        -- move upper belief up a bit
-        agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] * 1.1   -- increase by 10%
+        agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] * 1.05   -- increase by 10%
         agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] * 1.1   -- increase by 10%
     end
 
     -- data checking
     if agent.isPerson.stockBelief[stocktype][1] <= 0 then agent.isPerson.stockBelief[stocktype][1] = 0.1 end
-end
-
-local function adjustSellersBelief(agent, stocktype, bidprice, askprice)
-    if askprice < bidprice then
-        -- move the range up by 20% of the overbid
-        local overbid = bidprice - askprice
-        local adjamount = overbid * 0.20
-        agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] + adjamount
-        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] + adjamount
-    else    -- askprice > bidprice
-        -- move the range down by 20% of the overbid
-        local overbid = askprice - bidprice
-        local adjamount = overbid * 0.20
-        agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] - adjamount
-        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] - adjamount
-    end
-
-    -- data checking
-    if agent.isPerson.stockBelief[stocktype][1] <= 0 then agent.isPerson.stockBelief[stocktype][1] = 0.5 end
-    if agent.isPerson.stockBelief[stocktype][2] < agent.isPerson.stockBelief[stocktype][1] then
-        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][1]
-    end
 end
 
 local function playPurchaseAudio(stocktype)

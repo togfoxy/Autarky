@@ -277,7 +277,7 @@ function love.update(dt)
 	end
 
 	PRICE_UPDATE_TIMER = PRICE_UPDATE_TIMER + dt
-	if PRICE_UPDATE_TIMER > 15 then
+	if PRICE_UPDATE_TIMER > 30 then
 		PRICE_UPDATE_TIMER = 0
 	    -- log the transaction for future graphing
 	    local nextindex = #STOCK_HISTORY[enum.stockFruit] + 1

@@ -28,9 +28,10 @@ function constants.load()
     VILLAGERS = {}
     TREE = {}			-- a tree that holds all possible behaviours for a person
     STOCK_HISTORY = {}  -- tracks actual transaction prices for each commodity
+    GAME_LOG = {}       -- a log on global events the player needs to see
 
 
-    NUMBER_OF_STOCK_TYPES = 9   --## must equal the highest number (or more). It is NOT a count!!
+    NUMBER_OF_STOCK_TYPES = 9   --## must equal the highest number (or more). It is NOT a count/sequence!!
 
     DEBUG = false
     NEW_VILLAGER_TIMER = 0
