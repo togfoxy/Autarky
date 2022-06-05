@@ -847,7 +847,7 @@ local function prepTiles()
 
             if e.isTile.tileOwner ~= nil then
                 if e.isTile.tileOwner.uid ~= nil then
-                    item.tileOwnerUID = e.isTile.tileOwner.uid.value     -- probably won't serialise
+                    item.tileOwnerUID = e.isTile.tileOwner.uid.value
                 end
             end
             table.insert(tilestable, item)
@@ -865,6 +865,7 @@ local function prepPerson()
     --! uid
     for k, v in pairs(VILLAGERS) do
         item = {}
+        item.queue = v.isPerson.queue
         item.uid = v.isPerson.uid
         item.gender = v.isPerson.gender
         item.health = v.isPerson.health
@@ -926,13 +927,22 @@ local function loadTile(tilestable)
         tiles.uid.value = tilestable[i].uid
         tiles.isTile.tileType = tilestable[i].tileType
         tiles.isTile.tileHeight = tilestable[i].tileHeight
-        tiles.isTile.tileOwner = tilestable[i].tileOwner    --!test this on a map with improvements
         tiles.isTile.improvementType = tilestable[i].improvementType
         tiles.isTile.decorationType = tilestable[i].decorationType
         tiles.isTile.stockType = tilestable[i].stockType
         tiles.isTile.stockLevel = tilestable[i].stockLevel
         tiles.isTile.mudLevel = tilestable[i].mudLevel
         tiles.isTile.timeToBuild = tilestable[i].timeToBuild
+
+        if tilestable[i].tileOwnerUID ~= nil then
+            -- find the villager with this UID
+            for k, vill in pairs(VILLAGERS) do
+                if vill.isPerson.uid == tilestable[i].tileOwnerUID then
+                    e.isTile.tileOwner = vill
+                    break
+                end
+            end
+        end
 
         if tilestable[i].improvementType == enum.improvementWell then
             local nextindex = #WELLS + 1
@@ -954,7 +964,17 @@ local function loadPerson(persontable)
         :give("uid")
         :give("isPerson")
 
+        -- put up top and let it get overwritten
+        for i = 1, NUMBER_OF_STOCK_TYPES do
+            v.isPerson.stockBelief[i] = {}
+            v.isPerson.stockBelief[i][1] = 0       -- lowest belief for stock item 'i'
+            v.isPerson.stockBelief[i][2] = 0       -- highest belief
+            v.isPerson.stockBelief[i][3] = 0       -- total financial amount transacted    -- finanical amount / count = average for item 'i'
+            v.isPerson.stockBelief[i][4] = 0       -- total count transacted
+        end
+
         v.isPerson.uid = persontable[i].uid
+        v.isPerson.queue = persontable[i].queue
         v.isPerson.gender = persontable[i].gender
         v.isPerson.health = persontable[i].health
         v.isPerson.stamina = persontable[i].stamina
@@ -988,6 +1008,10 @@ local function loadPerson(persontable)
             v.residence.unbuiltMaxHealth = persontable[i].residenceunbuiltmaxhealth
         end
         table.insert(VILLAGERS, v)
+
+        assert(v.isPerson.stockBelief[enum.stockFruit][2] ~= nil)
+        assert(v.isPerson.stockBelief[enum.stockWood][2] ~= nil)
+        assert(v.isPerson.stockBelief[enum.stockHealingHerbs][2] ~= nil)
     end
 end
 
@@ -1055,17 +1079,6 @@ function functions.LoadGame()
 	local size
 	local error = false
 
-    -- NOTE: ensure tiles are loaded before people
-	savefile = savedir .. "/savedata/" .. "tiles.dat"
-	if nativefs.getInfo(savefile) then
-		contents, size = nativefs.read(savefile)
-	    tilestable = bitser.loads(contents)
-        loadTile(tilestable)
-	else
-		error = true
-	end
-
-    -- NOTE: ensure tiles are loaded before people
 	savefile = savedir .. "/savedata/" .. "person.dat"
 	if nativefs.getInfo(savefile) then
 		contents, size = nativefs.read(savefile)
@@ -1075,12 +1088,19 @@ function functions.LoadGame()
 		error = true
 	end
 
-    -- NOTE: ensure tiles are loaded before people
+	savefile = savedir .. "/savedata/" .. "tiles.dat"
+	if nativefs.getInfo(savefile) then
+		contents, size = nativefs.read(savefile)
+	    tilestable = bitser.loads(contents)
+        loadTile(tilestable)
+	else
+		error = true
+	end
+
 	savefile = savedir .. "/savedata/" .. "stockhistory.dat"
 	if nativefs.getInfo(savefile) then
 		contents, size = nativefs.read(savefile)
 	    STOCK_HISTORY = bitser.loads(contents)
-        loadPerson(persontable)
 	else
 		error = true
 	end

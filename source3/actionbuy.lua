@@ -42,7 +42,6 @@ end
 
 local function adjustBelief(agent, stocktype, bidprice, askprice)
 
-    local adjamount = agent.isPerson.stockBelief[stocktype][2] * 0.10        -- 10% of upper belief
     if bidprice >= askprice then -- succcess
         -- move the lower and upper closer together
         agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] * 1.1   -- increase by 10%
@@ -177,13 +176,12 @@ function actionbuy.newbuy(e, currentaction)
                     print("Bought stocktype " .. stocktype .. " for $" .. cf.round(agreedprice,2) .. " each.")
                     adjustBelief(buyer, stocktype, bid, ask)
                     adjustBelief(seller, stocktype, bid, ask)
-
                 end
             else
                 print("Agreed on a price but no wealth left")
             end
         else
-            print("Failed to agree on price for " .. stocktype .. ". Bid = " .. bid .. " / " .. cf.round(ask, 2))
+            print("Failed to agree on price for stocktype " .. stocktype .. ". Bid = " .. bid .. " / " .. cf.round(ask, 2))
             adjustBelief(buyer, stocktype, bid, ask)        -- Note: do not execute if agreed on price but no wealth left
             adjustBelief(seller, stocktype, bid, ask)
         end
