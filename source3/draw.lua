@@ -138,7 +138,7 @@ local function drawInstructions()
         addDrawItem(HUDText, "w = welfare officer", nil)
     end
 
-    addDrawItem(HUDText, "\n", nil)
+    addDrawItem(HUDText, "---", nil)
     addDrawItem(HUDText, "Camera:", nil)
     addDrawItem(HUDText, "mouse wheel = zoom", nil)
     addDrawItem(HUDText, "middle mouse button = pan", nil)

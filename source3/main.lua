@@ -235,7 +235,7 @@ function love.load()
 
 	LEFT_MARGIN = TILE_SIZE / 2
     TOP_MARGIN = TILE_SIZE / 2
-	GAME_LOG_DRAWX = SCREEN_WIDTH - 325
+	GAME_LOG_DRAWX = SCREEN_WIDTH - 275
 
 	print("There are " .. NUMBER_OF_ROWS .. " rows and " .. NUMBER_OF_COLS .. " columns.")
 

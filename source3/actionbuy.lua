@@ -40,7 +40,7 @@ local function tradeGoods(buyer, seller, stocktype, desiredQty, agreedprice)
     return purchaseamt
 end
 
-local function adjustBelief(agent, stocktype, bidprice, askprice)
+local function adjustBeliefBuyer(agent, stocktype, bidprice, askprice)
 
     if bidprice >= askprice then -- succcess
         -- move the lower and upper closer together
@@ -55,6 +55,27 @@ local function adjustBelief(agent, stocktype, bidprice, askprice)
     else    -- no success
         agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] * 1.05   -- increase by 10%
         agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] * 1.1   -- increase by 10%
+    end
+
+    -- data checking
+    if agent.isPerson.stockBelief[stocktype][1] <= 0 then agent.isPerson.stockBelief[stocktype][1] = 0.1 end
+end
+
+local function adjustBeliefSeller(agent, stocktype, bidprice, askprice)
+
+    if bidprice >= askprice then -- succcess
+        -- move the lower and upper closer together
+        agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] * 1.1
+        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] * 1
+        -- check that the bottom belief is less than upper belief
+        if agent.isPerson.stockBelief[stocktype][1] > agent.isPerson.stockBelief[stocktype][2] then
+            local avgvalue = (agent.isPerson.stockBelief[stocktype][1] + agent.isPerson.stockBelief[stocktype][2])  / 2
+            agent.isPerson.stockBelief[stocktype][1] = avgvalue
+            agent.isPerson.stockBelief[stocktype][2] = avgvalue
+        end
+    else    -- no success
+        agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] * 0.8
+        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] * 0.9
     end
 
     -- data checking
@@ -174,16 +195,16 @@ function actionbuy.newbuy(e, currentaction)
                 applyBuffs(buyer, stocktype, amtbought)        -- fruit and herbs have buffs
                 if seller ~= buyer then
                     print("Bought stocktype " .. stocktype .. " for $" .. cf.round(agreedprice,2) .. " each.")
-                    adjustBelief(buyer, stocktype, bid, ask)
-                    adjustBelief(seller, stocktype, bid, ask)
+                    adjustBeliefBuyer(buyer, stocktype, bid, ask)
+                    adjustBeliefSeller(seller, stocktype, bid, ask)
                 end
             else
                 print("Agreed on a price but no wealth left")
             end
         else
-            print("Failed to agree on price for stocktype " .. stocktype .. ". Bid = " .. cf.float(bid,2) .. " / " .. cf.round(ask, 2))
-            adjustBelief(buyer, stocktype, bid, ask)        -- Note: do not execute if agreed on price but no wealth left
-            adjustBelief(seller, stocktype, bid, ask)
+            print("Failed to agree on price for stocktype " .. stocktype .. ". Bid = " .. cf.round(bid,2) .. " / " .. cf.round(ask, 2))
+            adjustBeliefBuyer(buyer, stocktype, bid, ask)        -- Note: do not execute if agreed on price but no wealth left
+            adjustBeliefSeller(seller, stocktype, bid, ask)
         end
 
         if amtbought > 0 then

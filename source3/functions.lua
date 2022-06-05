@@ -941,7 +941,7 @@ local function loadTile(tilestable)
             -- find the villager with this UID
             for k, vill in pairs(VILLAGERS) do
                 if vill.uid.value == tilestable[i].tileOwnerUID then
-                    e.isTile.tileOwner = vill
+                    tiles.isTile.tileOwner = vill
                 end
             end
         end
