@@ -1042,6 +1042,8 @@ function functions.saveGame()
     savefile = savedir .. "/savedata/" .. "stockhistory.dat"
     serialisedString = bitser.dumps(STOCK_HISTORY)
     success, message = nativefs.write(savefile, serialisedString)
+
+    lovelyToasts.show("Game saved",5)
 end
 
 function functions.LoadGame()
@@ -1108,6 +1110,8 @@ function functions.LoadGame()
 	else
 		error = true
 	end
+
+
 
 end
 

@@ -263,6 +263,7 @@ function love.draw()
 	draw.Animations()
 	cam:detach()
 	draw.HUD()
+	lovelyToasts.draw()
     res.stop()
 end
 
@@ -321,5 +322,7 @@ function love.update(dt)
 
 	cam:setPos(TRANSLATEX,	TRANSLATEY)
 	cam:setZoom(ZOOMFACTOR)
+	lovelyToasts.update(dt)
 	res.update()
+
 end
