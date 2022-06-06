@@ -314,30 +314,11 @@ function ecsfunctions.init()
 
             local agentrow = e.position.row
             local agentcol = e.position.col
-            -- determine new action for queue (or none)
+
+           -- determine new action for queue (or none)
             if #e.isPerson.queue == 0 then
-                local goal
-                if e.isPerson.fullness < 50 and e.isPerson.wealth >= fun.getAvgSellPrice(enum.stockFruit) then
-                    -- force agent to eat
-                    goal = enum.goalEatFruit
-                elseif e.isPerson.stamina < 40 then
-                    goal = enum.goalRest
-                elseif e.isPerson.health < 30 and e.isPerson.wealth >= fun.getAvgSellPrice(enum.stockHealingHerbs) then
-                    goal = enum.goalHeal
-                else
-                    goal = ft.DetermineAction(TREE, e)
-                end
-
-                local actionlist = {}
-                local actionlist = fun.createActions(goal, e)  -- turns a simple decision from the tree into a complex sequence of actions and adds to queue
-
-                if #e.isPerson.queue == 0 then
-                    -- queue is still empty for whatever reason
-                    -- go to work
-                    if e:has("occupation") and e.isPerson.health > 20 then
-                        actionlist = fun.createActions(enum.goalWork, e)
-                    end
-                end
+print("zulu")
+                fun.getNewGoal(e)
             end
 
             -- add 'idle' action if queue is still empty
@@ -361,15 +342,6 @@ function ecsfunctions.init()
             -- process head of queue
             local currentaction = {}
             currentaction = e.isPerson.queue[1]      -- a table
-
-            -- ** debugging ** --
-            -- if currentaction.action ~= "idle" and currentaction.action ~= "move" and currentaction.action ~= "work" then
-            -- if currentaction.action ~= "idle" and currentaction.action ~= "move" then
-            --     -- print("Current action: " .. currentaction.action)
-            --     local agentrow = e.position.row
-            --     local agentcol = e.position.col
-            --     -- print(MAP[agentrow][agentcol].entity.isTile.improvementType)
-            -- end
 
             if currentaction.action == "idle" then
                 actidle.idle(e, currentaction, dt)
@@ -473,11 +445,11 @@ function ecsfunctions.init()
                 end
                 fun.addGameLog(txt)
                 if e:has("residence") then
-                    txt = "\n \nIt's house has been demolished."
+                    txt = "It's house has been demolished."
                     fun.addGameLog(txt)
                 end
                 if e:has("occupation") then
-                    txt = "\n \nIt's workplace has been demolished."
+                    txt = "It's workplace has been demolished."
                     --! add the occupation
                     fun.addGameLog(txt)
                 end

@@ -222,7 +222,7 @@ local function getBlankTile()
 end
 
 local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, startcol)
-    -- returns the closest building of required type
+    -- returns the closest building of required type (row, col)
     -- ensure the return value is checked for nil - meaning - building not found
     local closestvalue = -1
     local closestrow, closestcol
@@ -356,6 +356,9 @@ end
 function functions.createActions(goal, agent)
     -- takes the goal provided by the behavior tree and returns a complex set of actions to achieve that goal
     -- returns a table of actions
+
+    --! the 'goal' parameter is redundant as it is already in agent.isPerson.queue
+
     local queue = agent.isPerson.queue
     local agentrow = agent.position.row
     local agentcol = agent.position.col
@@ -725,7 +728,6 @@ function functions.playAudio(audionumber, isMusic, isSound)
         AUDIO[audionumber]:play()
     end
     -- print("playing music/sound #" .. audionumber)
-
 end
 
 function functions.determineFacing(e)
@@ -816,8 +818,11 @@ function functions.getAvgSellPrice(commodity)
             retvalue = FRUIT_SELL_PRICE
         elseif commodity == enum.stockWood then
             retvalue = WOOD_SELL_PRICE
+        elseif commodity == enum.stockHealingHerbs then
+            retvalue = HERB_SELL_PRICE
         else
-            error()
+            print("error: can't get average price for stocktype :" .. commodity)
+            -- error()
         end
     end
     return retvalue
@@ -848,6 +853,7 @@ local function prepTiles()
             if e.isTile.tileOwner ~= nil then
                 if e.isTile.tileOwner.uid ~= nil then
                     item.tileOwnerUID = e.isTile.tileOwner.uid.value
+                    print("Saving tile that has an owner with UID " .. item.tileOwnerUID)
                 end
             end
             table.insert(tilestable, item)
@@ -865,7 +871,7 @@ local function prepPerson()
     for k, v in pairs(VILLAGERS) do
         item = {}
         --! item.queue = v.isPerson.queue
-        item.uid = v.isPerson.uid
+        item.uid = v.uid.value
         item.gender = v.isPerson.gender
         item.health = v.isPerson.health
         item.stamina = v.isPerson.stamina
@@ -936,9 +942,8 @@ local function loadTile(tilestable)
         if tilestable[i].tileOwnerUID ~= nil then
             -- find the villager with this UID
             for k, vill in pairs(VILLAGERS) do
-                if vill.isPerson.uid == tilestable[i].tileOwnerUID then
-                    e.isTile.tileOwner = vill
-                    break
+                if vill.uid.value == tilestable[i].tileOwnerUID then
+                    tiles.isTile.tileOwner = vill
                 end
             end
         end
@@ -974,7 +979,7 @@ local function loadPerson(persontable)
 
         --! v.isPerson.queue = {}
 
-        v.isPerson.uid = persontable[i].uid
+        v.uid.value = persontable[i].uid
         --! v.isPerson.queue = persontable[i].queue
         v.isPerson.gender = persontable[i].gender
         v.isPerson.health = persontable[i].health
@@ -1016,7 +1021,6 @@ local function loadPerson(persontable)
     end
 end
 
-
 function functions.saveGame()
 	-- uses the globals because too hard to pass params
     --! will want to save global timers as well
@@ -1039,6 +1043,8 @@ function functions.saveGame()
     savefile = savedir .. "/savedata/" .. "stockhistory.dat"
     serialisedString = bitser.dumps(STOCK_HISTORY)
     success, message = nativefs.write(savefile, serialisedString)
+
+    lovelyToasts.show("Game saved",5)
 end
 
 function functions.LoadGame()
@@ -1106,11 +1112,95 @@ function functions.LoadGame()
 		error = true
 	end
 
+    lovelyToasts.show("Game continued",5)
 end
 
 function functions.addGameLog(txt)
     table.insert(GAME_LOG, txt)
 end
 
+function functions.getNewGoal(villager)
+    -- decision tree
+    local personIsHungry = villager.isPerson.fullness < 50
+    local personIsTired = villager.isPerson.stamina < 40
+    local personisPoor = villager.isPerson.wealth < fun.getAvgSellPrice(enum.stockFruit)
+    local personisSick = villager.isPerson.health < 20
+    local row, col
+    local agentrow = villager.position.row
+    local agentcol = villager.position.col
+
+print(personIsHungry,personIsTired,personisPoor,personisSick)
+
+    if personIsHungry then
+print("alpha")
+        row, col = getClosestBuilding(enum.improvementFarm, 1, agentrow, agentcol)
+        if row ~= nil then
+            -- farm with food is found
+            if personIsTired then
+    print("Beta")
+                if personisPoor then
+    print("charlie")
+                    fun.createActions(enum.goalRest, villager)
+                    fun.createActions(enum.goalGetWelfare, villager)
+                    fun.createActions(enum.goalEatFruit, villager)
+                else
+    print("delta")
+                    fun.createActions(enum.goalRest, villager)
+                    fun.createActions(enum.goalEatFruit, villager)
+                end
+            else    -- stamina is high
+    print("echo")
+                if personisPoor then
+    print("foxtrot")
+                    fun.createActions(enum.goalGetWelfare, villager)
+                    fun.createActions(enum.goalEatFruit, villager)
+                else
+    print("golf")
+                    fun.createActions(enum.goalEatFruit, villager)
+                end
+            end
+        else
+            if villager:has("occupation") then
+                fun.createActions(enum.goalWork, villager)
+            else    -- no occupation
+                fun.createActions(enum.goalRest, villager)      --! should probaly do welfare etc and not just rest
+                --! this can be foxtree
+            end
+        end
+    else    -- not hungry
+        if personIsTired then
+            fun.createActions(enum.goalRest, villager)
+        else    -- not tired
+            if personisPoor then
+                if personisSick then
+                    fun.createActions(enum.goalGetWelfare, villager)
+                    fun.createActions(enum.goalHeal, villager)
+                else    -- not sick
+                    if villager:has("occupation") then
+                        fun.createActions(enum.goalWork, villager)
+                    else    -- no occupation
+                        fun.createActions(enum.goalRest, villager)
+                        --! this can be foxtree
+                    end
+                end
+            else    -- not poor
+                if villager.isPerson.stockInv[enum.stockWood] <= 2 then
+                    if fun.getJobCount(enum.jobWoodsman) > 0 then
+                        fun.createActions(enum.goalBuyWood, villager)
+                    else
+                        if villager:has("occupation") then
+                            fun.createActions(enum.goalWork, villager)
+                        else
+                            fun.createActions(enum.goalRest, villager)
+                            --! this can be foxtree
+                        end
+                    end
+                else
+                    fun.createActions(enum.goalStockHouse, villager)
+                end
+            end
+        end
+    end
+end
 
 return functions

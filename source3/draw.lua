@@ -126,7 +126,6 @@ local function drawInstructions()
     end
 
     addDrawItem(HUDText, "---", nil)
-    addDrawItem(HUDText, "\n", nil)
     addDrawItem(HUDText, "Key commands:", nil)
     addDrawItem(HUDText, "(select red person first)", nil)
     if VILLAGERS_SELECTED > 0 then
@@ -139,7 +138,7 @@ local function drawInstructions()
         addDrawItem(HUDText, "w = welfare officer", nil)
     end
 
-    addDrawItem(HUDText, "\n", nil)
+    addDrawItem(HUDText, "---", nil)
     addDrawItem(HUDText, "Camera:", nil)
     addDrawItem(HUDText, "mouse wheel = zoom", nil)
     addDrawItem(HUDText, "middle mouse button = pan", nil)
