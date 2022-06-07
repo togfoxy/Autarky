@@ -335,6 +335,7 @@ function ecsfunctions.init()
                 item.start = love.math.random(0, 7)
                 item.stop = love.math.random(item.start, action.timeleft)
                 item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+                item.uid = e.uid.value
                 table.insert(DRAWQUEUE, item)
             end
 
@@ -448,6 +449,7 @@ function ecsfunctions.init()
                     fun.addGameLog(txt)
                 end
                 if e:has("occupation") then
+                    if not e.occupation.value == enum.jobTaxCollector and not e.occupation == enum.jobCarpenter then
                     txt = "It's workplace has been demolished."
                     --! add the occupation
                     fun.addGameLog(txt)

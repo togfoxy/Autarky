@@ -231,6 +231,7 @@ function actionbuy.newbuy(e, currentaction)
             item.start = 0
             item.stop = 3
             item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+            item.uid = buyer.uid.value
             table.insert(DRAWQUEUE, item)
         end
     else

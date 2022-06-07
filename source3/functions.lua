@@ -700,6 +700,14 @@ end
 
 function functions.killAgent(uniqueid)
     local deadID
+
+    -- remove any bubbles associated with this villager
+    for i = #DRAWQUEUE, 1, -1 do
+        if DRAWQUEUE[i].uid == uniqueid then
+            table.remove(DRAWQUEUE, i)
+        end
+    end
+    
     for k, v in ipairs(VILLAGERS) do
         -- print(uniqueid, v.uid.value)
         if v.uid.value == uniqueid then
@@ -1130,7 +1138,7 @@ function functions.getNewGoal(villager)
     local agentrow = villager.position.row
     local agentcol = villager.position.col
 
-print(personIsHungry,personIsTired,personisPoor,personisSick)
+    -- print(personIsHungry,personIsTired,personisPoor,personisSick)
 
     if personIsHungry then
 -- print("alpha")
@@ -1191,31 +1199,33 @@ print(personIsHungry,personIsTired,personisPoor,personisSick)
                     end
                 end
             else    -- not poor
-                if villager.isPerson.stockInv[enum.stockWood] <= 2 and villager:has("occupation") then
-    print("Papa")
-                    row, col = getClosestBuilding(enum.improvementWoodsman, 1, agentrow, agentcol)
+                if personisSick then
+                    row, col = getClosestBuilding(enum.improvementHealer, 1, agentrow, agentcol)
                     if row ~= nil then
-    print("Quebec")
-                        fun.createActions(enum.goalBuyWood, villager)
+                        fun.createActions(enum.goalHeal, villager)
                     else
-    print("Romeo")
-                        if villager:has("occupation") then
-                            fun.createActions(enum.goalWork, villager)
+                        fun.createActions(enum.goalRest, villager)
+                    end
+                else    -- not sick
+                    if villager.isPerson.stockInv[enum.stockWood] <= 2 and villager:has("occupation") then
+                        row, col = getClosestBuilding(enum.improvementWoodsman, 1, agentrow, agentcol)
+                        if row ~= nil then
+                            fun.createActions(enum.goalBuyWood, villager)
                         else
-    print("Tango")
+                            if villager:has("occupation") then
+                                fun.createActions(enum.goalWork, villager)
+                            else
+                                goal = ft.DetermineAction(TREE, villager)
+                                fun.createActions(goal, villager)
+                            end
+                        end
+                    else    -- has wood
+                        if villager.isPerson.stockInv[enum.stockWood] > 0 then
+                            fun.createActions(enum.goalStockHouse, villager)
+                        else
                             goal = ft.DetermineAction(TREE, villager)
                             fun.createActions(goal, villager)
                         end
-                    end
-                else    -- has wood
-    print("mike")
-                    if villager.isPerson.stockInv[enum.stockWood] > 0 then
-    print("Lima")
-                        fun.createActions(enum.goalStockHouse, villager)
-                    else
-    print("Oscar")
-                        goal = ft.DetermineAction(TREE, villager)
-                        fun.createActions(goal, villager)
                     end
                 end
             end
