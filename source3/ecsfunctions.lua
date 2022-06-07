@@ -317,7 +317,6 @@ function ecsfunctions.init()
 
            -- determine new action for queue (or none)
             if #e.isPerson.queue == 0 then
-print("zulu")
                 fun.getNewGoal(e)
             end
 
@@ -336,6 +335,7 @@ print("zulu")
                 item.start = love.math.random(0, 7)
                 item.stop = love.math.random(item.start, action.timeleft)
                 item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+                item.uid = e.uid.value
                 table.insert(DRAWQUEUE, item)
             end
 
@@ -449,9 +449,11 @@ print("zulu")
                     fun.addGameLog(txt)
                 end
                 if e:has("occupation") then
-                    txt = "It's workplace has been demolished."
-                    --! add the occupation
-                    fun.addGameLog(txt)
+                    if not e.occupation.value == enum.jobTaxCollector and not e.occupation == enum.jobCarpenter then
+                        txt = "It's workplace has been demolished."
+                        --! add the occupation
+                        fun.addGameLog(txt)
+                    end
                 end
 
                 fun.killAgent(e.uid.value)  -- removes the agent from the VILLAGERS table

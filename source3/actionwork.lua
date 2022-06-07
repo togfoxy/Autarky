@@ -69,7 +69,6 @@ function actionwork.work(e, currentaction, dt)
         local col = e.position.col
         local owner = MAP[row][col].entity.isTile.tileOwner
         local woodqty = MAP[row][col].entity.isTile.stockLevel
--- print(MAP[row][col].entity.isTile.stockLevel, owner.residence.health, owner.residence.unbuiltMaxHealth)
         if owner.residence.unbuiltMaxHealth < 100 and woodqty >= 1 then
             -- okay to add more wood
             owner.residence.unbuiltMaxHealth = owner.residence.unbuiltMaxHealth + HEALTH_GAIN_PER_WOOD
@@ -79,7 +78,6 @@ function actionwork.work(e, currentaction, dt)
             --! ensure builders don't come here unnecessarily
         end
 
--- print(MAP[row][col].entity.isTile.stockLevel, owner.residence.health, owner.residence.unbuiltMaxHealth)
         -- convert unbuilt health into real health
         if owner.residence.health < owner.residence.unbuiltMaxHealth then
             -- repair the house
@@ -98,8 +96,6 @@ function actionwork.work(e, currentaction, dt)
         else
             -- nothing to repair
         end
--- print(MAP[row][col].entity.isTile.stockLevel, owner.residence.health, owner.residence.unbuiltMaxHealth)
--- print("***")
     end
 
     if e.occupation.value == enum.jobTaxCollector then
@@ -126,6 +122,9 @@ function actionwork.work(e, currentaction, dt)
             if VILLAGE_WEALTH >= amt then
                 MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + (WELFARE_PRODUCTION_RATE * dt)
                 VILLAGE_WEALTH = VILLAGE_WEALTH - amt
+            else
+                -- coffers are empty!
+                table.remove(e.isPerson.queue, 1)
             end
         else
             -- print("Too much welfare. Won't create more")

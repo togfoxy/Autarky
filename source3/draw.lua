@@ -53,7 +53,8 @@ local function drawInstructions()
     addDrawItem(HUDText, "Population: ", #VILLAGERS)
     addDrawItem(HUDText, "#Farmers: ", fun.getJobCount(enum.jobFarmer))
     addDrawItem(HUDText, "#Lumberjacks: ", fun.getJobCount(enum.jobWoodsman))
-    addDrawItem(HUDText, "#healers: ", fun.getJobCount(enum.jobHealer))
+    addDrawItem(HUDText, "#Healers: ", fun.getJobCount(enum.jobHealer))
+    addDrawItem(HUDText, "#Unemployed: ", fun.getUnemployed())
     addDrawItem(HUDText, "---", nil)
 
     for k, v in pairs(VILLAGERS) do

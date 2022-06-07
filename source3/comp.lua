@@ -14,7 +14,7 @@ function comp.init()
         c.health = 100
         c.queue = {}
         c.stamina = 100         -- fully rested
-        c.fullness = 60        -- hunger. Start a little topped up so they have a chance to establish themselves.
+        c.fullness = 125        -- hunger. Start a little topped up so they have a chance to establish themselves.
         c.stockInv = {}         -- track how much of each stock is owned
         c.stockBelief = {}
         for i = 1, NUMBER_OF_STOCK_TYPES do
