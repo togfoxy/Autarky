@@ -119,16 +119,36 @@ local function determineBid(buyer, stocktype)
     assert(buyerlowestbelief <= buyerhighestbelief)
     local bid = love.math.random(buyerlowestbelief * 10, buyerhighestbelief * 10)
     bid = bid / 10
+
+    if buyer.isPerson.fullness < 20 then bid = bid + 1.2 end  -- offer extra if hungry
+
+    if bid > buyer.isPerson.wealth then bid = buyer.isPerson.wealth end
+
     if bid <= 0 then bid = 0 end
     return bid
 end
 
 local function determineAsk(seller, stocktype)
+    local agentrow = seller.position.row
+    local agentcol = seller.position.col
+
     local sellerlowestbelief = seller.isPerson.stockBelief[stocktype][1]
     local sellerhighestbelief = seller.isPerson.stockBelief[stocktype][2]
+
     assert(sellerlowestbelief <= sellerhighestbelief)
+
     local ask = love.math.random(sellerlowestbelief * 10, sellerhighestbelief * 10)
     ask = ask / 10
+
+    if MAP[agentrow][agentcol].entity.isTile.stockLevel >= 3 then
+        -- offer a discount due to too much supply
+        ask = ask * 0.8
+        -- print("Offering discount due to excess stock")
+    elseif MAP[agentrow][agentcol].entity.isTile.stockLevel < 2 then
+        ask = ask * 1.2
+        -- print("Charging more for limited stock")
+    end
+
     if ask <= 0.1 then ask = 0.1 end
     return ask
 end
@@ -149,7 +169,7 @@ function actionbuy.newbuy(e, currentaction)
     local bid, ask = 0, 99      -- default values
 
     assert(buyer ~= nil)
-    if (seller ~= nil) then
+    if (seller ~= nil) and seller ~= {} then
         if stocktype == enum.stockWelfare then
             bid = 0
             ask = 0
@@ -169,14 +189,7 @@ function actionbuy.newbuy(e, currentaction)
             assert(buyer ~= nil)
             assert(seller ~= nil)
 
-            if MAP[agentrow][agentcol].entity.isTile.stockLevel >= 3 then
-                -- offer a discount due to too much supply
-                ask = ask * 0.8
-                print("Offering discount due to excess stock")
-            elseif MAP[agentrow][agentcol].entity.isTile.stockLevel < 2 then
-                ask = ask * 1.2
-                print("Charging more for limited stock")
-            end
+
             if buyer == seller then
                 -- make bid same as ask just to ensure the transaction is successful
                 bid = 1
@@ -199,12 +212,14 @@ function actionbuy.newbuy(e, currentaction)
                     adjustBeliefSeller(seller, stocktype, bid, ask)
                 end
             else
-                print("Agreed on a price but no wealth left")
+                print("Agreed on a price but no wealth left. Bid = " .. cf.round(bid,2) .. " / " .. cf.round(ask, 2))
             end
-        else
+        else    -- bid < ask
             print("Failed to agree on price for stocktype " .. stocktype .. ". Bid = " .. cf.round(bid,2) .. " / " .. cf.round(ask, 2))
             adjustBeliefBuyer(buyer, stocktype, bid, ask)        -- Note: do not execute if agreed on price but no wealth left
-            adjustBeliefSeller(seller, stocktype, bid, ask)
+            if seller.isPerson ~= nil then
+                adjustBeliefSeller(seller, stocktype, bid, ask)
+            end
         end
 
         if amtbought > 0 then
@@ -218,8 +233,6 @@ function actionbuy.newbuy(e, currentaction)
             item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
             table.insert(DRAWQUEUE, item)
         end
-
-
     else
         -- shop/tile has no owner. Probably died. Do nothing.
     end

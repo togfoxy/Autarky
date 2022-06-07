@@ -21,10 +21,7 @@ function behaviortree.EstablishTree()
 	TREE.child[1] = {}
 	TREE.child[1].goal = enum.goalRest
 	TREE.child[1].priority = function(agent)
-								local priority = cf.round((100 - agent.isPerson.stamina) / 10)
-								if priority < 1 then priority = 1 end
-								-- if DEBUG then print("Rest priority is " .. priority) end
-								return priority
+								return 5
 							end
 	TREE.child[1].activate = function(agent)
 								return true	-- resting is the default action and must always be an option
@@ -45,92 +42,52 @@ function behaviortree.EstablishTree()
 							end
 
 	TREE.child[3] = {}
- 	TREE.child[3].goal = enum.goalEat
+ 	TREE.child[3].goal = enum.goalEatFruit
  	TREE.child[3].priority = function(agent)
-								local priority = cf.round((100 - agent.isPerson.fullness) / 10)
-								if priority < 1 then priority = 1 end
-								-- if DEBUG then print("Eat priority is " .. priority) end
-								return priority
+								return 5
  							end
  	TREE.child[3].activate = function(agent)
 								-- deactivate if person is full or broke and not a farmer
-								if agent.isPerson.fullness > 70 then
+								if agent.isPerson.fullness > 70 or agent.isPerson.wealth < fun.getAvgSellPrice(enum.stockFruit) then
 									return false
 								else
 									return true
 								end
 							end
 
-	TREE.child[3].child = {}
-	TREE.child[3].child[1] = {}
-	TREE.child[3].child[1].goal = enum.goalEatFruit
-	TREE.child[3].child[1].priority = function(agent)
-										return 5
-									end
-	TREE.child[3].child[1].activate = function(agent)
- 										if agent.isPerson.wealth >= FRUIT_SELL_PRICE then
-											return true
-										elseif agent.isPerson.wealth < (FRUIT_SELL_PRICE * 1.5) and agent:has("occupation") and agent.occupation.value == enum.jobFarmer then
-											if agent.occupation.value == enum.jobFarmer then	-- this is nested to avoid error with nils
-												-- the 1.5 is simply a margin/buffer
-												return true
-											else
-												return false
-											end
-										else
-											return false
-										end
-									end
-	TREE.child[3].child[2] = {}
-	TREE.child[3].child[2].goal = enum.goalGetWelfare
-	TREE.child[3].child[2].priority = function(agent)
-										return 5
-									end
-	TREE.child[3].child[2].activate = function(agent)
-										-- if agent.isPerson.wealth < AVERAGE_STOCK_PRICE[enum.stockFruit] then
-										local lastindex = #STOCK_HISTORY[enum.stockFruit]
-										if agent.isPerson.wealth < STOCK_HISTORY[enum.stockFruit][lastindex] then
-											return true
-										else
-											return false
-										end
-									end
-
-	TREE.child[4] = {}								-- parent node
-	TREE.child[4].goal = enum.goalBuy
+	TREE.child[4] = {}
+	TREE.child[4].goal = enum.goalGetWelfare
 	TREE.child[4].priority = function(agent)
-								return 3
-							end
-	TREE.child[4].activate = function(agent)
-								if agent.isPerson.wealth >= FRUIT_SELL_PRICE + 1 then
-									return true
-								else
-									return false
-								end
-							end
-
-
-	TREE.child[4].child = {}
-	TREE.child[4].child[1] = {}
-	TREE.child[4].child[1].goal = enum.goalBuyWood
-	TREE.child[4].child[1].priority = function(agent)
 										return 5
 									end
-	TREE.child[4].child[1].activate = function(agent)
-										if agent.isPerson.wealth >= WOOD_SELL_PRICE + 1 and agent.isPerson.stockInv[enum.stockWood] <= 4 then
+	TREE.child[4].activate = function(agent)
+										if agent.isPerson.wealth < fun.getAvgSellPrice(enum.stockFruit) then
 											return true
 										else
 											return false
 										end
 									end
-
 
 	TREE.child[5] = {}
-	TREE.child[5].goal = enum.goalStockHouse			-- includes initiating a house
+	TREE.child[5].goal = enum.goalBuyWood
 	TREE.child[5].priority = function(agent)
+										return 5
+									end
+	TREE.child[5].activate = function(agent)
+										if agent.isPerson.wealth >= fun.getAvgSellPrice(enum.stockWood) and agent:has("occupation") then
+											return true
+										else
+											return false
+										end
+									end
+
+
+	TREE.child[6] = {}
+	TREE.child[6].goal = enum.goalStockHouse			-- includes initiating a house
+	TREE.child[6].priority = function(agent)
 								return 5
 							end
-	TREE.child[5].activate = function(agent)
+	TREE.child[6].activate = function(agent)
 								if (agent.isPerson.stockInv[enum.stockWood] >= 1) then
 									return true
 								else
@@ -138,16 +95,13 @@ function behaviortree.EstablishTree()
 								end
 							end
 
-	TREE.child[6] = {}
-	TREE.child[6].goal = enum.goalHeal
-	TREE.child[6].priority = function(agent)
-								local priority = cf.round((100 - agent.isPerson.health) / 10)
-								if priority < 1 then priority = 1 end
-								-- if DEBUG then print("Eat priority is " .. priority) end
-								return priority
+	TREE.child[7] = {}
+	TREE.child[7].goal = enum.goalHeal
+	TREE.child[7].priority = function(agent)
+								return 5
 							end
-	TREE.child[6].activate = function(agent)
-								if agent.isPerson.wealth >= (HERB_SELL_PRICE + 1) and agent.isPerson.health < 100 then
+	TREE.child[7].activate = function(agent)
+								if agent.isPerson.wealth >= fun.getAvgSellPrice(enum.stockHealingHerbs) and agent.isPerson.health < 60 then
 									return true
 								else
 									return false

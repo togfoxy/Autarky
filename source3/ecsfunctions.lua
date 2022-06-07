@@ -317,7 +317,6 @@ function ecsfunctions.init()
 
            -- determine new action for queue (or none)
             if #e.isPerson.queue == 0 then
-print("zulu")
                 fun.getNewGoal(e)
             end
 

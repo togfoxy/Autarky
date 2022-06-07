@@ -421,11 +421,12 @@ function functions.createActions(goal, agent)
                 -- add a 'move' action
                 addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
                 -- do work
-                local time1 = love.math.random(20, 45)      -- some random formula. Please tweak!
-                local time2 = agent.isPerson.fullness
+                local time1 = agent.isPerson.stamina * 0.6
+                local time2 = agent.isPerson.fullness * 0.8
+                local time3 = love.math.random(20, 35)
                 local action = {}
                 action.action = "work"
-                action.timeleft = math.min(time1, time2)
+                action.timeleft = math.min(time1, time2, time3)
                 action.log = "Farmed"
                 table.insert(queue, action)
             else
@@ -1124,7 +1125,7 @@ function functions.getNewGoal(villager)
     local personIsHungry = villager.isPerson.fullness < 50
     local personIsTired = villager.isPerson.stamina < 40
     local personisPoor = villager.isPerson.wealth < fun.getAvgSellPrice(enum.stockFruit)
-    local personisSick = villager.isPerson.health < 20
+    local personisSick = villager.isPerson.health < 30
     local row, col
     local agentrow = villager.position.row
     local agentcol = villager.position.col
@@ -1132,39 +1133,39 @@ function functions.getNewGoal(villager)
 print(personIsHungry,personIsTired,personisPoor,personisSick)
 
     if personIsHungry then
-print("alpha")
+-- print("alpha")
         row, col = getClosestBuilding(enum.improvementFarm, 1, agentrow, agentcol)
         if row ~= nil then
             -- farm with food is found
             if personIsTired then
-    print("Beta")
+    -- print("Beta")
                 if personisPoor then
-    print("charlie")
+    -- print("charlie")
                     fun.createActions(enum.goalRest, villager)
                     fun.createActions(enum.goalGetWelfare, villager)
                     fun.createActions(enum.goalEatFruit, villager)
-                else
-    print("delta")
+                else    -- not poor
+    -- print("delta")
                     fun.createActions(enum.goalRest, villager)
                     fun.createActions(enum.goalEatFruit, villager)
                 end
             else    -- stamina is high
-    print("echo")
+    -- print("echo")
                 if personisPoor then
-    print("foxtrot")
+    -- print("foxtrot")
                     fun.createActions(enum.goalGetWelfare, villager)
                     fun.createActions(enum.goalEatFruit, villager)
                 else
-    print("golf")
+    -- print("golf")
                     fun.createActions(enum.goalEatFruit, villager)
                 end
             end
-        else
-            if villager:has("occupation") then
+        else    -- can't find building
+            if villager:has("occupation") and MAP[agentrow][agentcol].entity.isTile.stockLevel <= 4 then
                 fun.createActions(enum.goalWork, villager)
             else    -- no occupation
-                fun.createActions(enum.goalRest, villager)      --! should probaly do welfare etc and not just rest
-                --! this can be foxtree
+                goal = ft.DetermineAction(TREE, villager)
+                fun.createActions(goal, villager)
             end
         end
     else    -- not hungry
@@ -1174,33 +1175,64 @@ print("alpha")
             if personisPoor then
                 if personisSick then
                     fun.createActions(enum.goalGetWelfare, villager)
-                    fun.createActions(enum.goalHeal, villager)
+                    row, col = getClosestBuilding(enum.improvementHealer, 1, agentrow, agentcol)
+                    if row ~= nil then
+                        fun.createActions(enum.goalHeal, villager)
+                    else
+                        goal = ft.DetermineAction(TREE, villager)
+                        fun.createActions(goal, villager)
+                    end
                 else    -- not sick
-                    if villager:has("occupation") then
+                    if villager:has("occupation") and MAP[agentrow][agentcol].entity.isTile.stockLevel <= 4 then
                         fun.createActions(enum.goalWork, villager)
                     else    -- no occupation
-                        fun.createActions(enum.goalRest, villager)
-                        --! this can be foxtree
+                        goal = ft.DetermineAction(TREE, villager)
+                        fun.createActions(goal, villager)
                     end
                 end
             else    -- not poor
-                if villager.isPerson.stockInv[enum.stockWood] <= 2 then
-                    if fun.getJobCount(enum.jobWoodsman) > 0 then
+                if villager.isPerson.stockInv[enum.stockWood] <= 2 and villager:has("occupation") then
+    print("Papa")
+                    row, col = getClosestBuilding(enum.improvementWoodsman, 1, agentrow, agentcol)
+                    if row ~= nil then
+    print("Quebec")
                         fun.createActions(enum.goalBuyWood, villager)
                     else
+    print("Romeo")
                         if villager:has("occupation") then
                             fun.createActions(enum.goalWork, villager)
                         else
-                            fun.createActions(enum.goalRest, villager)
-                            --! this can be foxtree
+    print("Tango")
+                            goal = ft.DetermineAction(TREE, villager)
+                            fun.createActions(goal, villager)
                         end
                     end
-                else
-                    fun.createActions(enum.goalStockHouse, villager)
+                else    -- has wood
+    print("mike")
+                    if villager.isPerson.stockInv[enum.stockWood] > 0 then
+    print("Lima")
+                        fun.createActions(enum.goalStockHouse, villager)
+                    else
+    print("Oscar")
+                        goal = ft.DetermineAction(TREE, villager)
+                        fun.createActions(goal, villager)
+                    end
                 end
             end
         end
     end
+end
+
+function functions.getUnemployed()
+    local count = 0
+    for i = 1, #VILLAGERS do
+        if VILLAGERS[i]:has("occupation") then
+            -- dont' count
+        else
+            count = count + 1
+        end
+    end
+    return count
 end
 
 return functions
