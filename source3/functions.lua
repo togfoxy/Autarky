@@ -508,6 +508,14 @@ function functions.createActions(goal, agent)
         local shoprow, shopcol
         if ownsFruitshop then
             addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+            -- buy food
+            action = {}
+            action.action = "buy"
+            action.stockType = enum.stockFruit
+            action.purchaseAmount = qtyneeded
+            action.log = "Bought some fruit"
+            -- print("Added 'buy' goal")
+            table.insert(queue, action)
         else
             -- not a farmer or rich or own farm has no stock
             shoprow, shopcol = getClosestBuilding(enum.improvementFarm, qtyneeded, agentrow, agentcol)
@@ -523,22 +531,19 @@ function functions.createActions(goal, agent)
                     addMoveAction(queue, agentrow, agentcol, newrow, newcol)   -- will add as many 'move' actions as necessary
                 else
                     addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+                    -- buy food
+                    action = {}
+                    action.action = "buy"
+                    action.stockType = enum.stockFruit
+                    action.purchaseAmount = qtyneeded
+                    action.log = "Bought some fruit"
+                    -- print("Added 'buy' goal")
+                    table.insert(queue, action)
                 end
             end
         end
-        if ownsFruitshop or shoprow ~= nil then
-            -- buy food
-            action = {}
-            action.action = "buy"
-            action.stockType = enum.stockFruit
-            action.purchaseAmount = qtyneeded
-            action.log = "Bought some fruit"
-            -- print("Added 'buy' goal")
-            table.insert(queue, action)
-            assert(action.stockType ~= nil)
-            -- print("move and buy fruit action added")
-        end
     end
+
     if goal == enum.goalBuyWood then
         -- print("Goal = buy wood")
         local qtyneeded = 1
@@ -555,16 +560,14 @@ function functions.createActions(goal, agent)
                 addMoveAction(queue, agentrow, agentcol, newrow, newcol)   -- will add as many 'move' actions as necessary
             else
                 addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+                -- buy wood
+                action = {}
+                action.action = "buy"
+                action.stockType = enum.stockWood
+                action.purchaseAmount = qtyneeded
+                action.log = "Bought some wood"
+                table.insert(queue, action)
             end
-            -- buy wood
-            action = {}
-            action.action = "buy"
-            action.stockType = enum.stockWood
-            action.purchaseAmount = qtyneeded
-            action.log = "Bought some wood"
-            table.insert(queue, action)
-            -- print("move and buy wood action added")
-            assert(action.stockType ~= nil)
         else
             -- print("No woodsman found")
         end
