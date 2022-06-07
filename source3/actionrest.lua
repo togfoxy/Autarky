@@ -17,7 +17,7 @@ function actionrest.rest(e, currentaction, dt)
         fun.playAudio(enum.audioYawn, false, true)
     end
 
-    if currentaction.action == "rest" and e:has("residence") and e.residence.health >= 50 then  --! make the 80 value a constant
+    if currentaction.action == "rest" and e:has("residence") and e.residence.health >= 50 then  --! make the 50 value a constant
         if currentaction.timeleft > 5 then
             -- draw sleep bubble
             local item = {}
