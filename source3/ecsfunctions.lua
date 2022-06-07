@@ -450,9 +450,10 @@ function ecsfunctions.init()
                 end
                 if e:has("occupation") then
                     if not e.occupation.value == enum.jobTaxCollector and not e.occupation == enum.jobCarpenter then
-                    txt = "It's workplace has been demolished."
-                    --! add the occupation
-                    fun.addGameLog(txt)
+                        txt = "It's workplace has been demolished."
+                        --! add the occupation
+                        fun.addGameLog(txt)
+                    end
                 end
 
                 fun.killAgent(e.uid.value)  -- removes the agent from the VILLAGERS table

@@ -62,10 +62,10 @@ function constants.load()
     WOOD_SELL_PRICE = FRUIT_SELL_PRICE * 3.1        -- intentionally a touch higher
     WOOD_INCOME_PER_SECOND = WOOD_SELL_PRICE / (1/WOOD_PRODUCTION_RATE)
 
-    HERB_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 2
-    HERB_SELL_PRICE = FRUIT_SELL_PRICE * 2.1        -- intentionally a bit higher
+    HERB_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 1
+    HERB_SELL_PRICE = FRUIT_SELL_PRICE * 1.05        -- intentionally a bit higher
     HERB_INCOME_PER_SECOND = HERB_SELL_PRICE / (1/HERB_PRODUCTION_RATE)
-    HERB_HEAL_AMOUNT = 7
+    HERB_HEAL_AMOUNT = 3
 
     CARPENTER_BUILD_RATE = FRUIT_PRODUCTION_RATE * 100    -- how much time the carpenter spends on one wood
     CARPENTER_INCOME_PER_JOB = 1.5

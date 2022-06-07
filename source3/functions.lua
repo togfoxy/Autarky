@@ -512,7 +512,18 @@ function functions.createActions(goal, agent)
             -- not a farmer or rich or own farm has no stock
             shoprow, shopcol = getClosestBuilding(enum.improvementFarm, qtyneeded, agentrow, agentcol)
             if shoprow ~= nil then
-                addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+                local dist = cf.GetDistance(agentrow, agentcol, shoprow, shopcol)   -- tiles
+                if dist > 6 then
+                    -- determine half way
+                    print("moving half way in search of fruit")
+                    local newx, newy
+                    newrow = cf.round((agentrow + shoprow) / 2)
+                    newcol = cf.round((agentcol + shopcol) / 2)
+                    -- move to half way
+                    addMoveAction(queue, agentrow, agentcol, newrow, newcol)   -- will add as many 'move' actions as necessary
+                else
+                    addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+                end
             end
         end
         if ownsFruitshop or shoprow ~= nil then
@@ -533,7 +544,18 @@ function functions.createActions(goal, agent)
         local qtyneeded = 1
         local shoprow, shopcol = getClosestBuilding(enum.improvementWoodsman, qtyneeded, agentrow, agentcol)
         if shoprow ~= nil then
-            addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+            local dist = cf.GetDistance(agentrow, agentcol, shoprow, shopcol)   -- tiles
+            if dist > 6 then
+                -- determine half way
+                print("moving half way in search of wood")
+                local newx, newy
+                newrow = cf.round((agentrow + shoprow) / 2)
+                newcol = cf.round((agentcol + shopcol) / 2)
+                -- move to half way
+                addMoveAction(queue, agentrow, agentcol, newrow, newcol)   -- will add as many 'move' actions as necessary
+            else
+                addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+            end
             -- buy wood
             action = {}
             action.action = "buy"
@@ -707,7 +729,7 @@ function functions.killAgent(uniqueid)
             table.remove(DRAWQUEUE, i)
         end
     end
-    
+
     for k, v in ipairs(VILLAGERS) do
         -- print(uniqueid, v.uid.value)
         if v.uid.value == uniqueid then
