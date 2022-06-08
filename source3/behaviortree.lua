@@ -101,7 +101,7 @@ function behaviortree.EstablishTree()
 								return 5
 							end
 	TREE.child[7].activate = function(agent)
-								if agent.isPerson.wealth >= fun.getAvgSellPrice(enum.stockHealingHerbs) and agent.isPerson.health < 60 then
+								if agent.isPerson.wealth >= fun.getAvgSellPrice(enum.stockHealingHerbs) and agent.isPerson.health < 80 then
 									return true
 								else
 									return false

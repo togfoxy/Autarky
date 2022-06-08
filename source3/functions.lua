@@ -106,6 +106,8 @@ function functions.loadAudio()
     AUDIO[enum.audioSawWood] = love.audio.newSource("assets/audio/sawwood.wav", "static")
     AUDIO[enum.audioBandage] = love.audio.newSource("assets/audio/174627__altfuture__ripping-clothes.mp3", "static")
 
+    AUDIO[enum.audioWarning] = love.audio.newSource("assets/audio/507906__m-cel__warning-sound.ogg", "static")
+
 
     AUDIO[enum.audioWork]:setVolume(0.2)
     AUDIO[enum.musicMedievalFiesta]:setVolume(0.2)
@@ -521,14 +523,20 @@ function functions.createActions(goal, agent)
             shoprow, shopcol = getClosestBuilding(enum.improvementFarm, qtyneeded, agentrow, agentcol)
             if shoprow ~= nil then
                 local dist = cf.GetDistance(agentrow, agentcol, shoprow, shopcol)   -- tiles
-                if dist > 6 then
+                if dist > 8 then
                     -- determine half way
                     print("moving half way in search of fruit")
-                    local newx, newy
+                    local newrow, newcol
                     newrow = cf.round((agentrow + shoprow) / 2)
                     newcol = cf.round((agentcol + shopcol) / 2)
                     -- move to half way
                     addMoveAction(queue, agentrow, agentcol, newrow, newcol)   -- will add as many 'move' actions as necessary
+                    action = {}
+                    action.action = "goalBuyFruit"
+                    action.stockType = enum.stockFruit
+                    action.purchaseAmount = qtyneeded
+                    action.log = "Looking for some fruit"
+                    table.insert(queue, action)
                 else
                     addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
                     -- buy food
@@ -558,6 +566,13 @@ function functions.createActions(goal, agent)
                 newcol = cf.round((agentcol + shopcol) / 2)
                 -- move to half way
                 addMoveAction(queue, agentrow, agentcol, newrow, newcol)   -- will add as many 'move' actions as necessary
+                action = {}
+                action.action = "goalBuyWood"
+                action.stockType = enum.stockWood
+                action.purchaseAmount = qtyneeded
+                action.log = "Looking for some wood"
+                table.insert(queue, action)
+
             else
                 addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
                 -- buy wood
@@ -600,16 +615,31 @@ function functions.createActions(goal, agent)
             end
             if shoprow ~= nil then
                 -- buy herbs
-                addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+                local dist = cf.GetDistance(agentrow, agentcol, shoprow, shopcol)   -- tiles
+                if dist > 6 then
+                    -- determine half way
+                    print("moving half way in search of herbs")
+                    local newx, newy
+                    newrow = cf.round((agentrow + shoprow) / 2)
+                    newcol = cf.round((agentcol + shopcol) / 2)
+                    -- move to half way
+                    addMoveAction(queue, agentrow, agentcol, newrow, newcol)   -- will add as many 'move' actions as necessary
+                    action = {}
+                    action.action = "goalBuyHerbs"
+                    action.stockType = enum.stockHealingHerbs
+                    action.purchaseAmount = qtyneeded
+                    action.log = "Looking for some herbs"
+                    table.insert(queue, action)
+                else
+                    addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+                    action = {}
+                    action.action = "buy"
+                    action.stockType = enum.stockHealingHerbs
+                    action.purchaseAmount = qtyneeded
+                    action.log = "Bought some healing herbs"
+                    table.insert(queue, action)
+                end
 
-                action = {}
-                action.action = "buy"
-                action.stockType = enum.stockHealingHerbs
-                action.purchaseAmount = qtyneeded
-                action.log = "Bought some healing herbs"
-                table.insert(queue, action)
-                assert(action.stockType ~= nil)
-                -- print("move and buy herbs action added")
             end
         end
     end
@@ -1156,7 +1186,7 @@ end
 function functions.getNewGoal(villager)
     -- decision tree
     local personIsHungry = villager.isPerson.fullness < 50
-    local personIsTired = villager.isPerson.stamina < 40
+    local personIsTired = villager.isPerson.stamina < 30
     local personisPoor = villager.isPerson.wealth < fun.getAvgSellPrice(enum.stockFruit)
     local personisSick = villager.isPerson.health < 30
     local row, col
@@ -1166,34 +1196,54 @@ function functions.getNewGoal(villager)
     -- print(personIsHungry,personIsTired,personisPoor,personisSick)
 
     if personIsHungry then
--- print("alpha")
         row, col = getClosestBuilding(enum.improvementFarm, 1, agentrow, agentcol)
         if row ~= nil then
             -- farm with food is found
             if personIsTired then
-    -- print("Beta")
                 if personisPoor then
-    -- print("charlie")
-                    fun.createActions(enum.goalRest, villager)
-                    fun.createActions(enum.goalGetWelfare, villager)
-                    fun.createActions(enum.goalEatFruit, villager)
+                    local restdist = cf.GetDistance(agentrow, agentcol, WELLS[1].row, WELLS[1].col)   -- distance to farm
+
+                    row, col = getClosestBuilding(enum.improvementWelfare, agentrow, agentcol)
+                    local wfdist = cf.GetDistance(agentrow, agentcol, row, col)   -- distance
+
+                    if restdist < wfdist then
+                        fun.createActions(enum.goalRest, villager)
+                        fun.createActions(enum.goalGetWelfare, villager)
+                        fun.createActions(enum.goalEatFruit, villager)
+                    else    -- welfare is closer
+                        fun.createActions(enum.goalGetWelfare, villager)
+                        row, col = getClosestBuilding(enum.improvementFarm, 1, agentrow, agentcol)
+                        local fruitdist = cf.GetDistance(agentrow, agentcol, row, col)   -- distance
+
+                        if restdist < fruitdist then
+                            fun.createActions(enum.goalRest, villager)
+                            fun.createActions(enum.goalEatFruit, villager)
+                        else
+                            fun.createActions(enum.goalEatFruit, villager)
+                        end
+                    end
                 else    -- not poor
-    -- print("delta")
-                    fun.createActions(enum.goalRest, villager)
-                    fun.createActions(enum.goalEatFruit, villager)
+                    local dist = cf.GetDistance(agentrow, agentcol, row, col)   -- distance to farm
+                    if dist >= 5 then
+                        fun.createActions(enum.goalRest, villager)
+                        fun.createActions(enum.goalEatFruit, villager)
+                    else
+                        fun.createActions(enum.goalEatFruit, villager)
+                    end
                 end
             else    -- stamina is high
-    -- print("echo")
                 if personisPoor then
-    -- print("foxtrot")
                     fun.createActions(enum.goalGetWelfare, villager)
                     fun.createActions(enum.goalEatFruit, villager)
                 else
-    -- print("golf")
                     fun.createActions(enum.goalEatFruit, villager)
                 end
             end
         else    -- can't find building
+
+            --! play audio here
+            fun.playAudio(enum.audioWarning, false, true)       -- is music, is sound
+
             if villager:has("occupation") and MAP[agentrow][agentcol].entity.isTile.stockLevel <= 4 then
                 fun.createActions(enum.goalWork, villager)
             else    -- no occupation
@@ -1209,7 +1259,7 @@ function functions.getNewGoal(villager)
                 if personisSick then
                     fun.createActions(enum.goalGetWelfare, villager)
                     row, col = getClosestBuilding(enum.improvementHealer, 1, agentrow, agentcol)
-                    if row ~= nil then
+                    if row ~= nil and (villager.isPerson.wealth >= fun.getAvgSellPrice(enum.stockHealingHerbs)) then
                         fun.createActions(enum.goalHeal, villager)
                     else
                         goal = ft.DetermineAction(TREE, villager)

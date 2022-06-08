@@ -183,7 +183,7 @@ function actionbuy.newbuy(e, currentaction)
             if seller.isPerson ~= nil then  -- don't know how it can be nil but it happens somehow. Maybe villager dies?
                 ask = determineAsk(seller, stocktype)
             else
-                ask = 999   -- nonsense value. Not sure if this is a good idea
+                ask = 999   -- indicates that buyer is in a tile that is NOT a shop.
             end
 
             assert(buyer ~= nil)
@@ -212,7 +212,7 @@ function actionbuy.newbuy(e, currentaction)
                     adjustBeliefSeller(seller, stocktype, bid, ask)
                 end
             else
-                print("Agreed on a price but no wealth left. Stocktype = " .. stockType .. " and bid = " .. cf.round(bid,2) .. " / " .. cf.round(ask, 2))
+                print("Agreed on a price but no wealth left. Stocktype = " .. stocktype .. " and bid = " .. cf.round(bid,2) .. " / " .. cf.round(ask, 2))
             end
         else    -- bid < ask
             print("Failed to agree on price for stocktype " .. stocktype .. ". Bid = " .. cf.round(bid,2) .. " / " .. cf.round(ask, 2))

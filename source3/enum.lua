@@ -95,6 +95,7 @@ audioNewVillager = 4
 audioRustle = 5
 audioSawWood = 6
 audioBandage = 7
+audioWarning = 8
 
 
 musicCityofMagic = 11

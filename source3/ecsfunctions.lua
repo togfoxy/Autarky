@@ -368,6 +368,21 @@ function ecsfunctions.init()
                 actstockhouse.stockhouse(e, currentaction)
             end
 
+            if currentaction.action == "goalBuyFruit" then
+                fun.createActions(enum.goalEatFruit, e)
+                table.remove(e.isPerson.queue, 1)
+            end
+
+            if currentaction.action == "goalBuyWood" then
+                fun.createActions(enum.goalBuyWood, e)
+                table.remove(e.isPerson.queue, 1)
+            end
+
+            if currentaction.action == "goalBuyHerbs" then
+                fun.createActions(enum.goalHeal, e)
+                table.remove(e.isPerson.queue, 1)
+            end
+
             -- ******************* --
             -- do things that don't depend on an action
             -- ******************* --
