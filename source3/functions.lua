@@ -1278,6 +1278,10 @@ function functions.getNewGoal(villager)
                     else
                         goal = ft.DetermineAction(TREE, villager)
                         fun.createActions(goal, villager)
+                        -- if sick and poor, break the cycle by working if possible - even if sick
+                        if villager.isPerson.queue[1]..action == "rest" and villager:has("occupation") then
+                            fun.createActions(enum.goalWork, villager)
+                        end
                     end
                 else    -- not sick
                     if villager:has("occupation") and MAP[agentrow][agentcol].entity.isTile.stockLevel <= 4 then
