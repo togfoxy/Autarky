@@ -289,9 +289,9 @@ function ecsfunctions.init()
                     if e.isPerson.health < 25 then
                         txt = txt .. "health: " .. cf.round(e.isPerson.health) .. "\n"
                     end
-                    if e.isPerson.stamina < 25 then
-                        txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina) .. "\n"
-                    end
+                    -- if e.isPerson.stamina < 25 then
+                    --     txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina) .. "\n"
+                    -- end
                     if e.isPerson.fullness < 25 then
                         txt = txt .. "fullness: " .. cf.round(e.isPerson.fullness) .. "\n"
                     end
@@ -368,6 +368,21 @@ function ecsfunctions.init()
                 actstockhouse.stockhouse(e, currentaction)
             end
 
+            if currentaction.action == "goalBuyFruit" then
+                fun.createActions(enum.goalEatFruit, e)
+                table.remove(e.isPerson.queue, 1)
+            end
+
+            if currentaction.action == "goalBuyWood" then
+                fun.createActions(enum.goalBuyWood, e)
+                table.remove(e.isPerson.queue, 1)
+            end
+
+            if currentaction.action == "goalBuyHerbs" then
+                fun.createActions(enum.goalHeal, e)
+                table.remove(e.isPerson.queue, 1)
+            end
+
             -- ******************* --
             -- do things that don't depend on an action
             -- ******************* --
@@ -381,7 +396,7 @@ function ecsfunctions.init()
             if MAP[row][col].entity.isTile.mudLevel > 255 then MAP[row][col].entity.isTile.mudLevel = 255 end
 
             -- reduce stamina
-            e.isPerson.stamina = e.isPerson.stamina - (STAMINA_USE_RATE * TIME_SCALE * dt)   --! make constants
+            e.isPerson.stamina = e.isPerson.stamina - (STAMINA_USE_RATE * TIME_SCALE * dt)
             if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
 
             -- reduce fullness

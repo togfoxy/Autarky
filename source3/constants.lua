@@ -51,7 +51,7 @@ function constants.load()
     TIME_SCALE = 0.05          --0.025
     GST_RATE = 0.25             -- 10%
     INJURY_RATE = 20             -- higher numbers = more injuries
-    STAMINA_USE_RATE = 17
+    STAMINA_USE_RATE = 10       -- low means less stamina is used               
     STAMINA_RECOVERY_RATE = STAMINA_USE_RATE * 3
 
     FRUIT_PRODUCTION_RATE = 1 * TIME_SCALE   -- produce 1 per time period
@@ -65,7 +65,7 @@ function constants.load()
     HERB_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE / 1
     HERB_SELL_PRICE = FRUIT_SELL_PRICE * 1.05        -- intentionally a bit higher
     HERB_INCOME_PER_SECOND = HERB_SELL_PRICE / (1/HERB_PRODUCTION_RATE)
-    HERB_HEAL_AMOUNT = 3
+    HERB_HEAL_AMOUNT = 9
 
     CARPENTER_BUILD_RATE = FRUIT_PRODUCTION_RATE * 100    -- how much time the carpenter spends on one wood
     CARPENTER_INCOME_PER_JOB = 1.5

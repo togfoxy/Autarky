@@ -65,8 +65,8 @@ local function adjustBeliefSeller(agent, stocktype, bidprice, askprice)
 
     if bidprice >= askprice then -- succcess
         -- move the lower and upper closer together
-        agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] * 1.1
-        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] * 1
+        agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] * 1.2
+        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] * 1.1
         -- check that the bottom belief is less than upper belief
         if agent.isPerson.stockBelief[stocktype][1] > agent.isPerson.stockBelief[stocktype][2] then
             local avgvalue = (agent.isPerson.stockBelief[stocktype][1] + agent.isPerson.stockBelief[stocktype][2])  / 2
@@ -80,6 +80,10 @@ local function adjustBeliefSeller(agent, stocktype, bidprice, askprice)
 
     -- data checking
     if agent.isPerson.stockBelief[stocktype][1] <= 0 then agent.isPerson.stockBelief[stocktype][1] = 0.1 end
+
+    -- if stocktype == enum.stockFruit then
+    --     print("Farmer's belief is now $" .. agent.isPerson.stockBelief[stocktype][1] .. " / $" .. agent.isPerson.stockBelief[stocktype][2])
+    -- end
 end
 
 local function playPurchaseAudio(stocktype)
@@ -183,7 +187,7 @@ function actionbuy.newbuy(e, currentaction)
             if seller.isPerson ~= nil then  -- don't know how it can be nil but it happens somehow. Maybe villager dies?
                 ask = determineAsk(seller, stocktype)
             else
-                ask = 999   -- nonsense value. Not sure if this is a good idea
+                ask = 999   -- indicates that buyer is in a tile that is NOT a shop.
             end
 
             assert(buyer ~= nil)
@@ -212,7 +216,7 @@ function actionbuy.newbuy(e, currentaction)
                     adjustBeliefSeller(seller, stocktype, bid, ask)
                 end
             else
-                print("Agreed on a price but no wealth left. Stocktype = " .. stockType .. " and bid = " .. cf.round(bid,2) .. " / " .. cf.round(ask, 2))
+                print("Agreed on a price but no wealth left. Stocktype = " .. stocktype .. " and bid = " .. cf.round(bid,2) .. " / " .. cf.round(ask, 2))
             end
         else    -- bid < ask
             print("Failed to agree on price for stocktype " .. stocktype .. ". Bid = " .. cf.round(bid,2) .. " / " .. cf.round(ask, 2))
