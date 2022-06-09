@@ -1195,8 +1195,8 @@ function functions.getNewGoal(villager)
     local workplacerow, workplacecol
 
     if villager:has("workplace") then          --! is this even needed?
-        workplacerow = agent.workplace.row
-        workplacecol = agent.workplace.col
+        workplacerow = villager.workplace.row
+        workplacecol = villager.workplace.col
     end
 
     local houserow

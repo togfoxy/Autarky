@@ -289,9 +289,9 @@ function ecsfunctions.init()
                     if e.isPerson.health < 25 then
                         txt = txt .. "health: " .. cf.round(e.isPerson.health) .. "\n"
                     end
-                    if e.isPerson.stamina < 25 then
-                        txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina) .. "\n"
-                    end
+                    -- if e.isPerson.stamina < 25 then
+                    --     txt = txt .. "stamina: " .. cf.round(e.isPerson.stamina) .. "\n"
+                    -- end
                     if e.isPerson.fullness < 25 then
                         txt = txt .. "fullness: " .. cf.round(e.isPerson.fullness) .. "\n"
                     end
