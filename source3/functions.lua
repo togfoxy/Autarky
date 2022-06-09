@@ -424,7 +424,7 @@ function functions.createActions(goal, agent)
                 addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
                 -- do work
                 local time1 = agent.isPerson.stamina * 0.6
-                local time2 = agent.isPerson.fullness * 0.8
+                local time2 = agent.isPerson.fullness * 0.6
                 local time3 = love.math.random(20, 35)
                 local action = {}
                 action.action = "work"
@@ -588,7 +588,7 @@ function functions.createActions(goal, agent)
         end
     end
     if goal == enum.goalHeal then
-        local qtyneeded = (cf.round((100 - agent.isPerson.health) / 10)) + 1
+        local qtyneeded = 100 - agent.isPerson.health + 1
         local ownsHealershop = false
         -- see if healer owns a healing shop
         if agent:has("workplace") and agent.isPerson.wealth <= 4 then
@@ -1279,7 +1279,7 @@ function functions.getNewGoal(villager)
                         goal = ft.DetermineAction(TREE, villager)
                         fun.createActions(goal, villager)
                         -- if sick and poor, break the cycle by working if possible - even if sick
-                        if villager.isPerson.queue[1]..action == "rest" and villager:has("occupation") then
+                        if villager.isPerson.queue[1].action == "rest" and villager:has("occupation") then
                             fun.createActions(enum.goalWork, villager)
                         end
                     end

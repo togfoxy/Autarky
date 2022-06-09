@@ -396,7 +396,7 @@ function ecsfunctions.init()
             if MAP[row][col].entity.isTile.mudLevel > 255 then MAP[row][col].entity.isTile.mudLevel = 255 end
 
             -- reduce stamina
-            e.isPerson.stamina = e.isPerson.stamina - (STAMINA_USE_RATE * TIME_SCALE * dt)   --! make constants
+            e.isPerson.stamina = e.isPerson.stamina - (STAMINA_USE_RATE * TIME_SCALE * dt)
             if e.isPerson.stamina < 0 then e.isPerson.stamina = 0 end
 
             -- reduce fullness
