@@ -1192,8 +1192,22 @@ function functions.getNewGoal(villager)
     local row, col
     local agentrow = villager.position.row
     local agentcol = villager.position.col
+    local workplacerow, workplacecol
 
-    -- print(personIsHungry,personIsTired,personisPoor,personisSick)
+    if villager:has("workplace") then          --! is this even needed?
+        workplacerow = agent.workplace.row
+        workplacecol = agent.workplace.col
+    end
+
+    local houserow
+    local housecol
+    local housewood = 0     -- how much spare wood at house
+    if villager:has("residence") then
+        houserow = villager.residence.row
+        housecol = villager.residence.col
+        housewood = MAP[houserow][housecol].entity.isTile.stockLevel
+    end
+
 
     if personIsHungry then
         row, col = getClosestBuilding(enum.improvementFarm, 1, agentrow, agentcol)
@@ -1282,7 +1296,7 @@ function functions.getNewGoal(villager)
                         fun.createActions(enum.goalRest, villager)
                     end
                 else    -- not sick
-                    if villager.isPerson.stockInv[enum.stockWood] <= 2 and villager:has("occupation") then
+                    if villager.isPerson.stockInv[enum.stockWood] <= 2 and housewood <= 2 and villager:has("occupation") then
                         row, col = getClosestBuilding(enum.improvementWoodsman, 1, agentrow, agentcol)
                         if row ~= nil then
                             fun.createActions(enum.goalBuyWood, villager)
