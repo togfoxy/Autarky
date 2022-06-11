@@ -1337,7 +1337,7 @@ function functions.getNewGoal(villager)
                         goal = ft.DetermineAction(TREE, villager)
                         fun.createActions(goal, villager)
                         -- if sick and poor, break the cycle by working if possible - even if sick
-                        if villager.isPerson.queue[1].action == "rest" and occupation > 0 then
+                        if occupation > 0 then
                             fun.createActions(enum.goalWork, villager)
                         end
                     end

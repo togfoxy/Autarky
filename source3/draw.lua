@@ -1,5 +1,13 @@
 draw = {}
 
+local function getTaxesOwed()
+    local taxesowed
+    for k, v in pairs(VILLAGERS) do
+       taxesowed = taxesowed + v.taxesOwed
+    end
+    return taxesowed
+end
+
 local function drawGraph()
 
     local dotsize = 3       -- radius
@@ -50,6 +58,7 @@ local function drawInstructions()
 
     addDrawItem(HUDText, "Treasury: ", cf.round(VILLAGE_WEALTH))
     addDrawItem(HUDText, "GST: ", cf.round(GST_RATE, 2))
+    addDrawItem(HUDText, "Taxes owed: ", cf.round(getTaxesOwed(), 2))
     addDrawItem(HUDText, "---", nil)
     addDrawItem(HUDText, "Population: ", #VILLAGERS)
     addDrawItem(HUDText, "#Farmers: ", fun.getJobCount(enum.jobFarmer))
