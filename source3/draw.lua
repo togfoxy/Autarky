@@ -1,9 +1,9 @@
 draw = {}
 
 local function getTaxesOwed()
-    local taxesowed
+    local taxesowed = 0
     for k, v in pairs(VILLAGERS) do
-       taxesowed = taxesowed + v.taxesOwed
+       taxesowed = taxesowed + v.isPerson.taxesOwed
     end
     return taxesowed
 end
