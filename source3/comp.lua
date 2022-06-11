@@ -15,6 +15,7 @@ function comp.init()
         c.queue = {}
         c.stamina = 100         -- fully rested
         c.fullness = 125        -- hunger. Start a little topped up so they have a chance to establish themselves.
+        c.wealth = 0         -- starting amount. 3 days worth of food.
         c.stockInv = {}         -- track how much of each stock is owned
         c.stockBelief = {}
         for i = 1, NUMBER_OF_STOCK_TYPES do
@@ -38,7 +39,7 @@ function comp.init()
         c.stockBelief[enum.stockHealingHerbs][2] = HERB_SELL_PRICE + 0.25
         if c.stockBelief[enum.stockHealingHerbs][1] < 0 then c.stockBelief[enum.stockHealingHerbs][1] = 0.5 end
 
-        c.wealth = 3         -- starting amount. 3 days worth of food.
+
         c.stockInv[enum.stockWood] = 0
         c.log = {}
         c.taxesOwed = 0
