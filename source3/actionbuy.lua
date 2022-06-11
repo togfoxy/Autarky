@@ -15,6 +15,10 @@ local function tradeGoods(buyer, seller, stocktype, desiredQty, agreedprice)
         purchaseamt = math.floor(purchaseamt)       -- round down to nearest unit
         if purchaseamt <= 0 then purchaseamt = 0 end
         shoptile.stockLevel = shoptile.stockLevel  - purchaseamt
+
+        if stocktype == enum.stockWood then
+            buyer.isPerson.stockInv[stocktype] = buyer.isPerson.stockInv[stocktype] + purchaseamt
+        end
     else
         local canafford = math.floor(buyer.isPerson.wealth / agreedprice)     -- units that can be afforded rounds down
         purchaseamt = math.min(stockavail, canafford, desiredQty)   -- limit transaction to what can be afforded, desired and provisioned
@@ -64,9 +68,9 @@ end
 local function adjustBeliefSeller(agent, stocktype, bidprice, askprice)
 
     if bidprice >= askprice then -- succcess
-        -- move the lower and upper closer together
+        --
         agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] * 1.2
-        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] * 1.1
+        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] * 1.3
         -- check that the bottom belief is less than upper belief
         if agent.isPerson.stockBelief[stocktype][1] > agent.isPerson.stockBelief[stocktype][2] then
             local avgvalue = (agent.isPerson.stockBelief[stocktype][1] + agent.isPerson.stockBelief[stocktype][2])  / 2
@@ -178,26 +182,24 @@ function actionbuy.newbuy(e, currentaction)
             bid = 0
             ask = 0
         else
-            bid = determineBid(buyer, stocktype)
-
-            assert(buyer ~= nil)
-            assert(seller.isPerson ~= {})
-
-            -- determine the ask
-            if seller.isPerson ~= nil then  -- don't know how it can be nil but it happens somehow. Maybe villager dies?
-                ask = determineAsk(seller, stocktype)
-            else
-                ask = 999   -- indicates that buyer is in a tile that is NOT a shop.
-            end
-
-            assert(buyer ~= nil)
-            assert(seller ~= nil)
-
-
             if buyer == seller then
                 -- make bid same as ask just to ensure the transaction is successful
                 bid = 1
                 ask = 1
+            else
+                bid = determineBid(buyer, stocktype)
+
+                assert(buyer ~= nil)
+                assert(seller.isPerson ~= {})
+
+                -- determine the ask
+                if seller.isPerson ~= nil then  -- don't know how it can be nil but it happens somehow. Maybe villager dies?
+                    ask = determineAsk(seller, stocktype)
+                else
+                    ask = 999   -- indicates that buyer is in a tile that is NOT a shop.
+                end
+                assert(buyer ~= nil)
+                assert(seller ~= nil)
             end
         end
 
@@ -205,7 +207,7 @@ function actionbuy.newbuy(e, currentaction)
         if bid >= ask then
             -- transaction successful
             -- do transaction
-            local agreedprice = (bid + ask ) / 2        -- average
+            local agreedprice = cf.round((bid + ask ) / 2, 2)        -- average
             amtbought = tradeGoods(buyer, seller, stocktype, desiredQty, agreedprice)
 
             if amtbought >= 1 then
@@ -219,7 +221,7 @@ function actionbuy.newbuy(e, currentaction)
                 print("Agreed on a price but no wealth left. Stocktype = " .. stocktype .. " and bid = " .. cf.round(bid,2) .. " / " .. cf.round(ask, 2))
             end
         else    -- bid < ask
-            print("Failed to agree on price for stocktype " .. stocktype .. ". Bid = " .. cf.round(bid,2) .. " / " .. cf.round(ask, 2))
+            -- print("Failed to agree on price for stocktype " .. stocktype .. ". Bid = " .. cf.round(bid,2) .. " / " .. cf.round(ask, 2))
             adjustBeliefBuyer(buyer, stocktype, bid, ask)        -- Note: do not execute if agreed on price but no wealth left
             if seller.isPerson ~= nil then
                 adjustBeliefSeller(seller, stocktype, bid, ask)

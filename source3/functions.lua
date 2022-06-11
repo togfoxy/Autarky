@@ -119,6 +119,7 @@ function functions.loadAudio()
     AUDIO[enum.musicBirdsinForest]:setVolume(1)
     AUDIO[enum.audioSawWood]:setVolume(0.2)
     AUDIO[enum.audioBandage]:setVolume(0.2)
+    AUDIO[enum.audioWarning]:setVolume(0.2)
 
 end
 
@@ -229,24 +230,28 @@ local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, st
     local closestvalue = -1
     local closestrow, closestcol
 
-    for col = 1, NUMBER_OF_COLS do
-        for row = 1, NUMBER_OF_ROWS do
-            if MAP[row][col].entity.isTile.improvementType == buildingtype and MAP[row][col].entity.isTile.stockLevel >= requiredstocklevel then
-                local cmap = convertToCollisionMap(MAP)
-                cmap[row][col] = TILEWALKABLE
-                local _, dist = cf.findPath(cmap, TILEWALKABLE, startcol, startrow, col, row, false)
-                if closestvalue < 0 or dist < closestvalue then
-                    closestvalue = dist
-                    closestrow = row
-                    closestcol = col
+    if startrow ~= nil and startcol ~= nil then
+        for col = 1, NUMBER_OF_COLS do
+            for row = 1, NUMBER_OF_ROWS do
+                if MAP[row][col].entity.isTile.improvementType == buildingtype and MAP[row][col].entity.isTile.stockLevel >= requiredstocklevel then
+                    local cmap = convertToCollisionMap(MAP)
+                    cmap[row][col] = TILEWALKABLE
+                    local _, dist = cf.findPath(cmap, TILEWALKABLE, startcol, startrow, col, row, false)
+                    if closestvalue < 0 or dist < closestvalue then
+                        closestvalue = dist
+                        closestrow = row
+                        closestcol = col
+                    end
                 end
             end
         end
+        if closestrow == nil then
+            -- print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
+        end
+        return closestrow, closestcol
+    else
+        return nil, nil
     end
-    if closestrow == nil then
-        -- print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
-    end
-    return closestrow, closestcol
 end
 
 local function getRandomBuilding(buildingtype, requiredstocklevel)
@@ -400,16 +405,19 @@ function functions.createActions(goal, agent)
         action = {}
         action.action = "rest"
 
-        local time1 = ((100 - agent.isPerson.stamina) / 2) + love.math.random(5, 30)      -- some random formula. Please tweak!
-        local time2 = agent.isPerson.fullness * 0.5
+        local time1 = ((150 - agent.isPerson.stamina) * 0.75)      -- some random formula. Please tweak!
+        local time2 = math.max(agent.isPerson.fullness, 0) * 0.75   -- fullness might be a negative value
+        if time2 <= 10 then time2 = 10 end
         action.timeleft = math.min(time1, time2)    -- rest as much as you want (time1) but don't starve doing it (time2)
         action.log = "Rested"
         table.insert(queue, action)
+
+        if agent.isPerson.stockInv[enum.stockWood] > 0 then
+            fun.createActions(enum.goalStockHouse, agent)
+        end
     end
     if goal == enum.goalWork then
         -- time to earn a paycheck
-
-        -- print("alpha:" .. tostring(agent.occupation.isConverter))
         if agent.occupation.isProducer then
             if not agent:has("workplace") then
                 assignWorkplace(agent)
@@ -417,14 +425,12 @@ function functions.createActions(goal, agent)
             if agent:has("workplace") then
                 workplacerow = agent.workplace.row
                 workplacecol = agent.workplace.col
-
-                -- print("charlie")
                 -- move to workplace
                 -- add a 'move' action
                 addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
                 -- do work
-                local time1 = agent.isPerson.stamina * 0.6
-                local time2 = agent.isPerson.fullness * 0.6
+                local time1 = agent.isPerson.stamina * 0.4      --! make this more scientific by factoring stamina rate
+                local time2 = math.max(agent.isPerson.fullness, 0) * 0.4    -- fullness migh tbe a negative value
                 local time3 = love.math.random(20, 35)
                 local action = {}
                 action.action = "work"
@@ -460,7 +466,7 @@ function functions.createActions(goal, agent)
                         table.insert(queue, action)
                         print("Maintaining house using at most ".. (worktime) .. " seconds and " .. woodqty .. " wood used.")
                     else
-                        print("Found a house with health " .. househealth .. " and max health " .. housemaxhealth .. ". Nothing to do.")
+                        -- print("Found a house with health " .. househealth .. " and max health " .. housemaxhealth .. ". Nothing to do.")
                     end
                 else
                     -- print("Carpenter has nothing to build")
@@ -489,7 +495,7 @@ function functions.createActions(goal, agent)
                 addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
 
                 local time1 = love.math.random(20, 45)
-                local time2 = agent.isPerson.fullness * 0.75
+                local time2 = math.max(agent.isPerson.fullness, 0) * 0.75   -- fullness migh tbe a negative value
                 local action = {}
                 action.action = "work"
                 action.timeleft = math.min(time1,time2)
@@ -525,7 +531,7 @@ function functions.createActions(goal, agent)
                 local dist = cf.GetDistance(agentrow, agentcol, shoprow, shopcol)   -- tiles
                 if dist > 8 then
                     -- determine half way
-                    print("moving half way in search of fruit")
+                    -- print("moving half way in search of fruit")
                     local newrow, newcol
                     newrow = cf.round((agentrow + shoprow) / 2)
                     newcol = cf.round((agentcol + shopcol) / 2)
@@ -560,7 +566,7 @@ function functions.createActions(goal, agent)
             local dist = cf.GetDistance(agentrow, agentcol, shoprow, shopcol)   -- tiles
             if dist > 6 then
                 -- determine half way
-                print("moving half way in search of wood")
+                -- print("moving half way in search of wood")
                 local newx, newy
                 newrow = cf.round((agentrow + shoprow) / 2)
                 newcol = cf.round((agentcol + shopcol) / 2)
@@ -618,7 +624,7 @@ function functions.createActions(goal, agent)
                 local dist = cf.GetDistance(agentrow, agentcol, shoprow, shopcol)   -- tiles
                 if dist > 6 then
                     -- determine half way
-                    print("moving half way in search of herbs")
+                    -- print("moving half way in search of herbs")
                     local newx, newy
                     newrow = cf.round((agentrow + shoprow) / 2)
                     newcol = cf.round((agentcol + shopcol) / 2)
@@ -667,7 +673,7 @@ function functions.createActions(goal, agent)
 
         addMoveAction(queue, agentrow, agentcol, houserow, housecol)   -- will add as many 'move' actions as necessary
         local time1 = love.math.random(10, 30)
-        local time2 = agent.isPerson.fullness * 0.5
+        local time2 = math.max(agent.isPerson.fullness, 0) * 0.5    -- fullness migh tbe a negative value
         local action = {}
         action.action = "stockhouse"
         action.timeleft = math.min(time1, time2)
@@ -691,7 +697,26 @@ function functions.createActions(goal, agent)
             -- print("Looking for welfare but can't find an officer")
         end
     end
-
+    if goal == enum.goalGotoWorkplace then
+        if not agent:has("workplace") then
+            assignWorkplace(agent)
+        end
+        if agent:has("workplace") then
+            workplacerow = agent.workplace.row
+            workplacecol = agent.workplace.col
+            -- move to workplace
+            -- add a 'move' action
+            addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+            -- do work
+            local action = {}
+            action.action = "work"
+            action.timeleft = 1
+            action.log = "Going to work"
+            table.insert(queue, action)
+        else
+            error()     -- should never happen
+        end
+    end
     return queue
 end
 
@@ -767,11 +792,12 @@ function functions.killAgent(uniqueid)
         -- print(uniqueid, v.uid.value)
         if v.uid.value == uniqueid then
             print("Found dead guy. " .. k)
+            print("Time worked = " .. v.isPerson.timeWorking)
+            print("Time rested = " .. v.isPerson.timeResting)
             deadID = k
             break
         end
     end
-    print("deadid: " .. deadID)
     assert(deadID ~= nil)
     table.remove(VILLAGERS, deadID)     --! need to kill entity from WORLD before removing from table
     print("There are now " .. #VILLAGERS .. " villagers.")
@@ -917,7 +943,7 @@ local function prepTiles()
             if e.isTile.tileOwner ~= nil then
                 if e.isTile.tileOwner.uid ~= nil then
                     item.tileOwnerUID = e.isTile.tileOwner.uid.value
-                    print("Saving tile that has an owner with UID " .. item.tileOwnerUID)
+                    -- print("Saving tile that has an owner with UID " .. item.tileOwnerUID)
                 end
             end
             table.insert(tilestable, item)
@@ -1193,10 +1219,17 @@ function functions.getNewGoal(villager)
     local agentrow = villager.position.row
     local agentcol = villager.position.col
     local workplacerow, workplacecol
+    local occupation = 0    -- default value meaning no occupation
+    local workstock = 0
 
     if villager:has("workplace") then          --! is this even needed?
         workplacerow = villager.workplace.row
         workplacecol = villager.workplace.col
+        workstock = MAP[workplacerow][workplacecol].entity.isTile.stockLevel
+    end
+
+    if villager:has("occupation") then
+        occupation = villager.occupation.value
     end
 
     local houserow
@@ -1209,56 +1242,102 @@ function functions.getNewGoal(villager)
     end
 
 
+    -- ***************
+    -- * Decison tree
+    -- ***************
     if personIsHungry then
         row, col = getClosestBuilding(enum.improvementFarm, 1, agentrow, agentcol)
         if row ~= nil then
             -- farm with food is found
             if personIsTired then
                 if personisPoor then
-                    local restdist = cf.GetDistance(agentrow, agentcol, WELLS[1].row, WELLS[1].col)   -- distance to farm
-
-                    row, col = getClosestBuilding(enum.improvementWelfare, agentrow, agentcol)
-                    local wfdist = cf.GetDistance(agentrow, agentcol, row, col)   -- distance
-
-                    if restdist < wfdist then
-                        fun.createActions(enum.goalRest, villager)
-                        fun.createActions(enum.goalGetWelfare, villager)
-                        fun.createActions(enum.goalEatFruit, villager)
-                    else    -- welfare is closer
-                        fun.createActions(enum.goalGetWelfare, villager)
-                        row, col = getClosestBuilding(enum.improvementFarm, 1, agentrow, agentcol)
-                        local fruitdist = cf.GetDistance(agentrow, agentcol, row, col)   -- distance
-
-                        if restdist < fruitdist then
-                            fun.createActions(enum.goalRest, villager)
+                    if occupation == enum.jobFarmer then
+                        if workstock >= 1 then
+                            -- get fruit from own farm
+                            fun.createActions(enum.goalGotoWorkplace, villager)
                             fun.createActions(enum.goalEatFruit, villager)
                         else
+                            -- work and create fruit for self
+                            fun.createActions(enum.goalWork, villager)
+                        end
+                    else    -- not a farmer
+                        local restdist = cf.GetDistance(agentrow, agentcol, WELLS[1].row, WELLS[1].col)   -- distance to farm
+
+                        row, col = getClosestBuilding(enum.improvementWelfare, agentrow, agentcol)  --! what if owns house?
+                        local wfdist = 999
+                        if row ~= nil then
+                            wfdist = cf.GetDistance(agentrow, agentcol, row, col)   -- distance
+                        end
+
+                        if restdist < wfdist then
+                            -- town centre is closer so rest first
+                            fun.createActions(enum.goalRest, villager)
+                            fun.createActions(enum.goalGetWelfare, villager)
                             fun.createActions(enum.goalEatFruit, villager)
+                        else    -- welfare is closer
+                            fun.createActions(enum.goalGetWelfare, villager)
+
+                            local fruitdist = 999
+                            row, col = getClosestBuilding(enum.improvementFarm, 1, agentrow, agentcol)
+                            if row ~= nil then
+                                fruitdist = cf.GetDistance(agentrow, agentcol, row, col)   -- distance
+                            end
+
+                            if restdist < fruitdist then
+                                fun.createActions(enum.goalRest, villager)
+                                fun.createActions(enum.goalEatFruit, villager)
+                            else
+                                fun.createActions(enum.goalEatFruit, villager)
+                            end
                         end
                     end
                 else    -- not poor
-                    local dist = cf.GetDistance(agentrow, agentcol, row, col)   -- distance to farm
-                    if dist >= 5 then
+                    local farmdist = cf.GetDistance(agentrow, agentcol, row, col)   -- distance to farm
+                    if farmdist >= 5 then
                         fun.createActions(enum.goalRest, villager)
                         fun.createActions(enum.goalEatFruit, villager)
                     else
                         fun.createActions(enum.goalEatFruit, villager)
                     end
                 end
-            else    -- stamina is high
+            else    -- not tired
                 if personisPoor then
-                    fun.createActions(enum.goalGetWelfare, villager)
-                    fun.createActions(enum.goalEatFruit, villager)
-                else
+                    if occupation == enum.jobFarmer then
+                        if workstock >= 1 then
+                            -- get fruit from own farm
+                            fun.createActions(enum.goalGotoWorkplace, villager)
+                            fun.createActions(enum.goalEatFruit, villager)
+                        else
+                            -- work and create fruit for self
+                            fun.createActions(enum.goalWork, villager)
+                        end
+                    else    -- not a farmer
+                        -- look for welfare office
+                        row, col = getClosestBuilding(enum.improvementWelfare, agentrow, agentcol)
+                        if row ~= nil then
+                            -- found welfare
+                            fun.createActions(enum.goalGetWelfare, villager)
+                            fun.createActions(enum.goalEatFruit, villager)
+                        else
+                            -- go to work and try to make money
+                            if occupation > 0 then
+                                fun.createActions(enum.goalWork, villager)
+                            else
+                                -- out of options
+                                goal = ft.DetermineAction(TREE, villager)
+                                fun.createActions(goal, villager)
+                            end
+                        end
+                    end
+                else    -- not poor
                     fun.createActions(enum.goalEatFruit, villager)
                 end
             end
         else    -- can't find building
-
-            --! play audio here
+            -- play audio here
             fun.playAudio(enum.audioWarning, false, true)       -- is music, is sound
 
-            if villager:has("occupation") and MAP[agentrow][agentcol].entity.isTile.stockLevel <= 4 then
+            if occupation > 0 and workstock <= 4 then
                 fun.createActions(enum.goalWork, villager)
             else    -- no occupation
                 goal = ft.DetermineAction(TREE, villager)
@@ -1279,12 +1358,12 @@ function functions.getNewGoal(villager)
                         goal = ft.DetermineAction(TREE, villager)
                         fun.createActions(goal, villager)
                         -- if sick and poor, break the cycle by working if possible - even if sick
-                        if villager.isPerson.queue[1].action == "rest" and villager:has("occupation") then
+                        if occupation > 0 then
                             fun.createActions(enum.goalWork, villager)
                         end
                     end
                 else    -- not sick
-                    if villager:has("occupation") and MAP[agentrow][agentcol].entity.isTile.stockLevel <= 4 then
+                    if occupation > 0 and workstock <= 4 then
                         fun.createActions(enum.goalWork, villager)
                     else    -- no occupation
                         goal = ft.DetermineAction(TREE, villager)
@@ -1300,17 +1379,12 @@ function functions.getNewGoal(villager)
                         fun.createActions(enum.goalRest, villager)
                     end
                 else    -- not sick
-                    if villager.isPerson.stockInv[enum.stockWood] <= 2 and housewood <= 2 and villager:has("occupation") then
+                    if villager.isPerson.stockInv[enum.stockWood] <= 2 and housewood <= 2 and occupation > 0 then
                         row, col = getClosestBuilding(enum.improvementWoodsman, 1, agentrow, agentcol)
                         if row ~= nil then
                             fun.createActions(enum.goalBuyWood, villager)
                         else
-                            if villager:has("occupation") then
-                                fun.createActions(enum.goalWork, villager)
-                            else
-                                goal = ft.DetermineAction(TREE, villager)
-                                fun.createActions(goal, villager)
-                            end
+                            fun.createActions(enum.goalWork, villager)
                         end
                     else    -- has wood
                         if villager.isPerson.stockInv[enum.stockWood] > 0 then

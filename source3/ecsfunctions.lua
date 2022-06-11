@@ -285,6 +285,12 @@ function ecsfunctions.init()
                     txt = txt .. cf.round(e.isPerson.stockBelief[enum.stockFruit][1], 1) .. "\n"
                     love.graphics.setColor(1,1,1,1)
                     love.graphics.print(txt, drawx, drawy, 0, 1, 1, 30, 30)     -- positive x = move left
+                elseif love.keyboard.isDown("ralt") then
+                    txt = "Worked: " .. cf.round(e.isPerson.timeWorking) .. "\n"
+                    txt = txt .. "Rested: " .. cf.round(e.isPerson.timeResting) .. "\n"
+
+                    love.graphics.setColor(1,1,1,1)
+                    love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 60)
                 else
                     if e.isPerson.health < 25 then
                         txt = txt .. "health: " .. cf.round(e.isPerson.health) .. "\n"
@@ -430,7 +436,10 @@ function ecsfunctions.init()
             end
 
             -- do this last as it may nullify the entity
-            if e.isPerson.fullness < 0 or e.isPerson.health <= 0 then
+            if (e:has("occupation") and e.isPerson.fullness < -300) or
+                (not e:has("occupation") and e.isPerson.fullness < 0) or
+                (e.isPerson.health <= 0)
+                then
                 -- destroy any improvement belonging to starving agent
                 if e:has("workplace") then
                     -- destroy workplace

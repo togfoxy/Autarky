@@ -85,6 +85,7 @@ goalStockHouse = 6
 goalHeal = 7
 goalEatFruit = 8
 goalGetWelfare = 9
+goalGotoWorkplace = 10
 
 
 -- audio/music  ## ensure they have their own sequence without overlaps

@@ -6,6 +6,7 @@ function actionrest.rest(e, currentaction, dt)
     local agentcol = e.position.col
 
     currentaction.timeleft = currentaction.timeleft - dt
+    e.isPerson.timeResting = e.isPerson.timeResting + dt
 
     -- capture the current position as the previous position
     e.position.previousx = e.position.x

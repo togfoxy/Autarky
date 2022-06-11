@@ -1,4 +1,4 @@
-GAME_VERSION = "0.14"
+GAME_VERSION = "0.15"
 
 inspect = require 'lib.inspect'
 -- https://github.com/kikito/inspect.lua
@@ -135,6 +135,18 @@ function love.keyreleased( key, scancode )
 	if key == "s" then
 		fun.saveGame()
 	end
+
+	-- gst
+	if key == "," then
+		GST_RATE = GST_RATE - 0.01
+		if GST_RATE < 0 then GST_RATE = 0 end
+	end
+	if key == "." then
+		GST_RATE = GST_RATE + 0.01
+		if GST_RATE > 1 then GST_RATE = 1 end
+	end
+
+
 end
 
 function love.mousepressed( x, y, button, istouch, presses )
