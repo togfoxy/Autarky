@@ -230,24 +230,28 @@ local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, st
     local closestvalue = -1
     local closestrow, closestcol
 
-    for col = 1, NUMBER_OF_COLS do
-        for row = 1, NUMBER_OF_ROWS do
-            if MAP[row][col].entity.isTile.improvementType == buildingtype and MAP[row][col].entity.isTile.stockLevel >= requiredstocklevel then
-                local cmap = convertToCollisionMap(MAP)
-                cmap[row][col] = TILEWALKABLE
-                local _, dist = cf.findPath(cmap, TILEWALKABLE, startcol, startrow, col, row, false)
-                if closestvalue < 0 or dist < closestvalue then
-                    closestvalue = dist
-                    closestrow = row
-                    closestcol = col
+    if startrow ~= nil and startcol ~= nil then
+        for col = 1, NUMBER_OF_COLS do
+            for row = 1, NUMBER_OF_ROWS do
+                if MAP[row][col].entity.isTile.improvementType == buildingtype and MAP[row][col].entity.isTile.stockLevel >= requiredstocklevel then
+                    local cmap = convertToCollisionMap(MAP)
+                    cmap[row][col] = TILEWALKABLE
+                    local _, dist = cf.findPath(cmap, TILEWALKABLE, startcol, startrow, col, row, false)
+                    if closestvalue < 0 or dist < closestvalue then
+                        closestvalue = dist
+                        closestrow = row
+                        closestcol = col
+                    end
                 end
             end
         end
+        if closestrow == nil then
+            -- print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
+        end
+        return closestrow, closestcol
+    else
+        return nil, nil
     end
-    if closestrow == nil then
-        -- print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
-    end
-    return closestrow, closestcol
 end
 
 local function getRandomBuilding(buildingtype, requiredstocklevel)
@@ -402,7 +406,7 @@ function functions.createActions(goal, agent)
         action.action = "rest"
 
         local time1 = ((150 - agent.isPerson.stamina) * 0.75)      -- some random formula. Please tweak!
-        local time2 = agent.isPerson.fullness * 0.75
+        local time2 = math.max(agent.isPerson.fullness, 0) * 0.75   -- fullness migh tbe a negative value
         action.timeleft = math.min(time1, time2)    -- rest as much as you want (time1) but don't starve doing it (time2)
         action.log = "Rested"
         table.insert(queue, action)
@@ -429,7 +433,7 @@ function functions.createActions(goal, agent)
                 addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
                 -- do work
                 local time1 = agent.isPerson.stamina * 0.4      --! make this more scientific by factoring stamina rate
-                local time2 = agent.isPerson.fullness * 0.4
+                local time2 = math.max(agent.isPerson.fullness, 0) * 0.4    -- fullness migh tbe a negative value
                 local time3 = love.math.random(20, 35)
                 local action = {}
                 action.action = "work"
@@ -494,7 +498,7 @@ function functions.createActions(goal, agent)
                 addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
 
                 local time1 = love.math.random(20, 45)
-                local time2 = agent.isPerson.fullness * 0.75
+                local time2 = math.max(agent.isPerson.fullness, 0) * 0.75   -- fullness migh tbe a negative value
                 local action = {}
                 action.action = "work"
                 action.timeleft = math.min(time1,time2)
@@ -672,7 +676,7 @@ function functions.createActions(goal, agent)
 
         addMoveAction(queue, agentrow, agentcol, houserow, housecol)   -- will add as many 'move' actions as necessary
         local time1 = love.math.random(10, 30)
-        local time2 = agent.isPerson.fullness * 0.5
+        local time2 = math.max(agent.isPerson.fullness, 0) * 0.5    -- fullness migh tbe a negative value
         local action = {}
         action.action = "stockhouse"
         action.timeleft = math.min(time1, time2)
@@ -696,7 +700,6 @@ function functions.createActions(goal, agent)
             -- print("Looking for welfare but can't find an officer")
         end
     end
-
     return queue
 end
 
