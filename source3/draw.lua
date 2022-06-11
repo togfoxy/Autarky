@@ -235,6 +235,11 @@ function draw.Animations()
             love.graphics.draw(IMAGES[imgitem.imagenumber], imgitem.x, imgitem.y)
         end
     end
+
+    ANIMATION[enum.spriteRedWomanWaving]:draw(SPRITES[enum.spriteRedWomanWaving], 300, 300, 0, 1, 1, 0, 0)
+
+
+
 end
 
 

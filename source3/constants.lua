@@ -2,9 +2,9 @@ constants = {}
 
 function constants.load()
 
-    NUMBER_OF_VILLAGERS = 2
+    NUMBER_OF_VILLAGERS = 7
     VILLAGE_WEALTH = 0
-    NEW_VILLAGER_THRESHOLD = 1500       -- seconds it takes for a new villager
+    NEW_VILLAGER_THRESHOLD = 150       -- seconds it takes for a new villager
 
     ZOOMFACTOR = 1
     MUSIC_TOGGLE = true
@@ -30,6 +30,9 @@ function constants.load()
     TREE = {}			-- a tree that holds all possible behaviours for a person
     STOCK_HISTORY = {}  -- tracks actual transaction prices for each commodity
     GAME_LOG = {}       -- a log on global events the player needs to see
+    ANIMATION = {}      -- anim8 animations
+    GRID = {}           -- grids are used to load quads for anim8
+    FRAME = {}          -- frames within the grid
 
 
     NUMBER_OF_STOCK_TYPES = 9   --## must equal the highest number (or more). It is NOT a count/sequence!!

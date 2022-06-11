@@ -21,6 +21,9 @@ nativefs = require 'lib.nativefs'
 lovelyToasts = require 'lib.lovelyToasts'
 -- https://github.com/Loucee/Lovely-Toasts
 
+anim8 = require 'lib.anim8'
+-- https://github.com/kikito/anim8
+
 ft = require 'lib.foxtree'		-- foxtree
 
 cf = require 'lib.commonfunctions'
@@ -329,6 +332,8 @@ function love.update(dt)
 			table.remove(DRAWQUEUE, i)
 		end
 	end
+
+	ANIMATION[enum.spriteRedWomanWaving]:update(dt)
 
 	fun.PlayAmbientMusic()
 
