@@ -334,6 +334,7 @@ function love.update(dt)
 	end
 
 	ANIMATION[enum.spriteRedWomanWaving]:update(dt)
+	ANIMATION[enum.spriteRedWomanFlute]:update(dt)
 
 	fun.PlayAmbientMusic()
 

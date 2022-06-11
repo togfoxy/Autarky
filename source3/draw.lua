@@ -237,6 +237,7 @@ function draw.Animations()
     end
 
     ANIMATION[enum.spriteRedWomanWaving]:draw(SPRITES[enum.spriteRedWomanWaving], 300, 300, 0, 1, 1, 0, 0)
+    ANIMATION[enum.spriteRedWomanFlute]:draw(SPRITES[enum.spriteRedWomanFlute], 400, 400, 0, 1, 1, 0, 0)
 
 
 

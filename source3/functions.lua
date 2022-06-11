@@ -87,12 +87,14 @@ function functions.loadImages()
 
     -- anim8
     SPRITES[enum.spriteRedWomanWaving] = love.graphics.newImage("assets/images/RedWomanWaving30x32.png")
-    -- QUADS[enum.spriteRedWomanWaving] = cf.fromImageToQuads(SPRITES[enum.spriteRedWomanWaving], 15, 32)
     GRID[enum.spriteRedWomanWaving] = anim8.newGrid(30,32,150,32)       -- sprite width/height, sheet width/height
     FRAME[enum.spriteRedWomanWaving] = GRID[enum.spriteRedWomanWaving]:getFrames(1,1,2,1,3,1,4,1,5,1,4,1,3,1,2,1,1,1)  -- each pair is col/row within the quad/grid
     ANIMATION[enum.spriteRedWomanWaving] = anim8.newAnimation(FRAME[enum.spriteRedWomanWaving], 0.15)   -- frames and frame duration
 
-
+    SPRITES[enum.spriteRedWomanFlute] = love.graphics.newImage("assets/images/RedWomanFlute30x40.png")
+    GRID[enum.spriteRedWomanFlute] = anim8.newGrid(30,40,150,40)       -- sprite width/height, sheet width/height
+    FRAME[enum.spriteRedWomanFlute] = GRID[enum.spriteRedWomanFlute]:getFrames(1,1,2,1,3,1,4,1,5,1)  -- each pair is col/row within the quad/grid
+    ANIMATION[enum.spriteRedWomanFlute] = anim8.newAnimation(FRAME[enum.spriteRedWomanFlute], 0.30)   -- frames and frame duration
 
 
 
