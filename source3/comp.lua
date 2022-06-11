@@ -26,22 +26,26 @@ function comp.init()
             c.stockBelief[i][4] = 0       -- total count transacted
         end
 
-        c.stockBelief[enum.stockFruit][1] = FRUIT_SELL_PRICE - 1
-        c.stockBelief[enum.stockFruit][2] = FRUIT_SELL_PRICE + 1
+        c.stockBelief[enum.stockFruit][1] = FRUIT_SELL_PRICE - 0.25
+        c.stockBelief[enum.stockFruit][2] = FRUIT_SELL_PRICE + 0.25
         if c.stockBelief[enum.stockFruit][1] < 0 then c.stockBelief[enum.stockFruit][1] = 0.5 end
 
-        c.stockBelief[enum.stockWood][1] = WOOD_SELL_PRICE - 1
-        c.stockBelief[enum.stockWood][2] = WOOD_SELL_PRICE + 1
+        c.stockBelief[enum.stockWood][1] = WOOD_SELL_PRICE - 0.25
+        c.stockBelief[enum.stockWood][2] = WOOD_SELL_PRICE + 0.25
         if c.stockBelief[enum.stockWood][1] < 0 then c.stockBelief[enum.stockWood][1] = 0.5 end
 
-        c.stockBelief[enum.stockHealingHerbs][1] = HERB_SELL_PRICE - 1
-        c.stockBelief[enum.stockHealingHerbs][2] = HERB_SELL_PRICE + 1
+        c.stockBelief[enum.stockHealingHerbs][1] = HERB_SELL_PRICE - 0.25
+        c.stockBelief[enum.stockHealingHerbs][2] = HERB_SELL_PRICE + 0.25
         if c.stockBelief[enum.stockHealingHerbs][1] < 0 then c.stockBelief[enum.stockHealingHerbs][1] = 0.5 end
 
         c.wealth = 3         -- starting amount. 3 days worth of food.
         c.stockInv[enum.stockWood] = 0
         c.log = {}
         c.taxesOwed = 0
+
+        c.timeResting = 0
+        c.timeWorking = 0
+
     end)
 
     concord.component("occupation", function(c, jobtype, stocktype, bolProducer, bolService, bolConverter)

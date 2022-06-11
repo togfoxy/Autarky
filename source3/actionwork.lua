@@ -4,6 +4,7 @@ actionwork = {}
 function actionwork.work(e, currentaction, dt)
 
     currentaction.timeleft = currentaction.timeleft - dt
+    e.isPerson.timeWorking = e.isPerson.timeWorking + dt
 
     -- play audio
     if currentaction.timeleft > 3 and love.math.random(1, 5000) == 1 then

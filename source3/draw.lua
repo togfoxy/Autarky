@@ -49,6 +49,7 @@ local function drawInstructions()
     local HUDText = {}
 
     addDrawItem(HUDText, "Treasury: ", cf.round(VILLAGE_WEALTH))
+    addDrawItem(HUDText, "GST: ", cf.round(GST_RATE, 2))
     addDrawItem(HUDText, "---", nil)
     addDrawItem(HUDText, "Population: ", #VILLAGERS)
     addDrawItem(HUDText, "#Farmers: ", fun.getJobCount(enum.jobFarmer))
@@ -141,6 +142,8 @@ local function drawInstructions()
         addDrawItem(HUDText, "t = tax collector", nil)
         addDrawItem(HUDText, "w = welfare officer", nil)
     end
+
+    addDrawItem(HUDText, "Change GST = < and >", nil)
 
     addDrawItem(HUDText, "---", nil)
     addDrawItem(HUDText, "Camera:", nil)
