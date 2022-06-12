@@ -335,14 +335,36 @@ function ecsfunctions.init()
                 action.log = "Idle"
                 table.insert(e.isPerson.queue, action)
 
-                -- add a talking bubble
-                local item = {}
-                item.imagenumber = enum.imagesEmoteTalking
-                item.start = love.math.random(0, 7)
-                item.stop = love.math.random(item.start, action.timeleft)
-                item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
-                item.uid = e.uid.value
-                table.insert(DRAWQUEUE, item)
+                local rndanimation = love.math.random(1,3)
+                rndanimation = 2    --! testing!
+
+                if rndanimation == 1 then
+                    -- add a talking bubble
+                    local item = {}
+                    item.imagenumber = enum.imagesEmoteTalking
+                    item.start = love.math.random(0, 4)
+                    item.stop = love.math.random(item.start, action.timeleft)
+                    item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+                    item.uid = e.uid.value
+                    table.insert(DRAWQUEUE, item)
+                elseif rndanimation == 2 then
+                    -- wave
+                    local item = {}
+                    item.animationnumber = enum.spriteRedWomanWaving
+                    item.start = love.math.random(0, 4)
+                    item.stop = love.math.random(item.start, action.timeleft)
+                    item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+                    item.uid = e.uid.value
+                    table.insert(DRAWQUEUE, item)
+
+
+                elseif rndanimation == 3 then
+
+
+                else
+                    -- should not happen
+                    error("Unknown animation can't play.")
+                end
             end
 
             -- process head of queue
