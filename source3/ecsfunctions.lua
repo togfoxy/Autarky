@@ -335,35 +335,64 @@ function ecsfunctions.init()
                 action.log = "Idle"
                 table.insert(e.isPerson.queue, action)
 
-                local rndanimation = love.math.random(1,3)
-                rndanimation = 2    --! testing!
-
-                if rndanimation == 1 then
+                if e:has("occupation") then
                     -- add a talking bubble
                     local item = {}
                     item.imagenumber = enum.imagesEmoteTalking
                     item.start = love.math.random(0, 4)
                     item.stop = love.math.random(item.start, action.timeleft)
-                    item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+                    item.x, item.y = e.position.x, e.position.y
                     item.uid = e.uid.value
-                    table.insert(DRAWQUEUE, item)
-                elseif rndanimation == 2 then       --! only do this if female and unemployed
-                    -- wave
-                    local item = {}
-                    item.animationnumber = enum.spriteRedWomanWaving
-                    item.start = love.math.random(0, 4)
-                    item.stop = love.math.random(item.start, action.timeleft)
-                    item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
-                    item.uid = e.uid.value
-                    item.entity = e
-                    table.insert(DRAWQUEUE, item)
-                elseif rndanimation == 3 then
-
-
                 else
-                    -- should not happen
-                    error("Unknown animation can't play.")
+                    if e.gender == enum.genderMale then
+                        -- add a talking bubble
+                        local item = {}
+                        item.imagenumber = enum.imagesEmoteTalking
+                        item.start = love.math.random(0, 4)
+                        item.stop = love.math.random(item.start, action.timeleft)
+                        item.x, item.y = e.position.x, e.position.y
+                        item.uid = e.uid.value
+                        table.insert(DRAWQUEUE, item)
+                    else    -- gender == female
+                        local rndanimation = love.math.random(1,3)
+                        -- rndanimation = 2
+                        if rndanimation == 1 then
+                            -- add a talking bubble
+                            local item = {}
+                            item.imagenumber = enum.imagesEmoteTalking
+                            item.start = love.math.random(0, 4)
+                            item.stop = love.math.random(item.start, action.timeleft)
+                            item.x, item.y = e.position.x, e.position.y
+                            item.uid = e.uid.value
+                            table.insert(DRAWQUEUE, item)
+                        elseif rndanimation == 2 then       -- only do this if female and unemployed
+                            -- wave
+                            local item = {}
+                            item.animationnumber = enum.spriteRedWomanWaving
+                            item.start = love.math.random(0, 4)
+                            item.stop = love.math.random(item.start, action.timeleft)
+                            item.x, item.y = e.position.x, e.position.y
+                            item.uid = e.uid.value
+                            item.entity = e
+                            table.insert(DRAWQUEUE, item)
+                        elseif rndanimation == 3 then
+                            local item = {}
+                            item.animationnumber = enum.spriteRedWomanFlute
+                            item.start = love.math.random(0, 4)
+                            item.stop = love.math.random(item.start, action.timeleft)
+                            item.x, item.y = e.position.x, e.position.y
+                            item.uid = e.uid.value
+                            item.entity = e
+                            table.insert(DRAWQUEUE, item)
+                        else
+                            -- should not happen
+                            error("Unknown animation can't play.")
+                        end
+                    end
                 end
+
+
+
             end
 
             -- process head of queue
