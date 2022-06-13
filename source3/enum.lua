@@ -26,6 +26,8 @@ spriteBlueWoman = 103
 spriteRedWoman = 104
 spriteFarmerMan = 105
 spriteRandomTree = 106
+spriteRedWomanWaving = 107
+spriteRedWomanFlute = 108
 
 
 

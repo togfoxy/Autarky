@@ -21,6 +21,9 @@ nativefs = require 'lib.nativefs'
 lovelyToasts = require 'lib.lovelyToasts'
 -- https://github.com/Loucee/Lovely-Toasts
 
+anim8 = require 'lib.anim8'
+-- https://github.com/kikito/anim8
+
 ft = require 'lib.foxtree'		-- foxtree
 
 cf = require 'lib.commonfunctions'
@@ -325,10 +328,16 @@ function love.update(dt)
 	for i = #DRAWQUEUE, 1, -1 do
 		DRAWQUEUE[i].start = DRAWQUEUE[i].start - dt
 		DRAWQUEUE[i].stop = DRAWQUEUE[i].stop - dt
-		if DRAWQUEUE[i].stop <= 0 then
+		if DRAWQUEUE[i].stop <= 0 then	-- stop timer has expired
+			if DRAWQUEUE[i].animationnumber ~= nil then
+				DRAWQUEUE[i].entity:ensure("drawable")
+			end
 			table.remove(DRAWQUEUE, i)
 		end
 	end
+
+	ANIMATION[enum.spriteRedWomanWaving]:update(dt)
+	ANIMATION[enum.spriteRedWomanFlute]:update(dt)
 
 	fun.PlayAmbientMusic()
 

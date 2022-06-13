@@ -56,6 +56,9 @@ local function adjustBeliefBuyer(agent, stocktype, bidprice, askprice)
             agent.isPerson.stockBelief[stocktype][1] = avgvalue
             agent.isPerson.stockBelief[stocktype][2] = avgvalue
         end
+
+        if agent.isPerson.stockBelief[stocktype][1] > bidprice then agent.isPerson.stockBelief[stocktype][1] = bidprice end
+        if agent.isPerson.stockBelief[stocktype][2] < bidprice then agent.isPerson.stockBelief[stocktype][2] = bidprice end
     else    -- no success
         agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] * 1.05   -- increase by 10%
         agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] * 1.1   -- increase by 10%
@@ -63,6 +66,7 @@ local function adjustBeliefBuyer(agent, stocktype, bidprice, askprice)
 
     -- data checking
     if agent.isPerson.stockBelief[stocktype][1] <= 0 then agent.isPerson.stockBelief[stocktype][1] = 0.1 end
+
 end
 
 local function adjustBeliefSeller(agent, stocktype, bidprice, askprice)

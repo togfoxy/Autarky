@@ -232,9 +232,25 @@ function draw.Animations()
     for k, imgitem in pairs(DRAWQUEUE) do
         if imgitem.start <= 0 and imgitem.stop > 0 then
             -- draw item
-            love.graphics.draw(IMAGES[imgitem.imagenumber], imgitem.x, imgitem.y)
+            if imgitem.imagenumber ~= nil then -- could be an animation that uses a different attribute
+                love.graphics.draw(IMAGES[imgitem.imagenumber], imgitem.x, imgitem.y)
+            elseif imgitem.animationnumber ~= nil then
+                imgitem.entity:remove("drawable")
+                ANIMATION[imgitem.animationnumber]:draw(SPRITES[imgitem.animationnumber], imgitem.x, imgitem.y, 0, 1, 1, -15, 6)
+                -- -14, 0 is too left and too high
+                -- -12, 1 is too left and too high
+                -- -13, 0 is too high and too right
+                -- -10, 0 is too high and too right
+                -- -11, -1 is too low and too right
+            end
         end
     end
+
+    -- ANIMATION[enum.spriteRedWomanWaving]:draw(SPRITES[enum.spriteRedWomanWaving], 300, 300, 0, 1, 1, 0, 0)
+    -- ANIMATION[enum.spriteRedWomanFlute]:draw(SPRITES[enum.spriteRedWomanFlute], 400, 400, 0, 1, 1, 0, 0)
+
+
+
 end
 
 
