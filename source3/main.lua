@@ -328,7 +328,8 @@ function love.update(dt)
 	for i = #DRAWQUEUE, 1, -1 do
 		DRAWQUEUE[i].start = DRAWQUEUE[i].start - dt
 		DRAWQUEUE[i].stop = DRAWQUEUE[i].stop - dt
-		if DRAWQUEUE[i].stop <= 0 then
+		if DRAWQUEUE[i].stop <= 0 then	-- stop timer has expired
+			DRAWQUEUE[i].entity:ensure("drawable")
 			table.remove(DRAWQUEUE, i)
 		end
 	end

@@ -347,7 +347,7 @@ function ecsfunctions.init()
                     item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
                     item.uid = e.uid.value
                     table.insert(DRAWQUEUE, item)
-                elseif rndanimation == 2 then
+                elseif rndanimation == 2 then       --! only do this if female and unemployed
                     -- wave
                     local item = {}
                     item.animationnumber = enum.spriteRedWomanWaving
@@ -355,9 +355,8 @@ function ecsfunctions.init()
                     item.stop = love.math.random(item.start, action.timeleft)
                     item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
                     item.uid = e.uid.value
+                    item.entity = e
                     table.insert(DRAWQUEUE, item)
-
-
                 elseif rndanimation == 3 then
 
 
