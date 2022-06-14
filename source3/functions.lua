@@ -815,7 +815,7 @@ function functions.killAgent(uniqueid)
         end
     end
     assert(deadID ~= nil)
-    table.remove(VILLAGERS, deadID)     --! need to kill entity from WORLD before removing from table
+    table.remove(VILLAGERS, deadID)     -- Note: need to kill entity from WORLD before removing from table
     print("There are now " .. #VILLAGERS .. " villagers.")
 end
 
@@ -1139,9 +1139,6 @@ local function loadPerson(persontable)
 end
 
 function functions.saveGame()
-	-- uses the globals because too hard to pass params
-    --! will want to save global timers as well
-
     local savefile
     local contents
     local success, message
@@ -1188,7 +1185,7 @@ function functions.LoadGame()
         end
     end
 
-    MAP = {}        --! need to destroy all tiles from world before doing this
+    MAP = {}        -- Note: need to destroy all tiles from world before doing this
     WELLS = {}
 
     fun.initialiseMap()     -- initialises 2d map with nils

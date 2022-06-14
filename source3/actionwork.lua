@@ -75,8 +75,7 @@ function actionwork.work(e, currentaction, dt)
             owner.residence.unbuiltMaxHealth = owner.residence.unbuiltMaxHealth + HEALTH_GAIN_PER_WOOD
             MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel - 1
         else
-            -- max is already very high
-            --! ensure builders don't come here unnecessarily
+            -- max is already very high. Ensure builders don't come here unnecessarily
         end
 
         -- convert unbuilt health into real health

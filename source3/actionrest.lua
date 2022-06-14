@@ -18,7 +18,7 @@ function actionrest.rest(e, currentaction, dt)
         fun.playAudio(enum.audioYawn, false, true)
     end
 
-    if currentaction.action == "rest" and e:has("residence") and e.residence.health >= 50 then  --! make the 50 value a constant
+    if currentaction.action == "rest" and e:has("residence") and e.residence.health >= 50 then
         if currentaction.timeleft > 5 then
             -- draw sleep bubble
             local item = {}
@@ -30,7 +30,7 @@ function actionrest.rest(e, currentaction, dt)
             table.insert(DRAWQUEUE, item)
         end
         -- recover stamina faster
-        e.isPerson.stamina = e.isPerson.stamina + (1.5 * STAMINA_RECOVERY_RATE * TIME_SCALE * dt)      --! make constants
+        e.isPerson.stamina = e.isPerson.stamina + (1.5 * STAMINA_RECOVERY_RATE * TIME_SCALE * dt)
     else
         e.isPerson.stamina = e.isPerson.stamina + (STAMINA_RECOVERY_RATE * TIME_SCALE * dt)        -- gain 1 per second + recover the 0.5 applied above
     end
