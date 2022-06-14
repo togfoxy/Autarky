@@ -236,7 +236,7 @@ function draw.Animations()
                 love.graphics.draw(IMAGES[imgitem.imagenumber], imgitem.x, imgitem.y)
             elseif imgitem.animationnumber ~= nil then
                 imgitem.entity:remove("drawable")
-                ANIMATION[imgitem.animationnumber]:draw(SPRITES[imgitem.animationnumber], imgitem.x, imgitem.y, 0, 1, 1, -15, 6)
+                ANIMATION[imgitem.animationnumber]:draw(SPRITES[imgitem.animationnumber], imgitem.x + 15, imgitem.y, 0, 1, 1, 0, 0)
                 -- -14, 0 is too left and too high
                 -- -12, 1 is too left and too high
                 -- -13, 0 is too high and too right

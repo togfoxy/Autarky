@@ -335,6 +335,7 @@ function ecsfunctions.init()
                 action.log = "Idle"
                 table.insert(e.isPerson.queue, action)
 
+                -- determine animation/anim8
                 if e:has("occupation") then
                     -- add a talking bubble
                     local item = {}
