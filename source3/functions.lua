@@ -86,13 +86,13 @@ function functions.loadImages()
 
 
     -- anim8
-    SPRITES[enum.spriteRedWomanWaving] = love.graphics.newImage("assets/images/RedWomanWaving30x32.png")
+    SPRITES[enum.spriteRedWomanWaving] = love.graphics.newImage("assets/images/RedWomanWaving30x32v3.png")
     GRID[enum.spriteRedWomanWaving] = anim8.newGrid(30,32,150,32)       -- sprite width/height, sheet width/height
     FRAME[enum.spriteRedWomanWaving] = GRID[enum.spriteRedWomanWaving]:getFrames(1,1,2,1,3,1,4,1,5,1,4,1,3,1,2,1,1,1)  -- each pair is col/row within the quad/grid
     ANIMATION[enum.spriteRedWomanWaving] = anim8.newAnimation(FRAME[enum.spriteRedWomanWaving], 0.15)   -- frames and frame duration
 
-    SPRITES[enum.spriteRedWomanFlute] = love.graphics.newImage("assets/images/RedWomanFlute30x40.png")
-    GRID[enum.spriteRedWomanFlute] = anim8.newGrid(30,40,150,40)       -- sprite width/height, sheet width/height
+    SPRITES[enum.spriteRedWomanFlute] = love.graphics.newImage("assets/images/RedWomanFlute30x32v3.png")
+    GRID[enum.spriteRedWomanFlute] = anim8.newGrid(30,32,150,32)       -- sprite width/height, sheet width/height
     FRAME[enum.spriteRedWomanFlute] = GRID[enum.spriteRedWomanFlute]:getFrames(1,1,2,1,3,1,4,1,5,1)  -- each pair is col/row within the quad/grid
     ANIMATION[enum.spriteRedWomanFlute] = anim8.newAnimation(FRAME[enum.spriteRedWomanFlute], 0.30)   -- frames and frame duration
 
@@ -815,7 +815,7 @@ function functions.killAgent(uniqueid)
         end
     end
     assert(deadID ~= nil)
-    table.remove(VILLAGERS, deadID)     --! need to kill entity from WORLD before removing from table
+    table.remove(VILLAGERS, deadID)     -- Note: need to kill entity from WORLD before removing from table
     print("There are now " .. #VILLAGERS .. " villagers.")
 end
 
@@ -1021,6 +1021,17 @@ local function prepPerson()
     return persontable
 end
 
+local function prepGlobals()
+    local globalTable = {}
+    local item = {}
+    item.treasury = VILLAGE_WEALTH
+    item.gst = GST_RATE
+    item.music = MUSIC_TOGGLE
+    item.sound = SOUND_TOGGLE
+    table.insert(globalTable, item)
+    return globalTable
+end
+
 local function loadTile(tilestable)
 
     for i = 1, #tilestable do
@@ -1128,9 +1139,6 @@ local function loadPerson(persontable)
 end
 
 function functions.saveGame()
-	-- uses the globals because too hard to pass params
-    --! will want to save global timers as well
-
     local savefile
     local contents
     local success, message
@@ -1148,6 +1156,11 @@ function functions.saveGame()
 
     savefile = savedir .. "/savedata/" .. "stockhistory.dat"
     serialisedString = bitser.dumps(STOCK_HISTORY)
+    success, message = nativefs.write(savefile, serialisedString)
+
+    local globalsTable = prepGlobals()
+    savefile = savedir .. "/savedata/" .. "globals.dat"
+    serialisedString = bitser.dumps(globalsTable)
     success, message = nativefs.write(savefile, serialisedString)
 
     lovelyToasts.show("Game saved",5)
@@ -1172,17 +1185,17 @@ function functions.LoadGame()
         end
     end
 
-    MAP = {}        --! need to destroy all tiles from world before doing this
+    MAP = {}        -- Note: need to destroy all tiles from world before doing this
     WELLS = {}
 
     fun.initialiseMap()     -- initialises 2d map with nils
-
 
     DRAWQUEUE = {}      -- erase this and start fresh. Holds bubbles
     STOCK_HISTORY = {}
 
     local tilestable
     local persontable
+    local globalsTable
 
     local savedir = love.filesystem.getSource()
     love.filesystem.setIdentity(savedir)
@@ -1214,6 +1227,19 @@ function functions.LoadGame()
 	if nativefs.getInfo(savefile) then
 		contents, size = nativefs.read(savefile)
 	    STOCK_HISTORY = bitser.loads(contents)
+	else
+		error = true
+	end
+
+    savefile = savedir .. "/savedata/" .. "globals.dat"
+	if nativefs.getInfo(savefile) then
+		contents, size = nativefs.read(savefile)
+	    globalsTable = bitser.loads(contents)
+
+        VILLAGE_WEALTH = globalsTable[1].treasury
+        GST_RATE = globalsTable[1].gst
+        MUSIC_TOGGLE = globalsTable[1].music
+        SOUND_TOGGLE = globalsTable[1].sound
 	else
 		error = true
 	end

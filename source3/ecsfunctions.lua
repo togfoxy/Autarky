@@ -49,7 +49,7 @@ function ecsfunctions.init()
                     local imagenum = e.isTile.decorationType
                     local sprite = SPRITES[enum.spriteRandomTree]
                     local quad = QUADS[enum.spriteRandomTree][imagenum]
-                    local imagewidth, imageheight = 50,50       --! needs to line up with the size in LOADIMAGES()
+                    local imagewidth, imageheight = 50,50       -- Note: needs to line up with the size in LOADIMAGES()
                     local drawscalex = (TILE_SIZE / imagewidth)
                     local drawscaley = (TILE_SIZE / imageheight)
 
@@ -335,6 +335,7 @@ function ecsfunctions.init()
                 action.log = "Idle"
                 table.insert(e.isPerson.queue, action)
 
+                -- determine animation/anim8
                 if e:has("occupation") then
                     -- add a talking bubble
                     local item = {}
