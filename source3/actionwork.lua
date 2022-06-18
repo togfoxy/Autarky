@@ -31,11 +31,6 @@ function actionwork.work(e, currentaction, dt)
         fun.addLog(e, currentaction.log)
     end
 
-    -- print("+++")
-    -- print(e.occupation.value)
-    -- print(e.occupation.stockType)
-    -- print("+++")
-
     -- reap benefits of work
 
     if e.occupation.stockType ~= nil and e.occupation.value ~= enum.jobCarpenter then

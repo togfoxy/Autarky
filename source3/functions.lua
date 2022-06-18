@@ -436,89 +436,118 @@ function functions.createActions(goal, agent)
     end
     if goal == enum.goalWork then
         -- time to earn a paycheck
-        if agent.occupation.isProducer then
-            if not agent:has("workplace") then
-                assignWorkplace(agent)
-            end
-            if agent:has("workplace") then
-                workplacerow = agent.workplace.row
-                workplacecol = agent.workplace.col
-                -- move to workplace
-                -- add a 'move' action
-                addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
-                -- do work
-                local time1 = agent.isPerson.stamina * 0.4      --! make this more scientific by factoring stamina rate
-                local time2 = math.max(agent.isPerson.fullness, 0) * 0.4    -- fullness migh tbe a negative value
-                local time3 = love.math.random(20, 35)
-                local action = {}
-                action.action = "work"
-                action.timeleft = math.min(time1, time2, time3)
-                action.log = "Farmed"
-                table.insert(queue, action)
+        if agent.occupation.value == enum.jobSwordsman then
+            -- pick a random corner to move to and then move to it
+            local corner = love.math.random(1,4)    -- four corners
+            local coloffset = love.math.random(-2, 2)
+            local rowoffset = love.math.random(-2, 2)
+            local coltarget, rowtarget
+            if corner == 1 then
+                coltarget = 3 + coloffset
+                rowtarget = 3 + rowoffset
+            elseif corner == 2 then
+                coltarget = NUMBER_OF_COLS - 3 + coloffset
+                rowtarget = 3 + rowoffset
+            elseif corner == 3 then
+                coltarget = NUMBER_OF_COLS - 3 + coloffset
+                rowtarget = NUMBER_OF_ROWS - 3 + rowoffset
+            elseif corner == 4 then
+                coltarget = 3 + coloffset
+                rowtarget = NUMBER_OF_ROWS - 3 + rowoffset
             else
-                error()     -- should never happen
+                error()
             end
-        end
-        if agent.occupation.isConverter then
-            -- time to convert things
-            if agent.occupation.value == enum.jobCarpenter then
-                -- local destrow, destcol = getClosestBuilding(enum.improvementHouse, 1, agentrow, agentcol)
-                local destrow, destcol = getRandomBuilding(enum.improvementHouse, 1)
-
-                if destrow ~= nil then
-                    local owner = MAP[destrow][destcol].entity.isTile.tileOwner
-                    local woodqty = MAP[destrow][destcol].entity.isTile.stockLevel
-                    local househealth = owner.residence.health
-                    local housemaxhealth = owner.residence.unbuiltMaxHealth
-
-                    if (woodqty >= 1 and housemaxhealth < 100) or (househealth < housemaxhealth and owner.isPerson.wealth >= FRUIT_SELL_PRICE * 1.1) then
-                        addMoveAction(queue, agentrow, agentcol, destrow, destcol)   -- will add as many 'move' actions as necessary
-
-                        -- work out how long to work
-                        local worktime = woodqty * CARPENTER_BUILD_RATE   -- seconds
-
-                        local action = {}
-                        action.action = "work"
-                        action.timeleft = worktime
-                        action.log = "Working on house"
-                        table.insert(queue, action)
-                        print("Maintaining house using at most ".. (worktime) .. " seconds and " .. woodqty .. " wood used.")
-                    else
-                        -- print("Found a house with health " .. househealth .. " and max health " .. housemaxhealth .. ". Nothing to do.")
-                    end
-                else
-                    -- print("Carpenter has nothing to build")
+            addMoveAction(queue, agentrow, agentcol, rowtarget, coltarget)   -- will add as many 'move' actions as necessary
+            action = {}
+            action.action = "idle"      -- idle is same as rest but idle means "nothing else to do" but rest was chosen from btree
+            action.timeleft = love.math.random(5, 10)
+            action.log = "Idle"
+            table.insert(agent.isPerson.queue, action)
+        else
+            if agent.occupation.isProducer then
+                if not agent:has("workplace") then
+                    assignWorkplace(agent)
                 end
-            end
-            if agent.occupation.value == enum.jobTaxCollector then
-                local destrow, destcol = getClosestPerson(1, agentrow, agentcol)
-                if destrow ~= nil then
-                    addMoveAction(queue, agentrow, agentcol, destrow, destcol)
+                if agent:has("workplace") then
+                    workplacerow = agent.workplace.row
+                    workplacecol = agent.workplace.col
+                    -- move to workplace
+                    -- add a 'move' action
+                    addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+                    -- do work
+                    local time1 = agent.isPerson.stamina * 0.4      --! make this more scientific by factoring stamina rate
+                    local time2 = math.max(agent.isPerson.fullness, 0) * 0.4    -- fullness migh tbe a negative value
+                    local time3 = love.math.random(20, 35)
                     local action = {}
                     action.action = "work"
-                    action.timeleft = 5
-                    action.log = "Collected taxes"
+                    action.timeleft = math.min(time1, time2, time3)
+                    action.log = "Farmed"
                     table.insert(queue, action)
-                    print("Collecting taxes")
+                else
+                    error()     -- should never happen
                 end
             end
-        end
-        if agent.occupation.isService then
-            if not agent:has("workplace") then
-                assignWorkplace(agent)
-            end
-            if agent:has("workplace") then
-                workplacerow = agent.workplace.row
-                workplacecol = agent.workplace.col
-                addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+            if agent.occupation.isConverter then
+                -- time to convert things
+                if agent.occupation.value == enum.jobCarpenter then
+                    -- local destrow, destcol = getClosestBuilding(enum.improvementHouse, 1, agentrow, agentcol)
+                    local destrow, destcol = getRandomBuilding(enum.improvementHouse, 1)
 
-                local time1 = love.math.random(20, 45)
-                local time2 = math.max(agent.isPerson.fullness, 0) * 0.75   -- fullness migh tbe a negative value
-                local action = {}
-                action.action = "work"
-                action.timeleft = math.min(time1,time2)
-                action.log = "Provided welfare"
-                table.insert(queue, action)
+                    if destrow ~= nil then
+                        local owner = MAP[destrow][destcol].entity.isTile.tileOwner
+                        local woodqty = MAP[destrow][destcol].entity.isTile.stockLevel
+                        local househealth = owner.residence.health
+                        local housemaxhealth = owner.residence.unbuiltMaxHealth
+
+                        if (woodqty >= 1 and housemaxhealth < 100) or (househealth < housemaxhealth and owner.isPerson.wealth >= FRUIT_SELL_PRICE * 1.1) then
+                            addMoveAction(queue, agentrow, agentcol, destrow, destcol)   -- will add as many 'move' actions as necessary
+
+                            -- work out how long to work
+                            local worktime = woodqty * CARPENTER_BUILD_RATE   -- seconds
+
+                            local action = {}
+                            action.action = "work"
+                            action.timeleft = worktime
+                            action.log = "Working on house"
+                            table.insert(queue, action)
+                            print("Maintaining house using at most ".. (worktime) .. " seconds and " .. woodqty .. " wood used.")
+                        else
+                            -- print("Found a house with health " .. househealth .. " and max health " .. housemaxhealth .. ". Nothing to do.")
+                        end
+                    else
+                        -- print("Carpenter has nothing to build")
+                    end
+                end
+                if agent.occupation.value == enum.jobTaxCollector then
+                    local destrow, destcol = getClosestPerson(1, agentrow, agentcol)
+                    if destrow ~= nil then
+                        addMoveAction(queue, agentrow, agentcol, destrow, destcol)
+                        local action = {}
+                        action.action = "work"
+                        action.timeleft = 5
+                        action.log = "Collected taxes"
+                        table.insert(queue, action)
+                        print("Collecting taxes")
+                    end
+                end
+            end
+            if agent.occupation.isService then
+                if not agent:has("workplace") then
+                    assignWorkplace(agent)
+                end
+                if agent:has("workplace") then
+                    workplacerow = agent.workplace.row
+                    workplacecol = agent.workplace.col
+                    addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+
+                    local time1 = love.math.random(20, 45)
+                    local time2 = math.max(agent.isPerson.fullness, 0) * 0.75   -- fullness migh tbe a negative value
+                    local action = {}
+                    action.action = "work"
+                    action.timeleft = math.min(time1,time2)
+                    action.log = "Provided welfare"
+                    table.insert(queue, action)
+                end
             end
         end
     end
@@ -575,7 +604,6 @@ function functions.createActions(goal, agent)
             end
         end
     end
-
     if goal == enum.goalBuyWood then
         -- print("Goal = buy wood")
         local qtyneeded = 1
@@ -715,7 +743,7 @@ function functions.createActions(goal, agent)
             -- print("Looking for welfare but can't find an officer")
         end
     end
-    if goal == enum.goalGotoWorkplace then
+    if goal == enum.goalGotoWorkplace then      -- only important if occupation == enum.jobFarmer
         if not agent:has("workplace") then
             assignWorkplace(agent)
         end
