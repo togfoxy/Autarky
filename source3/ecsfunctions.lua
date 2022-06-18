@@ -12,7 +12,6 @@ function ecsfunctions.init()
 
     -- declare systems
     ecsDraw.draw()
-
     ecsUpdate.isPerson()
 
     systemIsTile = concord.system({
@@ -25,18 +24,7 @@ function ecsfunctions.init()
             MAP[row][col].entity = entity       -- this assigns isTile amongst other things
         end
     end
-
-    systemIsTileUpdate = concord.system({
-        pool = {"isTile"}
-    })
-    function systemIsTileUpdate:update(dt)
-        for _, e in ipairs(self.pool) do
-
-            -- decrease mud so that grass grows
-            e.isTile.mudLevel = cf.round(e.isTile.mudLevel - (dt / 3) * TIME_SCALE, 4)
-            if e.isTile.mudLevel < 0 then e.isTile.mudLevel = 0 end
-        end
-    end
+    ecsUpdate.isTile()
 
     -- add the systems to the world
     -- ## ensure all systems are added to the world
@@ -44,7 +32,7 @@ function ecsfunctions.init()
 
     -- create entities
 
-    -- capture the tile that has the well firs of all
+    -- capture the tile that has the well first of all
 	WELLS = {}
 	WELLS[1] = {}
 	WELLS[1].row = love.math.random(4, NUMBER_OF_ROWS - 4)  -- The 3 and -2 keeps the well off the screen edge

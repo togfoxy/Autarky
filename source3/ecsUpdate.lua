@@ -1,6 +1,5 @@
 ecsUpdate = {}
 
-
 function ecsUpdate.isPerson()
 
     systemIsPerson = concord.system({
@@ -228,8 +227,6 @@ function ecsUpdate.isPerson()
             end
         end
     end
-
-
 end
 
 function ecsUpdate.isTile()
@@ -244,7 +241,6 @@ function ecsUpdate.isTile()
             if e.isTile.mudLevel < 0 then e.isTile.mudLevel = 0 end
         end
     end
-
 end
 
 return ecsUpdate

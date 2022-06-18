@@ -302,7 +302,4 @@ function ecsDraw.draw()
         end
     end
 end
-
-
-
 return ecsDraw
