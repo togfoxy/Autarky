@@ -1,0 +1,21 @@
+
+
+How to add a new occupation:
+
+Source an icon and store in IMAGES folder (64 x 64)
+
+add a job enum in enum.lua
+
+add an icon enum in enum.lua (same as job + 30)
+
+updates functions.loadImages() to include the new icon
+
+update love.keyreleased to include new occupation
+
+update draw.lua to include new keypress
+
+update constants.lua to include any new economy information
+
+review actionwork.lua for new occupation
+
+review ecsUpdate.lua for new occupation
