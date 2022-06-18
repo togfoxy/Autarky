@@ -175,6 +175,13 @@ function ecsUpdate.isPerson()
                         VILLAGE_WEALTH = VILLAGE_WEALTH - amount
                     end
                 end
+                if e.occupation.value == enum.jobSwordsman then
+                    local amount = SWORDSMAN_INCOME_PER_JOB * dt * TIME_SCALE
+                    if VILLAGE_WEALTH >= amount then
+                        e.isPerson.wealth = e.isPerson.wealth + amount
+                        VILLAGE_WEALTH = VILLAGE_WEALTH - amount
+                    end
+                end
             end
 
             -- do this last as it may nullify the entity

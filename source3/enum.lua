@@ -47,13 +47,24 @@ improvementWelfare = 9
 
 -- jobs/occupations
 -- NOTE: ensure these occupations align to the improvement type (which aligns to the image!)
+-- jobs that don't have a workplace start in the 200 series
 jobFarmer = 5
 jobWoodsman = 6
 jobCarpenter = 201      -- this is a service - not a primary producer
 jobHealer = 8           -- produces healing herbs
 jobWelfareOfficer = 9
 jobTaxCollector = 202
+jobSwordsman = 203
 
+-- occupation icons
+-- NOTE: ensure this lines up with the job + 30 for offset to avoid clashes
+iconsApple = 35
+iconsAxe = 36
+iconsHammer = 231
+iconsHealer = 38
+iconsCoin = 232
+iconsWelfare = 39
+iconsSword = 233
 
 -- stock types
 -- NOTE: ensure this lines up with the improvement type that sells this stock
@@ -66,14 +77,7 @@ stockWelfare = 9
 
 
 
--- occupation icons
--- NOTE: ensure this lines up with the job + 30 for offset to avoid clashes
-iconsApple = 35
-iconsAxe = 36
-iconsHammer = 231
-iconsHealer = 38
-iconsCoin = 232
-iconsWelfare = 39
+
 
 
 

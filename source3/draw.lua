@@ -150,6 +150,7 @@ local function drawInstructions()
         addDrawItem(HUDText, "h = healer", nil)
         addDrawItem(HUDText, "t = tax collector", nil)
         addDrawItem(HUDText, "w = welfare officer", nil)
+        addDrawItem(HUDText, "g = guard", nil)
     end
 
     addDrawItem(HUDText, "Change GST = < and >", nil)

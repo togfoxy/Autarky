@@ -101,13 +101,22 @@ function love.keyreleased( key, scancode )
 		end
 		VILLAGERS_SELECTED = 0
 	end
-
 	if key == "w" then
 		-- if VILLAGERS_SELECTED == 1 then	-- can only be one welfare officer
 			-- local numofwelfareofficers = fun.getJobCount(enum.jobWelfareOfficer)
 			for k,v in pairs(VILLAGERS) do
 				if v:has("isSelected") and (not v:has("occupation")) then
 					v:ensure("occupation", enum.jobWelfareOfficer, stockWelfare, false, true, false)	-- jobtype, stocktype, bolProducer, bolService, bolConverter)
+				end
+				v:remove("isSelected")
+			end
+		-- end
+		VILLAGERS_SELECTED = 0
+	end
+	if key == "g" then
+			for k,v in pairs(VILLAGERS) do
+				if v:has("isSelected") and (not v:has("occupation")) then
+					v:ensure("occupation", enum.jobSwordsman, nil, false, true, false)	-- jobtype, stocktype, bolProducer, bolService, bolConverter)
 				end
 				v:remove("isSelected")
 			end

@@ -50,6 +50,8 @@ function functions.loadImages()
     IMAGES[enum.iconsHealer] = love.graphics.newImage("assets/images/healericon64x64.png")
     IMAGES[enum.iconsCoin] = love.graphics.newImage("assets/images/coinicon64x64.png")
     IMAGES[enum.iconsWelfare] = love.graphics.newImage("assets/images/handshakeicon64x64.png")
+    IMAGES[enum.iconsSword] = love.graphics.newImage("assets/images/swordicon_64x64.png")
+
 
     IMAGES[enum.imagesEmoteSleeping] = love.graphics.newImage("assets/images/emote_sleeps.png")
     IMAGES[enum.imagesEmoteTalking] = love.graphics.newImage("assets/images/emote_talking.png")
