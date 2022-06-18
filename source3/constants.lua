@@ -79,11 +79,12 @@ function constants.load()
     HEALTH_GAIN_FROM_WOOD = 1.5                     -- how much a house gains from a piece of wood
     HEALTH_GAIN_PER_WOOD = 25                       -- this is maxhealth, not current health
 
-    WELFARE_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE
-
     TAXCOLLECTOR_INCOME_PER_JOB = 0.2     -- arbitrary. No such thing as a 'job'. Public servants don't pay tax so keep this lower than normal
 
+    WELFARE_PRODUCTION_RATE = FRUIT_PRODUCTION_RATE
     WELLFAREOFFICER_INCOME_PER_JOB = TAXCOLLECTOR_INCOME_PER_JOB + (TAXCOLLECTOR_INCOME_PER_JOB * GST_RATE)  -- arbitrary. No such thing as a 'job'. Public servants don't pay tax so keep this lower than normal
+
+    SWORDSMAN_INCOME_PER_JOB = WELLFAREOFFICER_INCOME_PER_JOB
 end
 
 

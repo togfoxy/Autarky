@@ -1,4 +1,4 @@
-GAME_VERSION = "0.15"
+GAME_VERSION = "0.16"
 
 inspect = require 'lib.inspect'
 -- https://github.com/kikito/inspect.lua
@@ -29,6 +29,8 @@ ft = require 'lib.foxtree'		-- foxtree
 cf = require 'lib.commonfunctions'
 fun = require 'functions'
 ecs = require 'ecsfunctions'
+ecsDraw = require 'ecsDraw'
+ecsUpdate = require 'ecsUpdate'
 enum = require 'enum'
 bt = require 'behaviortree'
 draw = require 'draw'
@@ -99,13 +101,22 @@ function love.keyreleased( key, scancode )
 		end
 		VILLAGERS_SELECTED = 0
 	end
-
 	if key == "w" then
 		-- if VILLAGERS_SELECTED == 1 then	-- can only be one welfare officer
 			-- local numofwelfareofficers = fun.getJobCount(enum.jobWelfareOfficer)
 			for k,v in pairs(VILLAGERS) do
 				if v:has("isSelected") and (not v:has("occupation")) then
 					v:ensure("occupation", enum.jobWelfareOfficer, stockWelfare, false, true, false)	-- jobtype, stocktype, bolProducer, bolService, bolConverter)
+				end
+				v:remove("isSelected")
+			end
+		-- end
+		VILLAGERS_SELECTED = 0
+	end
+	if key == "g" then
+			for k,v in pairs(VILLAGERS) do
+				if v:has("isSelected") and (not v:has("occupation")) then
+					v:ensure("occupation", enum.jobSwordsman, nil, false, true, false)	-- jobtype, stocktype, bolProducer, bolService, bolConverter)
 				end
 				v:remove("isSelected")
 			end
