@@ -1,4 +1,4 @@
-GAME_VERSION = "0.15"
+GAME_VERSION = "0.16"
 
 inspect = require 'lib.inspect'
 -- https://github.com/kikito/inspect.lua
@@ -29,6 +29,8 @@ ft = require 'lib.foxtree'		-- foxtree
 cf = require 'lib.commonfunctions'
 fun = require 'functions'
 ecs = require 'ecsfunctions'
+ecsDraw = require 'ecsDraw'
+ecsUpdate = require 'ecsUpdate'
 enum = require 'enum'
 bt = require 'behaviortree'
 draw = require 'draw'
