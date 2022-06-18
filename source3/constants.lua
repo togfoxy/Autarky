@@ -27,6 +27,7 @@ function constants.load()
 
     MAP = {}			-- a 2d table of tiles
     VILLAGERS = {}
+    MONSTERS = {}       -- initialise the table of monsters
     TREE = {}			-- a tree that holds all possible behaviours for a person
     STOCK_HISTORY = {}  -- tracks actual transaction prices for each commodity
     GAME_LOG = {}       -- a log on global events the player needs to see

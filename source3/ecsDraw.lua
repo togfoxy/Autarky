@@ -299,6 +299,17 @@ function ecsDraw.draw()
                     love.graphics.print(txt, drawx, drawy, 0, 1, 1, -15, 25)
                 end
             end
+
+            if e.isMonster then
+                print("Hi")
+                local drawwidth = PERSON_DRAW_WIDTH
+                local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
+
+                local sprite, quad
+                sprite = SPRITES[enum.spriteMonster1]
+                quad = QUADS[enum.spriteMonster1][5]
+                love.graphics.draw(sprite, quad, drawx, drawy, 0, 1, 1, 0, 0)
+            end
         end
     end
 end

@@ -82,6 +82,9 @@ function functions.loadImages()
     SPRITES[enum.spriteRandomTree] = love.graphics.newImage("assets/images/randomtrees_50x50.png")
     QUADS[enum.spriteRandomTree] = cf.fromImageToQuads(SPRITES[enum.spriteRandomTree], 50, 50)
 
+    SPRITES[enum.spriteMonster1] = love.graphics.newImage("assets/images/monster1_30x32.png")
+    QUADS[enum.spriteMonster1] = cf.fromImageToQuads(SPRITES[enum.spriteMonster1], 30, 32)
+
     -- farmer
     SPRITES[enum.spriteFarmerMan] = love.graphics.newImage("assets/images/Farmer Male Walk.png")
     QUADS[enum.spriteFarmerMan] = cf.fromImageToQuads(SPRITES[enum.spriteFarmerMan], 15, 32)
@@ -461,7 +464,7 @@ function functions.createActions(goal, agent)
             action = {}
             action.action = "idle"      -- idle is same as rest but idle means "nothing else to do" but rest was chosen from btree
             action.timeleft = love.math.random(5, 10)
-            action.log = "Idle"
+            action.log = "Guarding"
             table.insert(agent.isPerson.queue, action)
         else
             if agent.occupation.isProducer then

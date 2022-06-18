@@ -81,6 +81,8 @@ function ecsfunctions.init()
         table.insert(VILLAGERS, villager)
     end
 
+
+
 end
 
 return ecsfunctions

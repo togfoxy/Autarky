@@ -250,6 +250,10 @@ function draw.Animations()
     -- ANIMATION[enum.spriteRedWomanWaving]:draw(SPRITES[enum.spriteRedWomanWaving], 300, 300, 0, 1, 1, 0, 0)
     -- ANIMATION[enum.spriteRedWomanFlute]:draw(SPRITES[enum.spriteRedWomanFlute], 400, 400, 0, 1, 1, 0, 0)
 
+    -- local sprite = SPRITES[enum.spriteMonster1]
+    -- local quad = QUADS[enum.spriteMonster1][5]
+    -- love.graphics.draw(sprite, quad, 200, 200, 0, 1, 1, 0, 0)
+
 
 
 end
