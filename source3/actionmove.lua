@@ -58,20 +58,24 @@ local function applyMovement(e, targetx, targety, velocity, dt)
     if e.position.col > NUMBER_OF_COLS then e.position.col = NUMBER_OF_COLS end
 end
 
-function actionmove.move(e, currentaction, dt)
+function actionmove.move(e, currentaction, que, stamina, dt)
+    -- NOTE: this is called by persons and by monsters so the STAMINA parameter is used to keep this generic
     local destx = currentaction.x
     local desty = currentaction.y
+
+    assert(dt ~= nil)   -- I added a 4th param so this is to make sure this is now called correctly
+
     if e.position.x == destx and e.position.y == desty then
         -- capture the current position as the previous position
         e.position.previousx = e.position.x
         e.position.previousy = e.position.y
 
         -- arrived at destination
-        table.remove(e.isPerson.queue, 1)
+        table.remove(que, 1)
         fun.addLog(e, currentaction.log)
     else
         -- move towards destination
-        if e.isPerson.stamina > 0 then
+        if stamina > 0 then
             applyMovement(e, destx, desty, WALKING_SPEED, dt)       -- entity, x, y, speed, dt
         else
             applyMovement(e, destx, desty, WALKING_SPEED / 2, dt)       -- entity, x, y, speed, dt

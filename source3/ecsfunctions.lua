@@ -25,10 +25,11 @@ function ecsfunctions.init()
         end
     end
     ecsUpdate.isTile()
+    ecsUpdate.isMonster()
 
     -- add the systems to the world
     -- ## ensure all systems are added to the world
-    WORLD:addSystems(systemDraw, systemIsTile, systemIsTileUpdate, systemIsPerson)
+    WORLD:addSystems(systemDraw, systemIsTile, systemIsTileUpdate, systemIsPerson, systemIsMonsterUpdate)
 
     -- create entities
 

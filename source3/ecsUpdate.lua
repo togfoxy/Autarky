@@ -216,6 +216,26 @@ local function getNewGoal(villager)
     end
 end
 
+local function getMostStockedShop()
+    -- determines which shop/tile/workspace has the most stock
+    -- returns row/col
+    -- check for row = -1 meaning no stock found at all
+
+    local mostrow, mostcol
+    local moststock = -1
+
+    for col = 1, NUMBER_OF_COLS do
+        for row = 1, NUMBER_OF_ROWS do
+            if MAP[row][col].entity.isTile.stockLevel > moststock then
+                moststock = MAP[row][col].entity.isTile.stockLevel
+                mostrow = row
+                mostcol = col
+            end
+        end
+    end
+    return mostrow, mostcol
+end
+
 function ecsUpdate.isPerson()
 
     systemIsPerson = concord.system({
@@ -298,9 +318,6 @@ function ecsUpdate.isPerson()
                         end
                     end
                 end
-
-
-
             end
 
             -- process head of queue
@@ -316,7 +333,7 @@ function ecsUpdate.isPerson()
             end
 
             if currentaction.action == "move" then
-                actmove.move(e, currentaction, dt)
+                actmove.move(e, currentaction, e.isPerson.queue, e.isPerson.stamina, dt)
             end
 
             if currentaction.action == "work" then
@@ -462,6 +479,57 @@ function ecsUpdate.isTile()
             -- decrease mud so that grass grows
             e.isTile.mudLevel = cf.round(e.isTile.mudLevel - (dt / 3) * TIME_SCALE, 4)
             if e.isTile.mudLevel < 0 then e.isTile.mudLevel = 0 end
+        end
+    end
+end
+
+function ecsUpdate.isMonster()
+    systemIsMonsterUpdate = concord.system({
+        pool = {"isMonster"}
+    })
+    function systemIsMonsterUpdate:update(dt)
+        for _, e in ipairs(self.pool) do
+
+            local agentrow = e.position.row
+            local agentcol = e.position.col
+
+            if #e.isMonster.queue == 0 then
+                --! determine target
+                local targetrow, targetcol = getMostStockedShop()
+                if targetrow ~= nil then
+                    -- found a target row/col
+
+                    -- add move commands
+                    fun.addMoveAction(e.isMonster.queue, agentrow, agentcol, targetrow, targetcol)   -- will add as many 'move' actions as necessary
+
+
+
+                    --! add "steal" command
+                    --! add "flee" command
+
+                else
+                    -- no stock found on map
+
+
+                end
+
+            end
+
+            -- process head of queue
+            local currentaction = {}
+            currentaction = e.isMonster.queue[1]      -- a table
+
+            if currentaction ~= nil then
+                if currentaction.action == "move" then
+                    actmove.move(e, currentaction, e.isMonster.queue, 1000, dt)
+                end
+            end
+
+            if e.isMonster.health <= 0 then
+                --! killAgent(e.uid.value)      -- operates directly on VILLAGERS
+                --! e:destroy()                 -- destroys the entity from the world
+            end
+
         end
     end
 end

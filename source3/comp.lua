@@ -15,7 +15,6 @@ function comp.init()
         c.log = {}
     end)
 
-
     concord.component("isPerson", function(c)
         c.gender = love.math.random(2)
         c.health = 100
