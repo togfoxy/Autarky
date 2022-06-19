@@ -358,7 +358,6 @@ function ecsDraw.draw()
             end
 
             if e.isMonster then
-                print("Hi")
                 local drawwidth = PERSON_DRAW_WIDTH
                 local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
 
