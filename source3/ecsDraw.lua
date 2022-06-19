@@ -1,5 +1,62 @@
 ecsDraw = {}
 
+local function getImageNumberFromFacing(facing)
+    if facing == "N" then return 21 end
+    if facing == "NE" then return 26 end
+    if facing == "E" then return 31 end
+    if facing == "SE" then return 36 end
+    if facing == "S" then return 1 end
+    if facing == "SW" then return 6 end
+    if facing == "W" then return 11 end
+    if facing == "NW" then return 16 end
+    error("Unknown facing")
+end
+
+local function determineFacing(e)
+    local prevx = (e.position.previousx)
+    local prevy = (e.position.previousy)
+    local currentx = (e.position.x)
+    local currenty = (e.position.y)
+
+    if prevx == currentx and prevy == currenty then
+        -- not moving
+        return "S"
+    end
+    if prevx == currentx and prevy > currenty then
+        -- moving up
+        return "N"
+    end
+    if prevx == currentx and prevy < currenty then
+        -- moving down
+        return "S"
+    end
+    if prevx > currentx and prevy == currenty then
+        -- moving left
+        return "W"
+    end
+    if prevx < currentx and prevy == currenty then
+        -- moving right
+        return "E"
+    end
+    if prevx < currentx and prevy > currenty then
+        -- moving up and right
+        return "NE"
+    end
+    if prevx < currentx and prevy < currenty then
+        -- moving down and right
+        return "SE"
+    end
+    if prevx > currentx and prevy < currenty then
+        -- moving down and left
+        return "SW"
+    end
+    if prevx > currentx and prevy > currenty then
+        -- moving up and left
+        return "NW"
+    end
+    error("Entity has unknown facing")
+end
+
 function ecsDraw.draw()
 
     systemDraw = concord.system({
@@ -202,8 +259,8 @@ function ecsDraw.draw()
                 end
 
                 -- draw the villager
-                local facing = fun.determineFacing(e)      -- gets the cardinal facing of the entity. Is a string
-                local imagenum = fun.getImageNumberFromFacing(facing)
+                local facing = determineFacing(e)      -- gets the cardinal facing of the entity. Is a string
+                local imagenum = getImageNumberFromFacing(facing)
                 local imagenumoffset = cf.round(e.position.movementDelta / 0.5)
                 imagenum = imagenum + imagenumoffset
 

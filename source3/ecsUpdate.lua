@@ -1,33 +1,28 @@
 ecsUpdate = {}
 
-local function getClosestBuilding(buildingtype, requiredstocklevel, startrow, startcol)
-    -- returns the closest building of required type (row, col)
-    -- ensure the return value is checked for nil - meaning - building not found
-    local closestvalue = -1
-    local closestrow, closestcol
+local function killAgent(uniqueid)
+    local deadID
 
-    if startrow ~= nil and startcol ~= nil then
-        for col = 1, NUMBER_OF_COLS do
-            for row = 1, NUMBER_OF_ROWS do
-                if MAP[row][col].entity.isTile.improvementType == buildingtype and MAP[row][col].entity.isTile.stockLevel >= requiredstocklevel then
-                    local cmap = convertToCollisionMap(MAP)
-                    cmap[row][col] = TILEWALKABLE
-                    local _, dist = cf.findPath(cmap, TILEWALKABLE, startcol, startrow, col, row, false)
-                    if closestvalue < 0 or dist < closestvalue then
-                        closestvalue = dist
-                        closestrow = row
-                        closestcol = col
-                    end
-                end
-            end
+    -- remove any bubbles associated with this villager
+    for i = #DRAWQUEUE, 1, -1 do
+        if DRAWQUEUE[i].uid == uniqueid then
+            table.remove(DRAWQUEUE, i)
         end
-        if closestrow == nil then
-            -- print("Can't find building of type " .. buildingtype .. " with stocklevel of at least " .. requiredstocklevel)
-        end
-        return closestrow, closestcol
-    else
-        return nil, nil
     end
+
+    for k, v in ipairs(VILLAGERS) do
+        -- print(uniqueid, v.uid.value)
+        if v.uid.value == uniqueid then
+            print("Found dead guy. " .. k)
+            print("Time worked = " .. v.isPerson.timeWorking)
+            print("Time rested = " .. v.isPerson.timeResting)
+            deadID = k
+            break
+        end
+    end
+    assert(deadID ~= nil)
+    table.remove(VILLAGERS, deadID)     -- Note: need to kill entity from WORLD before removing from table
+    print("There are now " .. #VILLAGERS .. " villagers.")
 end
 
 local function getNewGoal(villager)
@@ -67,7 +62,7 @@ local function getNewGoal(villager)
     -- * Decison tree
     -- ***************
     if personIsHungry then
-        row, col = getClosestBuilding(enum.improvementFarm, 1, agentrow, agentcol)
+        row, col = fun.getClosestBuilding(enum.improvementFarm, 1, agentrow, agentcol)
         if row ~= nil then
             -- farm with food is found
             if personIsTired then
@@ -84,7 +79,7 @@ local function getNewGoal(villager)
                     else    -- not a farmer
                         local restdist = cf.GetDistance(agentrow, agentcol, WELLS[1].row, WELLS[1].col)   -- distance to farm
 
-                        row, col = getClosestBuilding(enum.improvementWelfare, agentrow, agentcol)  --! what if owns house?
+                        row, col = fun.getClosestBuilding(enum.improvementWelfare, agentrow, agentcol)  --! what if owns house?
                         local wfdist = 999
                         if row ~= nil then
                             wfdist = cf.GetDistance(agentrow, agentcol, row, col)   -- distance
@@ -99,7 +94,7 @@ local function getNewGoal(villager)
                             fun.createActions(enum.goalGetWelfare, villager)
 
                             local fruitdist = 999
-                            row, col = getClosestBuilding(enum.improvementFarm, 1, agentrow, agentcol)
+                            row, col = fun.getClosestBuilding(enum.improvementFarm, 1, agentrow, agentcol)
                             if row ~= nil then
                                 fruitdist = cf.GetDistance(agentrow, agentcol, row, col)   -- distance
                             end
@@ -134,7 +129,7 @@ local function getNewGoal(villager)
                         end
                     else    -- not a farmer
                         -- look for welfare office
-                        row, col = getClosestBuilding(enum.improvementWelfare, agentrow, agentcol)
+                        row, col = fun.getClosestBuilding(enum.improvementWelfare, agentrow, agentcol)
                         if row ~= nil then
                             -- found welfare
                             fun.createActions(enum.goalGetWelfare, villager)
@@ -172,7 +167,7 @@ local function getNewGoal(villager)
             if personisPoor then
                 if personisSick then
                     fun.createActions(enum.goalGetWelfare, villager)
-                    row, col = getClosestBuilding(enum.improvementHealer, 1, agentrow, agentcol)
+                    row, col = fun.getClosestBuilding(enum.improvementHealer, 1, agentrow, agentcol)
                     if row ~= nil and (villager.isPerson.wealth >= fun.getAvgSellPrice(enum.stockHealingHerbs)) then
                         fun.createActions(enum.goalHeal, villager)
                     else
@@ -193,7 +188,7 @@ local function getNewGoal(villager)
                 end
             else    -- not poor
                 if personisSick then
-                    row, col = getClosestBuilding(enum.improvementHealer, 1, agentrow, agentcol)
+                    row, col = fun.getClosestBuilding(enum.improvementHealer, 1, agentrow, agentcol)
                     if row ~= nil then
                         fun.createActions(enum.goalHeal, villager)
                     else
@@ -201,7 +196,7 @@ local function getNewGoal(villager)
                     end
                 else    -- not sick
                     if villager.isPerson.stockInv[enum.stockWood] <= 2 and housewood <= 2 and occupation > 0 then
-                        row, col = getClosestBuilding(enum.improvementWoodsman, 1, agentrow, agentcol)
+                        row, col = fun.getClosestBuilding(enum.improvementWoodsman, 1, agentrow, agentcol)
                         if row ~= nil then
                             fun.createActions(enum.goalBuyWood, villager)
                         else
@@ -450,7 +445,7 @@ function ecsUpdate.isPerson()
                     end
                 end
 
-                fun.killAgent(e.uid.value)  -- removes the agent from the VILLAGERS table
+                killAgent(e.uid.value)  -- removes the agent from the VILLAGERS table
                 e:destroy()                 -- destroys the entity from the world
             end
         end
