@@ -1206,10 +1206,6 @@ function functions.spawnMonster()
     :give("isMonster")
     table.insert(MONSTERS, monster)
     -- print("Monster spawned")
-
-    --! identify target
-    --! issue 'move' command
-
 end
 
 return functions
