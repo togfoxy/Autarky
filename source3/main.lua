@@ -24,6 +24,9 @@ lovelyToasts = require 'lib.lovelyToasts'
 anim8 = require 'lib.anim8'
 -- https://github.com/kikito/anim8
 
+profiler = require 'lib.profiler'
+-- https://github.com/charlesmallah/lua-profiler
+
 ft = require 'lib.foxtree'		-- foxtree
 
 cf = require 'lib.commonfunctions'
@@ -282,6 +285,9 @@ function love.load()
 end
 
 function love.draw()
+
+-- profiler.start()
+
     res.start()
 	cam:attach()
     WORLD:emit("draw")
@@ -290,11 +296,16 @@ function love.draw()
 	draw.HUD()
 	lovelyToasts.draw()
     res.stop()
+
+
+-- profiler.stop()
+-- profiler.report("profiler.log")
 end
 
 function love.update(dt)
 
-    WORLD:emit("update", dt)
+
+	WORLD:emit("update", dt)
 
 	NEW_VILLAGER_TIMER = NEW_VILLAGER_TIMER + dt
 	if NEW_VILLAGER_TIMER > NEW_VILLAGER_THRESHOLD then
@@ -337,16 +348,8 @@ function love.update(dt)
 
 	-- spawn monsters
 	if love.math.random(1,99999) == 1 then
-		local monster = concord.entity(WORLD)
-		:give("drawable")
-		:give("position")
-		:give("uid")
-		:give("isMonster")
-        table.insert(MONSTERS, monster)
-		print("Monster spawned")
+		fun.spawnMonster()
 	end
-
-
 
 	for i = #DRAWQUEUE, 1, -1 do
 		DRAWQUEUE[i].start = DRAWQUEUE[i].start - dt

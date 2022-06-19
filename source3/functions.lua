@@ -197,7 +197,6 @@ local function getBlankTile()
     -- ensure the result is checked for nil - meaning - a blank tile was not found
 
     local row, col
-
     local count = 0
 
     repeat
@@ -1139,6 +1138,74 @@ function functions.addGameLog(txt)
     table.insert(GAME_LOG, txt)
 end
 
+local function getBlankBorderTile()
 
+    local row, col
+    local count = 0
+
+    repeat
+        count = count + 1
+        local tilevalid = true
+        local side = love.math.random(1, 4)
+        -- get a row/col for that side
+        if side == 1 then -- top border
+            row = 1
+            col = love.math.random(1, NUMBER_OF_COLS)
+        elseif side == 2 then   -- right border
+            col = NUMBER_OF_COLS
+            row = love.math.random(1, NUMBER_OF_ROWS)
+        elseif side == 3 then   -- bottom border
+            row = NUMBER_OF_ROWS
+            col = love.math.random(1, NUMBER_OF_COLS)
+        elseif side == 4 then   -- left border
+            col = 1
+            row = love.math.random(1, NUMBER_OF_ROWS)
+        else
+            error()
+        end
+        if MAP[row][col].entity.isTile.improvementType ~= nil then
+            tilevalid = false
+        end
+
+        local cmap = convertToCollisionMap(MAP)
+        -- jumper uses x and y which is really col and row
+        local startx = WELLS[1].col
+        local starty = WELLS[1].row
+        local endx = col
+        local endy = row
+
+        local path = cf.findPath(cmap, 0, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
+        if path == nil then
+            tilevalid = false
+            if count == 10000 then
+                print("Can't find path to new tile. Trying to find a new tile.")
+            end
+        end
+    until tilevalid or count > 10000
+
+    if count > 10000 then
+        print("Can't find a blank tile for monster. Giving up after 1000 tries." .. count)
+        return nil, nil
+    else
+        return row, col
+    end
+end
+
+function functions.spawnMonster()
+    --! get an empty border tile
+    local row, col = getBlankBorderTile()
+    -- spawn monster
+    local monster = concord.entity(WORLD)
+    :give("drawable")
+    :give("position", row, col)
+    :give("uid")
+    :give("isMonster")
+    table.insert(MONSTERS, monster)
+    print("Monster spawned")
+
+    --! identify target
+    --! issue 'move' command
+
+end
 
 return functions
