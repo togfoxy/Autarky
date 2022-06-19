@@ -59,6 +59,8 @@ end
 
 function ecsDraw.draw()
 
+profiler.start()
+
     systemDraw = concord.system({
         pool = {"position", "drawable"}
     })
@@ -368,5 +370,9 @@ function ecsDraw.draw()
             end
         end
     end
+
+profiler.stop()
+profiler.report("profiler.log")
+
 end
 return ecsDraw

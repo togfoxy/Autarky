@@ -197,7 +197,6 @@ local function getBlankTile()
     -- ensure the result is checked for nil - meaning - a blank tile was not found
 
     local row, col
-
     local count = 0
 
     repeat
@@ -282,8 +281,10 @@ local function getClosestPerson(taxesOwed, startrow, startcol)
     return closestrow, closestcol
 end
 
-local function addMoveAction(queue, startrow, startcol, stoprow, stopcol)
+function functions.addMoveAction(queue, startrow, startcol, stoprow, stopcol)
     -- uses jumper to add as many "move" actions as necessary to get to the waypoint
+
+    assert(stoprow ~= nil, "Can't move to invalid destination")
 
     -- get path to destination
     local cmap = convertToCollisionMap(MAP)
@@ -416,7 +417,7 @@ function functions.createActions(goal, agent)
         end
 
         -- add a 'move' action
-        addMoveAction(queue, agentrow, agentcol, destrow, destcol)   -- will add as many 'move' actions as necessary
+        fun.addMoveAction(queue, agentrow, agentcol, destrow, destcol)   -- will add as many 'move' actions as necessary
 
         -- add an 'idle' action
         action = {}
@@ -456,7 +457,7 @@ function functions.createActions(goal, agent)
             else
                 error()
             end
-            addMoveAction(queue, agentrow, agentcol, rowtarget, coltarget)   -- will add as many 'move' actions as necessary
+            fun.addMoveAction(queue, agentrow, agentcol, rowtarget, coltarget)   -- will add as many 'move' actions as necessary
             action = {}
             action.action = "idle"      -- idle is same as rest but idle means "nothing else to do" but rest was chosen from btree
             action.timeleft = love.math.random(5, 10)
@@ -472,7 +473,7 @@ function functions.createActions(goal, agent)
                     workplacecol = agent.workplace.col
                     -- move to workplace
                     -- add a 'move' action
-                    addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+                    fun.addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
                     -- do work
                     local time1 = agent.isPerson.stamina * 0.4      --! make this more scientific by factoring stamina rate
                     local time2 = math.max(agent.isPerson.fullness, 0) * 0.4    -- fullness migh tbe a negative value
@@ -498,7 +499,7 @@ function functions.createActions(goal, agent)
                         local housemaxhealth = owner.residence.unbuiltMaxHealth
 
                         if (woodqty >= 1 and housemaxhealth < 100) or (househealth < housemaxhealth and owner.isPerson.wealth >= FRUIT_SELL_PRICE * 1.1) then
-                            addMoveAction(queue, agentrow, agentcol, destrow, destcol)   -- will add as many 'move' actions as necessary
+                            fun.addMoveAction(queue, agentrow, agentcol, destrow, destcol)   -- will add as many 'move' actions as necessary
 
                             -- work out how long to work
                             local worktime = woodqty * CARPENTER_BUILD_RATE   -- seconds
@@ -519,7 +520,7 @@ function functions.createActions(goal, agent)
                 if agent.occupation.value == enum.jobTaxCollector then
                     local destrow, destcol = getClosestPerson(1, agentrow, agentcol)
                     if destrow ~= nil then
-                        addMoveAction(queue, agentrow, agentcol, destrow, destcol)
+                        fun.addMoveAction(queue, agentrow, agentcol, destrow, destcol)
                         local action = {}
                         action.action = "work"
                         action.timeleft = 5
@@ -536,7 +537,7 @@ function functions.createActions(goal, agent)
                 if agent:has("workplace") then
                     workplacerow = agent.workplace.row
                     workplacecol = agent.workplace.col
-                    addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+                    fun.addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
 
                     local time1 = love.math.random(20, 45)
                     local time2 = math.max(agent.isPerson.fullness, 0) * 0.75   -- fullness migh tbe a negative value
@@ -560,7 +561,7 @@ function functions.createActions(goal, agent)
         end
         local shoprow, shopcol
         if ownsFruitshop then
-            addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+            fun.addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
             -- buy food
             action = {}
             action.action = "buy"
@@ -581,7 +582,7 @@ function functions.createActions(goal, agent)
                     newrow = cf.round((agentrow + shoprow) / 2)
                     newcol = cf.round((agentcol + shopcol) / 2)
                     -- move to half way
-                    addMoveAction(queue, agentrow, agentcol, newrow, newcol)   -- will add as many 'move' actions as necessary
+                    fun.addMoveAction(queue, agentrow, agentcol, newrow, newcol)   -- will add as many 'move' actions as necessary
                     action = {}
                     action.action = "goalBuyFruit"
                     action.stockType = enum.stockFruit
@@ -589,7 +590,7 @@ function functions.createActions(goal, agent)
                     action.log = "Looking for some fruit"
                     table.insert(queue, action)
                 else
-                    addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+                    fun.addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
                     -- buy food
                     action = {}
                     action.action = "buy"
@@ -615,7 +616,7 @@ function functions.createActions(goal, agent)
                 newrow = cf.round((agentrow + shoprow) / 2)
                 newcol = cf.round((agentcol + shopcol) / 2)
                 -- move to half way
-                addMoveAction(queue, agentrow, agentcol, newrow, newcol)   -- will add as many 'move' actions as necessary
+                fun.addMoveAction(queue, agentrow, agentcol, newrow, newcol)   -- will add as many 'move' actions as necessary
                 action = {}
                 action.action = "goalBuyWood"
                 action.stockType = enum.stockWood
@@ -624,7 +625,7 @@ function functions.createActions(goal, agent)
                 table.insert(queue, action)
 
             else
-                addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+                fun.addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
                 -- buy wood
                 action = {}
                 action.action = "buy"
@@ -649,7 +650,7 @@ function functions.createActions(goal, agent)
         end
 
         if ownsHealershop then
-            addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+            fun.addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
             action = {}
             action.action = "buy"
             action.stockType = enum.stockHealingHerbs
@@ -673,7 +674,7 @@ function functions.createActions(goal, agent)
                     newrow = cf.round((agentrow + shoprow) / 2)
                     newcol = cf.round((agentcol + shopcol) / 2)
                     -- move to half way
-                    addMoveAction(queue, agentrow, agentcol, newrow, newcol)   -- will add as many 'move' actions as necessary
+                    fun.addMoveAction(queue, agentrow, agentcol, newrow, newcol)   -- will add as many 'move' actions as necessary
                     action = {}
                     action.action = "goalBuyHerbs"
                     action.stockType = enum.stockHealingHerbs
@@ -681,7 +682,7 @@ function functions.createActions(goal, agent)
                     action.log = "Looking for some herbs"
                     table.insert(queue, action)
                 else
-                    addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+                    fun.addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
                     action = {}
                     action.action = "buy"
                     action.stockType = enum.stockHealingHerbs
@@ -715,7 +716,7 @@ function functions.createActions(goal, agent)
         local houserow = agent.residence.row
         local housecol = agent.residence.col
 
-        addMoveAction(queue, agentrow, agentcol, houserow, housecol)   -- will add as many 'move' actions as necessary
+        fun.addMoveAction(queue, agentrow, agentcol, houserow, housecol)   -- will add as many 'move' actions as necessary
         local time1 = love.math.random(10, 30)
         local time2 = math.max(agent.isPerson.fullness, 0) * 0.5    -- fullness migh tbe a negative value
         local action = {}
@@ -728,7 +729,7 @@ function functions.createActions(goal, agent)
         if fun.getJobCount(enum.jobWelfareOfficer) > 0 then
             shoprow, shopcol = fun.getClosestBuilding(enum.improvementWelfare, 1, agentrow, agentcol)
             if shoprow ~= nil then
-                addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
+                fun.addMoveAction(queue, agentrow, agentcol, shoprow, shopcol)   -- will add as many 'move' actions as necessary
                 action = {}
                 action.action = "buy"
                 action.stockType = enum.stockWelfare
@@ -750,7 +751,7 @@ function functions.createActions(goal, agent)
             workplacecol = agent.workplace.col
             -- move to workplace
             -- add a 'move' action
-            addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
+            fun.addMoveAction(queue, agentrow, agentcol, workplacerow, workplacecol)   -- will add as many 'move' actions as necessary
             -- do work
             local action = {}
             action.action = "work"
@@ -768,7 +769,9 @@ function functions.addLog(person, txtitem)
     assert(txtitem ~= nil)
     local logitem = {}
     logitem.text = txtitem
-    table.insert(person.isPerson.log, logitem)
+    if person.isPerson ~= nil then
+        table.insert(person.isPerson.log, logitem)
+    end
 end
 
 function functions.playAudio(audionumber, isMusic, isSound)
@@ -1139,6 +1142,74 @@ function functions.addGameLog(txt)
     table.insert(GAME_LOG, txt)
 end
 
+function functions.getBlankBorderTile()
 
+    local row, col
+    local count = 0
+
+    repeat
+        count = count + 1
+        local tilevalid = true
+        local side = love.math.random(1, 4)
+        -- get a row/col for that side
+        if side == 1 then -- top border
+            row = 1
+            col = love.math.random(1, NUMBER_OF_COLS)
+        elseif side == 2 then   -- right border
+            col = NUMBER_OF_COLS
+            row = love.math.random(1, NUMBER_OF_ROWS)
+        elseif side == 3 then   -- bottom border
+            row = NUMBER_OF_ROWS
+            col = love.math.random(1, NUMBER_OF_COLS)
+        elseif side == 4 then   -- left border
+            col = 1
+            row = love.math.random(1, NUMBER_OF_ROWS)
+        else
+            error()
+        end
+        if MAP[row][col].entity.isTile.improvementType ~= nil then
+            tilevalid = false
+        end
+
+        local cmap = convertToCollisionMap(MAP)
+        -- jumper uses x and y which is really col and row
+        local startx = WELLS[1].col
+        local starty = WELLS[1].row
+        local endx = col
+        local endy = row
+
+        local path = cf.findPath(cmap, 0, startx, starty, endx, endy, false)        -- startx, starty, endx, endy
+        if path == nil then
+            tilevalid = false
+            if count == 10000 then
+                print("Can't find path to new tile. Trying to find a new tile.")
+            end
+        end
+    until tilevalid or count > 10000
+
+    if count > 10000 then
+        print("Can't find a blank tile for monster. Giving up after 1000 tries." .. count)
+        return nil, nil
+    else
+        return row, col
+    end
+end
+
+function functions.spawnMonster()
+    --! get an empty border tile
+    local row, col = fun.getBlankBorderTile()
+    -- spawn monster
+    local monster = concord.entity(WORLD)
+    :give("drawable")
+    :give("position", row, col)
+    :give("uid")
+    :give("isMonster")
+    table.insert(MONSTERS, monster)
+    -- print("Monster spawned")
+
+    --! identify target
+    --! issue 'move' command
+
+end
 
 return functions
