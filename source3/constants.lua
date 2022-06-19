@@ -27,6 +27,7 @@ function constants.load()
 
     MAP = {}			-- a 2d table of tiles
     VILLAGERS = {}
+    MONSTERS = {}       -- initialise the table of monsters
     TREE = {}			-- a tree that holds all possible behaviours for a person
     STOCK_HISTORY = {}  -- tracks actual transaction prices for each commodity
     GAME_LOG = {}       -- a log on global events the player needs to see
@@ -52,7 +53,7 @@ function constants.load()
 
     WALKING_SPEED = 900
     TIME_SCALE = 0.05          --0.025
-    GST_RATE = 0.25             -- 10%
+    GST_RATE = 0.15             -- 10%
     INJURY_RATE = 20             -- higher numbers = more injuries
     STAMINA_USE_RATE = 10       -- low means less stamina is used
     STAMINA_RECOVERY_RATE = STAMINA_USE_RATE * 3

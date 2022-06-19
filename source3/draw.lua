@@ -8,6 +8,18 @@ local function getTaxesOwed()
     return taxesowed
 end
 
+local function getUnemployed()
+    local count = 0
+    for i = 1, #VILLAGERS do
+        if VILLAGERS[i]:has("occupation") then
+            -- dont' count
+        else
+            count = count + 1
+        end
+    end
+    return count
+end
+
 local function drawGraph()
 
     local dotsize = 3       -- radius
@@ -67,7 +79,7 @@ local function drawInstructions()
     addDrawItem(HUDText, "#Builders: ", fun.getJobCount(enum.jobCarpenter))
     addDrawItem(HUDText, "#Tax collectors: ", fun.getJobCount(enum.jobTaxCollector))
     addDrawItem(HUDText, "#Welfare officers: ", fun.getJobCount(enum.jobWelfareOfficer))
-    addDrawItem(HUDText, "#Unemployed: ", fun.getUnemployed())
+    addDrawItem(HUDText, "#Unemployed: ", getUnemployed())
     addDrawItem(HUDText, "---", nil)
 
     for k, v in pairs(VILLAGERS) do
@@ -249,6 +261,10 @@ function draw.Animations()
 
     -- ANIMATION[enum.spriteRedWomanWaving]:draw(SPRITES[enum.spriteRedWomanWaving], 300, 300, 0, 1, 1, 0, 0)
     -- ANIMATION[enum.spriteRedWomanFlute]:draw(SPRITES[enum.spriteRedWomanFlute], 400, 400, 0, 1, 1, 0, 0)
+
+    -- local sprite = SPRITES[enum.spriteMonster1]
+    -- local quad = QUADS[enum.spriteMonster1][5]
+    -- love.graphics.draw(sprite, quad, 200, 200, 0, 1, 1, 0, 0)
 
 
 

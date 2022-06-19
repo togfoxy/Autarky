@@ -103,7 +103,6 @@ function love.keyreleased( key, scancode )
 	end
 	if key == "w" then
 		-- if VILLAGERS_SELECTED == 1 then	-- can only be one welfare officer
-			-- local numofwelfareofficers = fun.getJobCount(enum.jobWelfareOfficer)
 			for k,v in pairs(VILLAGERS) do
 				if v:has("isSelected") and (not v:has("occupation")) then
 					v:ensure("occupation", enum.jobWelfareOfficer, stockWelfare, false, true, false)	-- jobtype, stocktype, bolProducer, bolService, bolConverter)
@@ -336,6 +335,19 @@ function love.update(dt)
 		end
 	end
 
+	-- spawn monsters
+	if love.math.random(1,99999) == 1 then
+		local monster = concord.entity(WORLD)
+		:give("drawable")
+		:give("position")
+		:give("uid")
+		:give("isMonster")
+        table.insert(MONSTERS, monster)
+		print("Monster spawned")
+	end
+
+
+
 	for i = #DRAWQUEUE, 1, -1 do
 		DRAWQUEUE[i].start = DRAWQUEUE[i].start - dt
 		DRAWQUEUE[i].stop = DRAWQUEUE[i].stop - dt
@@ -347,7 +359,7 @@ function love.update(dt)
 		end
 	end
 
-	ANIMATION[enum.spriteRedWomanWaving]:update(dt)
+	ANIMATION[enum.spriteRedWomanWaving]:update(dt)		--! will need to be a local function when it gets long enough
 	ANIMATION[enum.spriteRedWomanFlute]:update(dt)
 
 	fun.PlayAmbientMusic()

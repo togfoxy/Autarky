@@ -9,6 +9,13 @@ function comp.init()
 
     concord.component("isSelected") -- clicked by the mouse
 
+    concord.component("isMonster", function(c)
+        c.health = 100
+        c.queue = {}
+        c.log = {}
+    end)
+
+
     concord.component("isPerson", function(c)
         c.gender = love.math.random(2)
         c.health = 100

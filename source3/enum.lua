@@ -28,6 +28,7 @@ spriteFarmerMan = 105
 spriteRandomTree = 106
 spriteRedWomanWaving = 107
 spriteRedWomanFlute = 108
+spriteMonster1 = 200
 
 
 
@@ -74,11 +75,6 @@ stockWood = 6
 stockHouse = 7
 stockHealingHerbs = 8
 stockWelfare = 9
-
-
-
-
-
 
 
 -- goals/activities/queue items/actions
