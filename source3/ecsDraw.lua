@@ -308,7 +308,7 @@ function ecsDraw.draw()
                 local sprite, quad
                 sprite = SPRITES[enum.spriteMonster1]
                 quad = QUADS[enum.spriteMonster1][5]
-                love.graphics.draw(sprite, quad, drawx, drawy, 0, 1, 1, 0, 0)
+                love.graphics.draw(sprite, quad, drawx, drawy, 0, 1, 1, 25, 20)
             end
         end
     end
