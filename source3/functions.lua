@@ -284,6 +284,8 @@ end
 function functions.addMoveAction(queue, startrow, startcol, stoprow, stopcol)
     -- uses jumper to add as many "move" actions as necessary to get to the waypoint
 
+    assert(stoprow ~= nil, "Can't move to invalid destination")
+
     -- get path to destination
     local cmap = convertToCollisionMap(MAP)
 
@@ -1140,7 +1142,7 @@ function functions.addGameLog(txt)
     table.insert(GAME_LOG, txt)
 end
 
-local function getBlankBorderTile()
+function functions.getBlankBorderTile()
 
     local row, col
     local count = 0
@@ -1195,7 +1197,7 @@ end
 
 function functions.spawnMonster()
     --! get an empty border tile
-    local row, col = getBlankBorderTile()
+    local row, col = fun.getBlankBorderTile()
     -- spawn monster
     local monster = concord.entity(WORLD)
     :give("drawable")
@@ -1203,7 +1205,7 @@ function functions.spawnMonster()
     :give("uid")
     :give("isMonster")
     table.insert(MONSTERS, monster)
-    print("Monster spawned")
+    -- print("Monster spawned")
 
     --! identify target
     --! issue 'move' command

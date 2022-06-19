@@ -1,6 +1,9 @@
 ecsUpdate = {}
 
-local function killAgent(uniqueid)
+local function killAgent(uniqueid, array)
+    -- remvoves uniqueid from array
+    -- can be used on VILLAGERS and MONSTERS
+
     local deadID
 
     -- remove any bubbles associated with this villager
@@ -10,19 +13,19 @@ local function killAgent(uniqueid)
         end
     end
 
-    for k, v in ipairs(VILLAGERS) do
+    for k, v in ipairs(array) do
         -- print(uniqueid, v.uid.value)
         if v.uid.value == uniqueid then
-            print("Found dead guy. " .. k)
-            print("Time worked = " .. v.isPerson.timeWorking)
-            print("Time rested = " .. v.isPerson.timeResting)
+            -- print("Found dead guy. " .. k)
+            -- print("Time worked = " .. v.isPerson.timeWorking)
+            -- print("Time rested = " .. v.isPerson.timeResting)
             deadID = k
             break
         end
     end
     assert(deadID ~= nil)
-    table.remove(VILLAGERS, deadID)     -- Note: need to kill entity from WORLD before removing from table
-    print("There are now " .. #VILLAGERS .. " villagers.")
+    table.remove(array, deadID)     -- Note: need to kill entity from WORLD before removing from table
+    print("There are now " .. #array .. " entities.")
 end
 
 local function getNewGoal(villager)
@@ -222,7 +225,7 @@ local function getMostStockedShop()
     -- check for row = -1 meaning no stock found at all
 
     local mostrow, mostcol
-    local moststock = -1
+    local moststock = 0
 
     for col = 1, NUMBER_OF_COLS do
         for row = 1, NUMBER_OF_ROWS do
@@ -462,7 +465,7 @@ function ecsUpdate.isPerson()
                     end
                 end
 
-                killAgent(e.uid.value)  -- removes the agent from the VILLAGERS table
+                killAgent(e.uid.value, VILLAGERS)  -- removes the agent from the VILLAGERS table
                 e:destroy()                 -- destroys the entity from the world
             end
         end
@@ -496,23 +499,23 @@ function ecsUpdate.isMonster()
             if #e.isMonster.queue == 0 then
                 --! determine target
                 local targetrow, targetcol = getMostStockedShop()
+print(targetrow, targetcol)
                 if targetrow ~= nil then
                     -- found a target row/col
 
                     -- add move commands
                     fun.addMoveAction(e.isMonster.queue, agentrow, agentcol, targetrow, targetcol)   -- will add as many 'move' actions as necessary
 
-
-
                     --! add "steal" command
-                    --! add "flee" command
-
+                    action = {}
+                    action.action = "goalSteal"
+                    action.log = "Stealing!"
+                    table.insert(e.isMonster.queue, action)
                 else
-                    -- no stock found on map
-
-
+                    -- no stock found on map. Just leave.
+                    e.isMonster.health = -1         -- kill it
+                    table.remove(e.isMonster.queue, 1)
                 end
-
             end
 
             -- process head of queue
@@ -523,11 +526,32 @@ function ecsUpdate.isMonster()
                 if currentaction.action == "move" then
                     actmove.move(e, currentaction, e.isMonster.queue, 1000, dt)
                 end
+
+                if currentaction.action == "goalSteal" then
+                    local stolenamt = MAP[agentrow][agentcol].entity.isTile.stockLevel
+                    print("Monster stole " .. stolenamt .. " units!")
+                    MAP[agentrow][agentcol].entity.isTile.stockLevel = 0
+                    table.remove(e.isMonster.queue, 1)
+
+                    local exitrow, exitcol = fun.getBlankBorderTile()
+                    fun.addMoveAction(e.isMonster.queue, agentrow, agentcol, exitrow, exitcol)   -- will add as many 'move' actions as necessary
+
+                    action = {}
+                    action.action = "die"
+                    action.log = "Fleeing"
+                    table.insert(e.isMonster.queue, action)
+                end
+
+                if currentaction.action == "die" then
+                    e.isMonster.health = -1         -- kill it
+                    table.remove(e.isMonster.queue, 1)
+                end
             end
 
             if e.isMonster.health <= 0 then
-                --! killAgent(e.uid.value)      -- operates directly on VILLAGERS
-                --! e:destroy()                 -- destroys the entity from the world
+                killAgent(e.uid.value, MONSTERS)      -- operates directly on VILLAGERS
+                e:destroy()                 -- destroys the entity from the world
+                print("ack!")
             end
 
         end
