@@ -183,7 +183,7 @@ local function getNewGoal(villager)
                         -- if sick and poor, break the cycle by working if possible - even if sick
                         if occupation > 0 then
                             local action = {}
-                            action.action = "goalWork"      -- 
+                            action.action = "goalWork"      --
                             action.timeleft = love.math.random(5, 10)       --! not sure this is the right timer
                             action.log = "Working"
                             table.insert(villager.isPerson.queue, action)
@@ -389,7 +389,7 @@ function ecsUpdate.isPerson()
             local col = e.position.col
 
             -- add mud
-            if MAP[row][col].entity.isTile.improvementType == nil then
+            if MAP[row][col].entity.isTile.improvementType == nil or MAP[row][col].entity.isTile.improvementType == enum.improvementWell then
                 MAP[row][col].entity.isTile.mudLevel = MAP[row][col].entity.isTile.mudLevel + (dt * 15 * TIME_SCALE)       --! make constants
             end
             if MAP[row][col].entity.isTile.mudLevel > 255 then MAP[row][col].entity.isTile.mudLevel = 255 end
