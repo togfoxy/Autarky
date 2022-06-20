@@ -2,6 +2,7 @@ constants = {}
 
 function constants.load()
 
+    DEBUG = false
     NUMBER_OF_VILLAGERS = 7
     VILLAGE_WEALTH = 0
     NEW_VILLAGER_THRESHOLD = 150       -- seconds it takes for a new villager
@@ -38,7 +39,6 @@ function constants.load()
 
     NUMBER_OF_STOCK_TYPES = 9   --## must equal the highest number (or more). It is NOT a count/sequence!!
 
-    DEBUG = false
     NEW_VILLAGER_TIMER = 0
     PRICE_UPDATE_TIMER = 0
     VILLAGERS_SELECTED = 0          -- a count of selected villagers

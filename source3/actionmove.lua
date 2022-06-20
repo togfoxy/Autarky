@@ -4,11 +4,7 @@ local function applyMovement(e, targetx, targety, velocity, dt)
     -- assumes an entity has a position and a target.
     -- updates the x,y for the entity (e)
 
-    -- print("Target is " .. targetx, targety)
-
     local distancemovedthisstep = velocity * dt * TIME_SCALE
-    -- print(distancemovedthisstep, velocity, velocity * dt)
-    --if e.isPerson.stamina < 1 then print("Hi") end
 
     -- map row/col to x/y
     local currentx = (e.position.x)
@@ -27,23 +23,15 @@ local function applyMovement(e, targetx, targety, velocity, dt)
     local xvector = targetx - currentx  -- tiles
     local yvector = targety - currenty  -- tiles
 
-    -- print(distancemovedthisstep, currentx,currenty,targetx,targety,xvector,yvector)
-
     local xscale = math.abs(xvector / distancemovedthisstep)
     local yscale = math.abs(yvector / distancemovedthisstep)
     local scale = math.max(xscale, yscale)
-
-    --print(cf.round(scale), cf.round(xscale),cf.round(yscale))
 
     if scale > 1 then
         xvector = xvector / scale
         yvector = yvector / scale
     end
 
-    --print(xvector, yvector)
-
-    -- currentx = cf.round(currentx + xvector, 0)
-    -- currenty = cf.round(currenty + yvector, 0)
     currentx = (currentx + xvector)
     currenty = (currenty + yvector)
 

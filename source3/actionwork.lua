@@ -3,6 +3,11 @@ actionwork = {}
 
 function actionwork.work(e, currentaction, dt)
 
+    -- local row = e.position.row
+    -- local col = e.position.col
+    -- local owner = MAP[row][col].entity.isTile.tileOwner
+    -- print(owner)
+
     currentaction.timeleft = currentaction.timeleft - dt
     e.isPerson.timeWorking = e.isPerson.timeWorking + dt
 
@@ -55,6 +60,11 @@ function actionwork.work(e, currentaction, dt)
 
         stockgained = cf.round(stockgained, 4)
         MAP[row][col].entity.isTile.stockLevel = MAP[row][col].entity.isTile.stockLevel + stockgained
+        -- print(row, col, e.workplace.row, e.workplace.col)
+
+        -- check if at workplace
+        assert(row == e.workplace.row, "Current row is " .. row .. " but workplace row is " .. e.workplace.row .. " so not sure how can work on this tile.")
+
     end
 
     if e.occupation.value == enum.jobCarpenter then
