@@ -78,6 +78,7 @@ local function getNewGoal(villager)
                         else
                             -- work and create fruit for self
                             fun.createActions(enum.goalWork, villager)
+                            print("alpha")
                         end
                     else    -- not a farmer
                         local restdist = cf.GetDistance(agentrow, agentcol, WELLS[1].row, WELLS[1].col)   -- distance to farm
@@ -114,7 +115,7 @@ local function getNewGoal(villager)
                     local farmdist = cf.GetDistance(agentrow, agentcol, row, col)   -- distance to farm
                     if farmdist >= 5 then
                         fun.createActions(enum.goalRest, villager)
-                        fun.createActions(enum.goalEatFruit, villager)
+                        fun.createActions(enum.goalEatFruit, villager)      --! should this be "enum.goalEatFruit"  ??!!
                     else
                         fun.createActions(enum.goalEatFruit, villager)
                     end
@@ -129,6 +130,7 @@ local function getNewGoal(villager)
                         else
                             -- work and create fruit for self
                             fun.createActions(enum.goalWork, villager)
+                            print("beta")
                         end
                     else    -- not a farmer
                         -- look for welfare office
@@ -141,6 +143,7 @@ local function getNewGoal(villager)
                             -- go to work and try to make money
                             if occupation > 0 then
                                 fun.createActions(enum.goalWork, villager)
+                                print("charlie")
                             else
                                 -- out of options
                                 goal = ft.DetermineAction(TREE, villager)
@@ -175,15 +178,21 @@ local function getNewGoal(villager)
                         fun.createActions(enum.goalHeal, villager)
                     else
                         goal = ft.DetermineAction(TREE, villager)
+                        print("Echo goal is " .. goal)
                         fun.createActions(goal, villager)
                         -- if sick and poor, break the cycle by working if possible - even if sick
                         if occupation > 0 then
-                            fun.createActions(enum.goalWork, villager)
+                            local action = {}
+                            action.action = "goalWork"      -- 
+                            action.timeleft = love.math.random(5, 10)       --! not sure this is the right timer
+                            action.log = "Working"
+                            table.insert(villager.isPerson.queue, action)
                         end
                     end
                 else    -- not sick
                     if occupation > 0 and workstock <= 4 then
                         fun.createActions(enum.goalWork, villager)
+                        print("foxtrot")
                     else    -- no occupation
                         goal = ft.DetermineAction(TREE, villager)
                         fun.createActions(goal, villager)
@@ -204,6 +213,7 @@ local function getNewGoal(villager)
                             fun.createActions(enum.goalBuyWood, villager)
                         else
                             fun.createActions(enum.goalWork, villager)
+                            print("golf")
                         end
                     else    -- has wood
                         if villager.isPerson.stockInv[enum.stockWood] > 0 then
@@ -259,7 +269,7 @@ function ecsUpdate.isPerson()
             -- add 'idle' action if queue is still empty
             if #e.isPerson.queue < 1 then
                 -- add an 'idle' action
-                action = {}
+                local action = {}
                 action.action = "idle"      -- idle is same as rest but idle means "nothing else to do" but rest was chosen from btree
                 action.timeleft = love.math.random(5, 10)
                 action.log = "Idle"
@@ -354,6 +364,11 @@ function ecsUpdate.isPerson()
 
             if currentaction.action == "goalBuyFruit" then
                 fun.createActions(enum.goalEatFruit, e)
+                table.remove(e.isPerson.queue, 1)
+            end
+
+            if currentaction.action == "goalWork" then
+                fun.createActions(enum.goalWork, e)
                 table.remove(e.isPerson.queue, 1)
             end
 
@@ -499,7 +514,6 @@ function ecsUpdate.isMonster()
             if #e.isMonster.queue == 0 then
                 --! determine target
                 local targetrow, targetcol = getMostStockedShop()
-print(targetrow, targetcol)
                 if targetrow ~= nil then
                     -- found a target row/col
 
@@ -507,7 +521,7 @@ print(targetrow, targetcol)
                     fun.addMoveAction(e.isMonster.queue, agentrow, agentcol, targetrow, targetcol)   -- will add as many 'move' actions as necessary
 
                     --! add "steal" command
-                    action = {}
+                    local action = {}
                     action.action = "goalSteal"
                     action.log = "Stealing!"
                     table.insert(e.isMonster.queue, action)
@@ -536,7 +550,7 @@ print(targetrow, targetcol)
                     local exitrow, exitcol = fun.getBlankBorderTile()
                     fun.addMoveAction(e.isMonster.queue, agentrow, agentcol, exitrow, exitcol)   -- will add as many 'move' actions as necessary
 
-                    action = {}
+                    local action = {}
                     action.action = "die"
                     action.log = "Fleeing"
                     table.insert(e.isMonster.queue, action)
