@@ -94,7 +94,6 @@ profiler.start()
                 love.graphics.draw(IMAGES[enum.imagesMud], drawx, drawy, 0, drawscalex, drawscaley, offsetx, offsety)
 
                 -- draw the random decoration - if there is one
-                -- if MAP[row][col].decoration ~= nil then
                 if e.isTile.decorationType ~= nil then
                     local imagenum = e.isTile.decorationType
                     local sprite = SPRITES[enum.spriteRandomTree]
@@ -147,7 +146,7 @@ profiler.start()
                 local imptype
                 if MAP[row][col].entity.isTile.improvementType ~= nil then imptype = e.isTile.improvementType end
 
-                -- draw the improvement
+                -- draw the improvement over the top of the mud
                 local sprite, quad
                 if imptype ~= nil then
                     local imagenumber = imptype
