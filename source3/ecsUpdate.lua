@@ -338,7 +338,10 @@ function ecsUpdate.isPerson()
 
             -- if e:has("occupation") then
             --     if e.occupation.value == enum.jobSwordsman then
-            --         print(e.isPerson.queue[1].action)
+            --         for i = 1, #e.isPerson.queue do
+            --             print(e.isPerson.queue[i].action)
+            --         end
+            --         print("###########")
             --     end
             -- end
 
@@ -393,9 +396,9 @@ function ecsUpdate.isPerson()
 
             if currentaction.action == "chasemonster" then
                 -- only applies to guards
-                print("prepping to chase monster")
                 fun.createActions(enum.goalChaseMonster, e)
                 table.remove(e.isPerson.queue, 1)
+
             end
 
             -- ******************* --
@@ -448,6 +451,24 @@ function ecsUpdate.isPerson()
                         e.isPerson.wealth = e.isPerson.wealth + amount
                         VILLAGE_WEALTH = VILLAGE_WEALTH - amount
                     end
+                    -- attack monsters
+                    for k, m in pairs(MONSTERS) do
+                        if row == m.position.row and col == m.position.col then
+                            m.isMonster.health = 0
+                            print("Attack!!")
+                        end
+                    end
+                    if #MONSTERS > 0 then
+                        --! this is a hack!!
+                        local action = {}
+                        action.action = "chasemonster"
+                        action.stockType = nil
+                        action.purchaseAmount = nil
+                        action.timeleft = 0
+                        action.log = "Chased monster"
+                        table.insert(e.isPerson.queue, action)
+                    end
+
                 end
             end
 
@@ -528,8 +549,10 @@ function ecsUpdate.isMonster()
             local agentcol = e.position.col
 
             if #e.isMonster.queue == 0 then
-                --! determine target
+                -- determine target
                 local targetrow, targetcol = getMostStockedShop()
+                e.isMonster.targetrow = targetrow
+                e.isMonster.targetcol = targetcol
                 if targetrow ~= nil then
                     -- found a target row/col
 
@@ -562,6 +585,8 @@ function ecsUpdate.isMonster()
                     print("Monster stole " .. stolenamt .. " units!")
                     MAP[agentrow][agentcol].entity.isTile.stockLevel = 0
                     table.remove(e.isMonster.queue, 1)
+                    e.isMonster.targetrow = 0
+                    e.isMonster.targetcol = 0
 
                     local exitrow, exitcol = fun.getBlankBorderTile()
                     fun.addMoveAction(e.isMonster.queue, agentrow, agentcol, exitrow, exitcol)   -- will add as many 'move' actions as necessary

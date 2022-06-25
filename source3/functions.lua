@@ -382,34 +382,37 @@ local function assignWorkplace(agent)
     print("Assigning workplace to tile " .. workplacerow .. ", " .. workplacecol)
 end
 
-local function moveToMonster(e, monsterrow, monstercol)
+local function moveToMonster(e, monster)
 
     -- determine new location to move to
     local guardrow = e.position.row
     local guardcol = e.position.col
+    local monsterrow = monster.position.row
+    local monstercol = monster.position.col
+    local targetrow = monster.isMonster.targetrow
+    local targetcol = monster.isMonster.targetcol
+
+    print("Monster is heading to " .. targetrow, targetcol)
 
     assert(monstercol ~= nil)
     assert(monsterrow ~= nil)
     assert(guardrow ~= nil)
     assert(guardcol ~= nil)
 
-    -- take the row/col difference, divide by 2, then add that to current position
-    newrow = cf.round(((monsterrow - guardrow) / 2) + guardrow)
-    newcol = cf.round(((monstercol - guardcol) / 2) + guardcol)
+    local newrow = targetrow
+    local newcol = targetcol
 
-print(newrow,newcol)
-
-    -- add move location
-    fun.addMoveAction(e.queue, guardrow, guardcol, newrow, newcol)   -- will add as many 'move' actions as necessary
-    print("set waypoint to monster. Guard is in tile " .. guardrow, guardcol .. " and monster is in " .. monsterrow, monstercol .. " so moving to " .. newrow, newcol)
-
-    -- add "chase action"
-    local action = {}
-    action.action = "chasemonster"
-    action.stockType = nil
-    action.purchaseAmount = nil
-    action.log = "Chased monster"
-    table.insert(e.queue, action)
+    if newrow > 0 and newcol > 0 then
+        -- add move location
+        fun.addMoveAction(e.isPerson.queue, guardrow, guardcol, newrow, newcol)   -- will add as many 'move' actions as necessary
+        print("Guard is in tile " .. guardrow, guardcol .. " and monster is in " .. monsterrow, monstercol .. " so moving to " .. newrow, newcol)
+    else
+        -- monster has no target - so move towards the monster (and not the monsters target)
+        -- take the row/col difference, divide by 2, then add that to current position
+        newrow = cf.round(((monsterrow - guardrow) / 3) + guardrow)
+        newcol = cf.round(((monstercol - guardcol) / 3) + guardcol)
+        fun.addMoveAction(e.isPerson.queue, guardrow, guardcol, newrow, newcol)   -- will add as many 'move' actions as necessary
+    end
 end
 
 function functions.createActions(goal, agent)
@@ -417,7 +420,6 @@ function functions.createActions(goal, agent)
     -- returns a table of actions
 
     --! the 'goal' parameter is redundant as it is already in agent.isPerson.queue
-
     local queue = agent.isPerson.queue
     local agentrow = agent.position.row
     local agentcol = agent.position.col
@@ -791,12 +793,25 @@ function functions.createActions(goal, agent)
     if goal == enum.goalChaseMonster then
         -- determine which monster
         local numofmonsters = #MONSTERS
-            if numofmonsters > 0 then
-            local rndnum = love.math.random(1, numofmonsters)
+
+        queue = {}       -- there is only one task - chase the monster
+
+        if numofmonsters > 0 then
+            local rndnum = love.math.random(1, numofmonsters)       -- won't work if multiple monsters - agent will just run around crazy
             local monsterrow = MONSTERS[rndnum].position.row
             local monstercol = MONSTERS[rndnum].position.col
+            moveToMonster(agent, MONSTERS[rndnum])
 
-            moveToMonster(agent, monsterrow, monstercol)
+            local action = {}
+            action.action = "chasemonster"
+            action.stockType = nil
+            action.purchaseAmount = nil
+            action.timeleft = 0
+            action.log = "Chased monster"
+            table.insert(queue, action)
+            print(inspect(queue))
+        else
+
         end
     end
 
