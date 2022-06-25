@@ -336,6 +336,12 @@ function ecsUpdate.isPerson()
                 end
             end
 
+            -- if e:has("occupation") then
+            --     if e.occupation.value == enum.jobSwordsman then
+            --         print(e.isPerson.queue[1].action)
+            --     end
+            -- end
+
             -- process head of queue
             local currentaction = {}
             currentaction = e.isPerson.queue[1]      -- a table
@@ -382,6 +388,13 @@ function ecsUpdate.isPerson()
 
             if currentaction.action == "goalBuyHerbs" then
                 fun.createActions(enum.goalHeal, e)
+                table.remove(e.isPerson.queue, 1)
+            end
+
+            if currentaction.action == "chasemonster" then
+                -- only applies to guards
+                print("prepping to chase monster")
+                fun.createActions(enum.goalChaseMonster, e)
                 table.remove(e.isPerson.queue, 1)
             end
 
@@ -568,7 +581,7 @@ function ecsUpdate.isMonster()
             if e.isMonster.health <= 0 then
                 killAgent(e.uid.value, MONSTERS)      -- operates directly on VILLAGERS
                 e:destroy()                 -- destroys the entity from the world
-                print("ack!")
+                print("ack! Monster dead. Either had no target or left the map")
             end
 
         end
