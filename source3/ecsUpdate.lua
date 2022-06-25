@@ -216,7 +216,7 @@ local function getNewGoal(villager)
                             fun.createActions(enum.goalBuyWood, villager)
                         else
                             fun.createActions(enum.goalWork, villager)
-                            print("golf")
+                            print("golf - try to work")
                         end
                     else    -- has wood
                         if villager.isPerson.stockInv[enum.stockWood] > 0 then
