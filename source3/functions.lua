@@ -716,8 +716,6 @@ function functions.createActions(goal, agent)
                 MAP[houserow][housecol].entity.isTile.stockLevel = 0
                 MAP[houserow][housecol].entity.isTile.tileOwner = agent
                 MAP[houserow][housecol].entity.isTile.decorationType = nil          -- clear tree or other decoration
-
-                -- print("House established on tile " .. houserow, housecol)
             end
         end
 
@@ -726,7 +724,7 @@ function functions.createActions(goal, agent)
 
         fun.addMoveAction(queue, agentrow, agentcol, houserow, housecol)   -- will add as many 'move' actions as necessary
         local time1 = love.math.random(10, 30)
-        local time2 = math.max(agent.isPerson.fullness, 0) * 0.5    -- fullness migh tbe a negative value
+        local time2 = math.max(agent.isPerson.fullness, 0) * 0.5    -- fullness might be a negative value
         local action = {}
         action.action = "stockhouse"
         action.timeleft = math.min(time1, time2)

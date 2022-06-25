@@ -95,8 +95,11 @@ function actionwork.work(e, currentaction, dt)
             e.isPerson.taxesOwed = e.isPerson.taxesOwed + taxamount
             VILLAGE_WEALTH = VILLAGE_WEALTH + taxamount
             owner.isPerson.wealth = owner.isPerson.wealth - wage          -- is okay if goes negative
-            if (owner.isPerson.wealth <= FRUIT_SELL_PRICE * 1.1) or (owner.residence.health >= owner.residence.unbuiltMaxHealth) then
-                table.remove(e.isPerson.queue, 1)   -- stop the job when home owner runs low on money
+
+            -- continue to build if the owner has enough money or the buildier owns the house or the house is fully constructed
+            if ((owner.isPerson.wealth <= FRUIT_SELL_PRICE * 1.1) and e ~= owner)
+                or (owner.residence.health >= owner.residence.unbuiltMaxHealth) then
+                    table.remove(e.isPerson.queue, 1)   -- stop the job when home owner runs low on money
             end
         else
             -- nothing to repair

@@ -191,8 +191,11 @@ local function getNewGoal(villager)
                     end
                 else    -- not sick
                     if occupation > 0 and workstock <= 4 then
-                        fun.createActions(enum.goalWork, villager)
-                        print("foxtrot")
+                        -- NOTE: the removed lines was causing an endless loop
+                        -- fun.createActions(enum.goalWork, villager)
+                        -- print("foxtrot")
+                        goal = ft.DetermineAction(TREE, villager)
+                        fun.createActions(goal, villager)
                     else    -- no occupation
                         goal = ft.DetermineAction(TREE, villager)
                         fun.createActions(goal, villager)

@@ -237,7 +237,7 @@ profiler.start()
 
             if e.isPerson then
                 if e.isSelected then
-                    love.graphics.setColor(0,1,0,1)
+                    love.graphics.setColor(0,1,0,1)     -- sadly works on images but not anim8
                 else
                     love.graphics.setColor(1,1,1,1)
                 end
