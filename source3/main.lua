@@ -73,7 +73,7 @@ function love.keyreleased( key, scancode )
 				v:ensure("occupation", enum.jobWoodsman, enum.stockWood, true, false, false)
 			end
 			v:remove("isSelected")
-			v.queue = {}
+			v.isPerson.queue = {}
 		end
 		VILLAGERS_SELECTED = 0
 	end
@@ -84,7 +84,7 @@ function love.keyreleased( key, scancode )
 				v:ensure("occupation", enum.jobCarpenter, enum.stockHouseFrame, false, false, true)
 			end
 			v:remove("isSelected")
-			v.queue = {}
+			v.isPerson.queue = {}
 		end
 		VILLAGERS_SELECTED = 0
 	end
@@ -95,7 +95,7 @@ function love.keyreleased( key, scancode )
 				v:ensure("occupation", enum.jobHealer, enum.stockHealingHerbs, true, false, false)
 			end
 			v:remove("isSelected")
-			v.queue = {}
+			v.isPerson.queue = {}
 		end
 		VILLAGERS_SELECTED = 0
 	end
@@ -105,7 +105,7 @@ function love.keyreleased( key, scancode )
 				v:ensure("occupation", enum.jobTaxCollector, nil, false, false, true)	-- jobtype, stocktype, bolProducer, bolService, bolConverter)
 			end
 			v:remove("isSelected")
-			v.queue = {}
+			v.isPerson.queue = {}
 		end
 		VILLAGERS_SELECTED = 0
 	end
@@ -116,7 +116,7 @@ function love.keyreleased( key, scancode )
 					v:ensure("occupation", enum.jobWelfareOfficer, stockWelfare, false, true, false)	-- jobtype, stocktype, bolProducer, bolService, bolConverter)
 				end
 				v:remove("isSelected")
-				v.queue = {}
+				v.isPerson.queue = {}
 			end
 		-- end
 		VILLAGERS_SELECTED = 0
@@ -127,7 +127,7 @@ function love.keyreleased( key, scancode )
 					v:ensure("occupation", enum.jobSwordsman, nil, false, true, false)	-- jobtype, stocktype, bolProducer, bolService, bolConverter)
 				end
 				v:remove("isSelected")
-				v.queue = {}
+				v.isPerson.queue = {}
 			end
 		-- end
 		VILLAGERS_SELECTED = 0
