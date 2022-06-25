@@ -285,7 +285,7 @@ function functions.addMoveAction(queue, startrow, startcol, stoprow, stopcol)
     -- uses jumper to add as many "move" actions as necessary to get to the waypoint
 
     assert(stoprow ~= nil, "Can't move to invalid destination")
-    print("Pathfinding from ".. startrow .. ", " .. startcol .. " to " .. stoprow .. ", " .. stopcol)
+    -- print("Pathfinding from ".. startrow .. ", " .. startcol .. " to " .. stoprow .. ", " .. stopcol)
 
     -- get path to destination
     local cmap = convertToCollisionMap(MAP)
@@ -315,7 +315,7 @@ function functions.addMoveAction(queue, startrow, startcol, stoprow, stopcol)
                 y = y + love.math.random(-10, 10)
                 action.x, action.y = x, y
                 table.insert(queue, action)
-                print("Added waypoint " .. y, x)
+                -- print("Added waypoint " .. y, x)
             end
         end
     else
@@ -380,6 +380,36 @@ local function assignWorkplace(agent)
     MAP[workplacerow][workplacecol].entity.isTile.tileOwner = agent
     MAP[workplacerow][workplacecol].entity.isTile.decorationType = nil          -- clear any tree or other decoration
     print("Assigning workplace to tile " .. workplacerow .. ", " .. workplacecol)
+end
+
+local function moveToMonster(e, monsterrow, monstercol)
+
+    -- determine new location to move to
+    local guardrow = e.position.row
+    local guardcol = e.position.col
+
+    assert(monstercol ~= nil)
+    assert(monsterrow ~= nil)
+    assert(guardrow ~= nil)
+    assert(guardcol ~= nil)
+
+    -- take the row/col difference, divide by 2, then add that to current position
+    newrow = cf.round(((monsterrow - guardrow) / 2) + guardrow)
+    newcol = cf.round(((monstercol - guardcol) / 2) + guardcol)
+
+print(newrow,newcol)
+
+    -- add move location
+    fun.addMoveAction(e.queue, guardrow, guardcol, newrow, newcol)   -- will add as many 'move' actions as necessary
+    print("set waypoint to monster. Guard is in tile " .. guardrow, guardcol .. " and monster is in " .. monsterrow, monstercol .. " so moving to " .. newrow, newcol)
+
+    -- add "chase action"
+    local action = {}
+    action.action = "chasemonster"
+    action.stockType = nil
+    action.purchaseAmount = nil
+    action.log = "Chased monster"
+    table.insert(e.queue, action)
 end
 
 function functions.createActions(goal, agent)
@@ -487,10 +517,6 @@ function functions.createActions(goal, agent)
                     action.timeleft = math.min(time1, time2, time3)
                     action.log = "Farmed"
                     table.insert(queue, action)
-
--- print(inspect(queue))
--- print("***********************")
-
                 else
                     error()     -- should never happen
                 end
@@ -762,6 +788,18 @@ function functions.createActions(goal, agent)
             error()     -- should never happen
         end
     end
+    if goal == enum.goalChaseMonster then
+        -- determine which monster
+        local numofmonsters = #MONSTERS
+            if numofmonsters > 0 then
+            local rndnum = love.math.random(1, numofmonsters)
+            local monsterrow = MONSTERS[rndnum].position.row
+            local monstercol = MONSTERS[rndnum].position.col
+
+            moveToMonster(agent, monsterrow, monstercol)
+        end
+    end
+
     return queue
 end
 
@@ -1196,7 +1234,7 @@ function functions.getBlankBorderTile()
 end
 
 function functions.spawnMonster()
-    --! get an empty border tile
+    -- get an empty border tile
     local row, col = fun.getBlankBorderTile()
     -- spawn monster
     local monster = concord.entity(WORLD)
@@ -1205,7 +1243,23 @@ function functions.spawnMonster()
     :give("uid")
     :give("isMonster")
     table.insert(MONSTERS, monster)
-    -- print("Monster spawned")
+    print("Spawned monster on " .. row, col)
+    -- ensure all guards have a cleared queue and then set to chase monster
+    for k,v in pairs(VILLAGERS) do
+        if v:has("occupation") then
+            if v.occupation.value == enum.jobSwordsman then
+                print("Clearing queue to chase monster")
+                v.isPerson.queue = {}
+                local action = {}
+                action.action = "chasemonster"
+                action.stockType = nil
+                action.purchaseAmount = nil
+                action.timeleft = 0
+                action.log = "Chased monster"
+                table.insert(v.isPerson.queue, action)
+            end
+        end
+    end
 end
 
 return functions
