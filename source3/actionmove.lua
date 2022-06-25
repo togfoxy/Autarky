@@ -6,6 +6,10 @@ local function applyMovement(e, targetx, targety, velocity, dt)
 
     local distancemovedthisstep = velocity * dt * TIME_SCALE
 
+    if e:has("isMonster") then
+        distancemovedthisstep = distancemovedthisstep * 0.9 -- monsters move slower than guards
+    end
+
     -- map row/col to x/y
     local currentx = (e.position.x)
     local currenty = (e.position.y)

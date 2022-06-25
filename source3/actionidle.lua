@@ -14,19 +14,20 @@ function actionidle.idle(e, currentaction, dt)
     e.position.previousy = e.position.y
     e.position.movementDelta = 0
 
-    if e:has("occupation") then
-        if e.occupation.value == enum.jobSwordsman then
-            if #MONSTERS > 0 then
-                -- add "chase action"
-                local action = {}
-                action.action = "chasemonster"
-                action.stockType = nil
-                action.purchaseAmount = nil
-                action.log = "Chased monster"
-                table.insert(e.queue, action)
-            end
-        end
-    end
+    -- if e:has("occupation") then
+    --     if e.occupation.value == enum.jobSwordsman then
+    --         if #MONSTERS > 0 then
+    --             -- add "chase action"
+    --             print("Monster detected")
+    --             local action = {}
+    --             action.action = "chasemonster"
+    --             action.stockType = nil
+    --             action.purchaseAmount = nil
+    --             action.log = "Chased monster"
+    --             table.insert(e.isPerson.queue, action)
+    --         end
+    --     end
+    -- end
 
     if currentaction.timeleft > 3 and love.math.random(1, 20000) == 1 then
         -- play audio

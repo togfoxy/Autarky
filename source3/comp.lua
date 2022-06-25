@@ -13,6 +13,9 @@ function comp.init()
         c.health = 100
         c.queue = {}
         c.log = {}
+        c.speed = 0.9 -- this is 1 x normal     --! not yet implemented
+        c.targetrow = 0
+        c.targetcol = 0
     end)
 
     concord.component("isPerson", function(c)
@@ -49,6 +52,7 @@ function comp.init()
 
         c.stockInv[enum.stockWood] = 0
         c.log = {}
+        c.speed = 1 -- this is 1 x normal       --! not yet implemented
 
 
         c.timeResting = 0
