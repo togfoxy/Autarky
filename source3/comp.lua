@@ -47,7 +47,7 @@ function comp.init()
         if c.stockBelief[enum.stockHealingHerbs][1] < 0 then c.stockBelief[enum.stockHealingHerbs][1] = 0.5 end
 
 
-        c.stockInv[enum.stockWood] = 0
+        c.stockInv[enum.stockWood] = 3
         c.log = {}
 
 

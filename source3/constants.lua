@@ -3,7 +3,7 @@ constants = {}
 function constants.load()
 
     DEBUG = false
-    NUMBER_OF_VILLAGERS = 70
+    NUMBER_OF_VILLAGERS = 1
     VILLAGE_WEALTH = 0
     NEW_VILLAGER_THRESHOLD = 150       -- seconds it takes for a new villager
 
