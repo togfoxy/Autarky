@@ -1,4 +1,4 @@
-GAME_VERSION = "0.16"
+GAME_VERSION = "0.17"
 
 inspect = require 'lib.inspect'
 -- https://github.com/kikito/inspect.lua
@@ -38,6 +38,8 @@ enum = require 'enum'
 bt = require 'behaviortree'
 draw = require 'draw'
 con = require 'constants'
+file = require 'file'
+decision = require 'decisions'
 
 actbuy = require 'actionbuy'
 actidle = require 'actionidle'
@@ -153,10 +155,10 @@ function love.keyreleased( key, scancode )
 	end
 
 	if key == "c" then
-		fun.LoadGame()
+		file.LoadGame()
 	end
 	if key == "s" then
-		fun.saveGame()
+		file.saveGame()
 	end
 
 	-- gst
@@ -168,8 +170,6 @@ function love.keyreleased( key, scancode )
 		GST_RATE = GST_RATE + 0.01
 		if GST_RATE > 1 then GST_RATE = 1 end
 	end
-
-
 end
 
 function love.mousepressed( x, y, button, istouch, presses )
