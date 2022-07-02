@@ -306,7 +306,6 @@ end
 
 function love.update(dt)
 
-
 	WORLD:emit("update", dt)
 
 	NEW_VILLAGER_TIMER = NEW_VILLAGER_TIMER + dt
@@ -351,9 +350,7 @@ function love.update(dt)
 	-- spawn monsters
 	if love.math.random(1,9999) == 1 and VILLAGE_WEALTH >= 5 then
 		if #MONSTERS < 1 then
-			if not DEBUG then
-				fun.spawnMonster()
-			end
+			fun.spawnMonster()
 		end
 	end
 

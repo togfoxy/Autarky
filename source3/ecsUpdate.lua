@@ -402,7 +402,9 @@ function ecsUpdate.isMonster()
             if e.isMonster.health <= 0 then
                 killAgent(e.uid.value, MONSTERS)      -- operates directly on VILLAGERS
                 e:destroy()                 -- destroys the entity from the world
-                print("ack! Monster dead. Either had no target or left the map")
+                -- print("ack! Monster dead. Either had no target or left the map")
+            else
+                AUDIO[enum.audioDanger]:play()
             end
 
         end

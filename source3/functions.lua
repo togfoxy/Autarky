@@ -85,9 +85,11 @@ function functions.loadImages()
     SPRITES[enum.spriteMonster1] = love.graphics.newImage("assets/images/monster1_30x32.png")
     QUADS[enum.spriteMonster1] = cf.fromImageToQuads(SPRITES[enum.spriteMonster1], 30, 32)
 
-    -- farmer
     SPRITES[enum.spriteFarmerMan] = love.graphics.newImage("assets/images/Farmer Male Walk.png")
     QUADS[enum.spriteFarmerMan] = cf.fromImageToQuads(SPRITES[enum.spriteFarmerMan], 15, 32)
+
+    SPRITES[enum.spriteImp] = love.graphics.newImage("assets/images/Imp_30x32.png")
+    QUADS[enum.spriteImp] = cf.fromImageToQuads(SPRITES[enum.spriteImp], 30, 32)
 
 
     -- anim8
@@ -124,6 +126,7 @@ function functions.loadAudio()
     AUDIO[enum.audioBandage] = love.audio.newSource("assets/audio/174627__altfuture__ripping-clothes.mp3", "static")
 
     AUDIO[enum.audioWarning] = love.audio.newSource("assets/audio/507906__m-cel__warning-sound.ogg", "static")
+    AUDIO[enum.audioDanger] = love.audio.newSource("assets/audio/580114__annyew__danger-alarm.wav", "static")
 
 
     AUDIO[enum.audioWork]:setVolume(0.2)
@@ -945,12 +948,12 @@ function functions.spawnMonster()
     :give("uid")
     :give("isMonster")
     table.insert(MONSTERS, monster)
-    print("Spawned monster on " .. row, col)
+    -- print("Spawned monster on " .. row, col)
     -- ensure all guards have a cleared queue and then set to chase monster
     for k,v in pairs(VILLAGERS) do
         if v:has("occupation") then
             if v.occupation.value == enum.jobSwordsman then
-                print("Clearing queue to chase monster")
+                -- print("Clearing queue to chase monster")
                 v.isPerson.queue = {}
                 local action = {}
                 action.action = "chasemonster"

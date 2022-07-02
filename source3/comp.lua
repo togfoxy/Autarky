@@ -85,7 +85,9 @@ function comp.init()
     concord.component("position", function(c, row, col)         -- exists on the map/grid
         c.row = row or love.math.random(1, NUMBER_OF_ROWS)  -- this is updated in "applyMovement"
         c.col = col or love.math.random(1, NUMBER_OF_COLS)
-        c.x, c.y = fun.getXYfromRowCol(c.row, c.col)
+        if c.x == nil then
+            c.x, c.y = fun.getXYfromRowCol(c.row, c.col)        --! not sure this should be set here and not persisting with the entity
+        end
         c.previousx = c.x
         c.previousy = c.y
         c.movementDelta = 0     -- track movement for animation purposes
