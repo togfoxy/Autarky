@@ -54,6 +54,7 @@ local function drawGraph()
 end
 
 local function addDrawItem(drawTable, label, value, red)
+    -- row of text that appears on the left side
     local item = {}
     item.label = label
     item.value = value
