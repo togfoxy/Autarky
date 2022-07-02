@@ -85,9 +85,11 @@ function functions.loadImages()
     SPRITES[enum.spriteMonster1] = love.graphics.newImage("assets/images/monster1_30x32.png")
     QUADS[enum.spriteMonster1] = cf.fromImageToQuads(SPRITES[enum.spriteMonster1], 30, 32)
 
-    -- farmer
     SPRITES[enum.spriteFarmerMan] = love.graphics.newImage("assets/images/Farmer Male Walk.png")
     QUADS[enum.spriteFarmerMan] = cf.fromImageToQuads(SPRITES[enum.spriteFarmerMan], 15, 32)
+
+    SPRITES[enum.spriteImp] = love.graphics.newImage("assets/images/Imp_30x32.png")
+    QUADS[enum.spriteImp] = cf.fromImageToQuads(SPRITES[enum.spriteImp], 30, 32)
 
 
     -- anim8

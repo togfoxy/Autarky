@@ -1,6 +1,6 @@
 ecsDraw = {}
 
-local function getImageNumberFromFacing(facing)
+local function getImageNumberFromEightFacing(facing)
     if facing == "N" then return 21 end
     if facing == "NE" then return 26 end
     if facing == "E" then return 31 end
@@ -59,7 +59,7 @@ end
 
 function ecsDraw.draw()
 
-profiler.start()
+    -- profiler.start()
 
     systemDraw = concord.system({
         pool = {"position", "drawable"}
@@ -261,7 +261,7 @@ profiler.start()
 
                 -- draw the villager
                 local facing = determineFacing(e)      -- gets the cardinal facing of the entity. Is a string
-                local imagenum = getImageNumberFromFacing(facing)
+                local imagenum = getImageNumberFromEightFacing(facing)
                 local imagenumoffset = cf.round(e.position.movementDelta / 0.5)
                 imagenum = imagenum + imagenumoffset
 
@@ -358,20 +358,54 @@ profiler.start()
                 end
             end
 
-            if e.isMonster then
-                local drawwidth = PERSON_DRAW_WIDTH
-                local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
+            -- if e.isMonster then
+            --     local drawwidth = PERSON_DRAW_WIDTH
+            --     local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
+            --
+            --     local sprite, quad
+            --     sprite = SPRITES[enum.spriteMonster1]
+            --     quad = QUADS[enum.spriteMonster1][5]
+            --     love.graphics.draw(sprite, quad, drawx, drawy, 0, 1, 1, 25, 20)
+            -- end
 
-                local sprite, quad
-                sprite = SPRITES[enum.spriteMonster1]
-                quad = QUADS[enum.spriteMonster1][5]
-                love.graphics.draw(sprite, quad, drawx, drawy, 0, 1, 1, 25, 20)
+            if e.isMonster then
+                -- determine facing
+                -- determine row from spritesheet
+                -- determine frame from row
+
+                local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
+                local spriterow
+                local spriteframe
+
+    -- print(e.position.previousx, e.position.x)
+                if e.position.previousx < e.position.x then
+                    -- moving to the right
+                    spriterow = 1
+                else
+                    spriterow = 2
+                end
+
+    -- print(e.position.movementDelta)
+                spriteframe = cf.round(e.position.movementDelta / 0.28) + 1 -- 8 frames spread over 2 seconds = 0.25 seconds for each frame
+    print(spriteframe)
+                local imagenum = spriterow * spriteframe
+                if imagenum < 1 then imagenum = 1 end
+                if imagenum > 16 then imagenum = 16 end
+
+
+                local sprite = SPRITES[enum.spriteImp]
+    -- print(spriteframe, imagenum)
+                local quad = QUADS[enum.spriteImp][imagenum]
+                love.graphics.draw(sprite, quad, drawx, drawy, 0, 1, 1, 10, 25)
+
+
             end
+
         end
     end
 
-profiler.stop()
-profiler.report("profiler.log")
+    -- profiler.stop()
+    -- profiler.report("profiler.log")
 
 end
 return ecsDraw

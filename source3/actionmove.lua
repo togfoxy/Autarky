@@ -18,7 +18,7 @@ local function applyMovement(e, targetx, targety, velocity, dt)
     e.position.previousx = currentx
     e.position.previousy = currenty
     e.position.movementDelta = e.position.movementDelta + dt    -- track time between animation frames
-    if e.position.movementDelta > 2 then
+    if e.position.movementDelta > 2 then        -- 2 seconds
         -- reset the animation timer back to zero
         e.position.movementDelta = 0
     end

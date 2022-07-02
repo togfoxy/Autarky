@@ -250,11 +250,6 @@ function draw.Animations()
             elseif imgitem.animationnumber ~= nil then
                 imgitem.entity:remove("drawable")
                 ANIMATION[imgitem.animationnumber]:draw(SPRITES[imgitem.animationnumber], imgitem.x + 15, imgitem.y, 0, 1, 1, 0, 0)
-                -- -14, 0 is too left and too high
-                -- -12, 1 is too left and too high
-                -- -13, 0 is too high and too right
-                -- -10, 0 is too high and too right
-                -- -11, -1 is too low and too right
             end
         end
     end

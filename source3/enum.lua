@@ -29,6 +29,7 @@ spriteRandomTree = 106
 spriteRedWomanWaving = 107
 spriteRedWomanFlute = 108
 spriteMonster1 = 200
+spriteImp = 201
 
 
 
