@@ -358,26 +358,14 @@ function ecsDraw.draw()
                 end
             end
 
-            -- if e.isMonster then
-            --     local drawwidth = PERSON_DRAW_WIDTH
-            --     local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
-            --
-            --     local sprite, quad
-            --     sprite = SPRITES[enum.spriteMonster1]
-            --     quad = QUADS[enum.spriteMonster1][5]
-            --     love.graphics.draw(sprite, quad, drawx, drawy, 0, 1, 1, 25, 20)
-            -- end
-
             if e.isMonster then
-                -- determine facing
-                -- determine row from spritesheet
-                -- determine frame from row
-
                 local drawx, drawy = LEFT_MARGIN + e.position.x, TOP_MARGIN + e.position.y
                 local spriterow
                 local spriteframe
 
-    -- print(e.position.previousx, e.position.x)
+                -- determine facing
+                -- determine row from spritesheet
+    print(e.position.previousx < e.position.x)
                 if e.position.previousx < e.position.x then
                     -- moving to the right
                     spriterow = 1
@@ -385,27 +373,17 @@ function ecsDraw.draw()
                     spriterow = 2
                 end
 
-    -- print(e.position.movementDelta)
-                spriteframe = cf.round(e.position.movementDelta / 0.28) + 1 -- 8 frames spread over 2 seconds = 0.25 seconds for each frame
-    print(spriteframe)
+                -- determine frame from row
+                spriteframe = cf.round(e.position.movementDelta / 0.28) + 1 -- 7 frames spread over 2 seconds = 0.25 seconds for each frame
                 local imagenum = spriterow * spriteframe
                 if imagenum < 1 then imagenum = 1 end
                 if imagenum > 16 then imagenum = 16 end
 
-
                 local sprite = SPRITES[enum.spriteImp]
-    -- print(spriteframe, imagenum)
                 local quad = QUADS[enum.spriteImp][imagenum]
                 love.graphics.draw(sprite, quad, drawx, drawy, 0, 1, 1, 10, 25)
-
-
             end
-
         end
     end
-
-    -- profiler.stop()
-    -- profiler.report("profiler.log")
-
 end
 return ecsDraw
