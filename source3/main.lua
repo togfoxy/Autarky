@@ -300,8 +300,6 @@ function love.draw()
 	draw.HUD()
 	lovelyToasts.draw()
     res.stop()
-
-
 end
 
 function love.update(dt)

@@ -37,6 +37,7 @@ function decision.getNewGoal(villager)
     -- * Decison tree
     -- ***************
     if personIsHungry then
+        -- can find food?
         row, col = fun.getClosestBuilding(enum.improvementFarm, 1, agentrow, agentcol)
         if row ~= nil then
             -- farm with food is found
@@ -114,8 +115,21 @@ function decision.getNewGoal(villager)
                         else
                             -- go to work and try to make money
                             if occupation > 0 then
-                                fun.createActions(enum.goalWork, villager)
-                                print("charlie")
+                                if occupation == enum.jobTaxCollector or occupation == enum.jobWelfareOfficer or
+                                    occupation == enum.jobSwordsman then
+
+                                    -- is a public servant. Ensure there is treasury funds
+                                    if VILLAGE_WEALTH >= 1 then
+                                        fun.createActions(enum.goalWork, villager)
+                                    else
+                                        -- out of options
+                                        goal = ft.DetermineAction(TREE, villager)
+                                        fun.createActions(goal, villager)
+                                    end
+                                else
+                                    -- is not a public servant so go to work
+                                    fun.createActions(enum.goalWork, villager)
+                                end
                             else
                                 -- out of options
                                 goal = ft.DetermineAction(TREE, villager)
@@ -132,7 +146,21 @@ function decision.getNewGoal(villager)
             fun.playAudio(enum.audioWarning, false, true)       -- is music, is sound
 
             if occupation > 0 and workstock <= 4 then
-                fun.createActions(enum.goalWork, villager)
+                if occupation == enum.jobTaxCollector or occupation == enum.jobWelfareOfficer or
+                    occupation == enum.jobSwordsman then
+
+                    -- is a public servant. Ensure there is treasury funds
+                    if VILLAGE_WEALTH >= 1 then
+                        fun.createActions(enum.goalWork, villager)
+                    else
+                        -- out of options
+                        goal = ft.DetermineAction(TREE, villager)
+                        fun.createActions(goal, villager)
+                    end
+                else
+                    -- is not a public servant so go to work
+                    fun.createActions(enum.goalWork, villager)
+                end
             else    -- no occupation
                 goal = ft.DetermineAction(TREE, villager)
                 fun.createActions(goal, villager)
@@ -148,9 +176,8 @@ function decision.getNewGoal(villager)
                     row, col = fun.getClosestBuilding(enum.improvementHealer, 1, agentrow, agentcol)
                     if row ~= nil and (villager.isPerson.wealth >= fun.getAvgSellPrice(enum.stockHealingHerbs)) then
                         fun.createActions(enum.goalHeal, villager)
-                    else
+                    else    -- can't find herbs
                         goal = ft.DetermineAction(TREE, villager)
-                        print("Echo goal is " .. goal)
                         fun.createActions(goal, villager)
                         -- if sick and poor, break the cycle by working if possible - even if sick
                         if occupation > 0 then
@@ -187,8 +214,21 @@ function decision.getNewGoal(villager)
                         if row ~= nil then
                             fun.createActions(enum.goalBuyWood, villager)
                         else
-                            fun.createActions(enum.goalWork, villager)
-                            print("golf - try to work")
+                            if occupation == enum.jobTaxCollector or occupation == enum.jobWelfareOfficer or
+                                occupation == enum.jobSwordsman then
+
+                                -- is a public servant. Ensure there is treasury funds
+                                if VILLAGE_WEALTH >= 1 then
+                                    fun.createActions(enum.goalWork, villager)
+                                else
+                                    -- out of options
+                                    goal = ft.DetermineAction(TREE, villager)
+                                    fun.createActions(goal, villager)
+                                end
+                            else
+                                -- is not a public servant so go to work
+                                fun.createActions(enum.goalWork, villager)
+                            end
                         end
                     else    -- has wood
                         if villager.isPerson.stockInv[enum.stockWood] > 0 then

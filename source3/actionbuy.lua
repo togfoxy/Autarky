@@ -73,8 +73,8 @@ local function adjustBeliefSeller(agent, stocktype, bidprice, askprice)
 
     if bidprice >= askprice then -- succcess
         --
-        agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] * 1.2
-        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] * 1.3
+        agent.isPerson.stockBelief[stocktype][1] = agent.isPerson.stockBelief[stocktype][1] * 1.1
+        agent.isPerson.stockBelief[stocktype][2] = agent.isPerson.stockBelief[stocktype][2] * 1.2
         -- check that the bottom belief is less than upper belief
         if agent.isPerson.stockBelief[stocktype][1] > agent.isPerson.stockBelief[stocktype][2] then
             local avgvalue = (agent.isPerson.stockBelief[stocktype][1] + agent.isPerson.stockBelief[stocktype][2])  / 2
@@ -232,18 +232,22 @@ function actionbuy.newbuy(e, currentaction)
             end
         end
 
+        -- add bubble
+        local item = {}
+        item.start = 0
+        item.stop = 3
+        item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+        item.uid = buyer.uid.value
+
         if amtbought > 0 then
             playPurchaseAudio(stocktype)
-
-            -- add a money bubble
-            local item = {}
+           -- add a money bubble
             item.imagenumber = enum.imagesEmoteCash
-            item.start = 0
-            item.stop = 3
-            item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
-            item.uid = buyer.uid.value
-            table.insert(DRAWQUEUE, item)
+        else
+            -- show sad face
+            item.imagenumber = enum.imagesEmoteSad
         end
+        table.insert(DRAWQUEUE, item)
     else
         -- shop/tile has no owner. Probably died. Do nothing.
     end

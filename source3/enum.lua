@@ -17,6 +17,7 @@ imagesVillagerLog = 104
 imagesEmoteSleeping = 121
 imagesEmoteTalking = 122
 imagesEmoteCash = 123
+imagesEmoteSad = 124
 
 
 -- quads/sprites
