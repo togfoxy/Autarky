@@ -306,7 +306,6 @@ end
 
 function love.update(dt)
 
-
 	WORLD:emit("update", dt)
 
 	NEW_VILLAGER_TIMER = NEW_VILLAGER_TIMER + dt
