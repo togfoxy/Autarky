@@ -150,7 +150,7 @@ function decision.getNewGoal(villager)
                         fun.createActions(enum.goalHeal, villager)
                     else
                         goal = ft.DetermineAction(TREE, villager)
-                        print("Echo goal is " .. goal)
+                        -- print("Echo goal is " .. goal)
                         fun.createActions(goal, villager)
                         -- if sick and poor, break the cycle by working if possible - even if sick
                         if occupation > 0 then
