@@ -115,7 +115,7 @@ function decision.getNewGoal(villager)
                             -- go to work and try to make money
                             if occupation > 0 then
                                 fun.createActions(enum.goalWork, villager)
-                                print("charlie")
+                                -- print("charlie")
                             else
                                 -- out of options
                                 goal = ft.DetermineAction(TREE, villager)
@@ -188,7 +188,7 @@ function decision.getNewGoal(villager)
                             fun.createActions(enum.goalBuyWood, villager)
                         else
                             fun.createActions(enum.goalWork, villager)
-                            print("golf - try to work")
+                            -- print("golf - try to work")
                         end
                     else    -- has wood
                         if villager.isPerson.stockInv[enum.stockWood] > 0 then

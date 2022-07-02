@@ -232,18 +232,22 @@ function actionbuy.newbuy(e, currentaction)
             end
         end
 
+        -- add bubble
+        local item = {}
+        item.start = 0
+        item.stop = 3
+        item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
+        item.uid = buyer.uid.value
+
         if amtbought > 0 then
             playPurchaseAudio(stocktype)
-
-            -- add a money bubble
-            local item = {}
+           -- add a money bubble
             item.imagenumber = enum.imagesEmoteCash
-            item.start = 0
-            item.stop = 3
-            item.x, item.y = fun.getXYfromRowCol(agentrow, agentcol)
-            item.uid = buyer.uid.value
-            table.insert(DRAWQUEUE, item)
+        else
+            -- show sad face
+            item.imagenumber = enum.imagesEmoteSad
         end
+        table.insert(DRAWQUEUE, item)
     else
         -- shop/tile has no owner. Probably died. Do nothing.
     end
