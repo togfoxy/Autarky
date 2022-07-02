@@ -349,7 +349,7 @@ function love.update(dt)
 	end
 
 	-- spawn monsters
-	if love.math.random(1,99) == 1 and VILLAGE_WEALTH >= 0 then
+	if love.math.random(1,9999) == 1 and VILLAGE_WEALTH >= 5 then
 		if #MONSTERS < 1 then
 			fun.spawnMonster()
 		end

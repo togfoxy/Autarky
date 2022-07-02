@@ -102,6 +102,7 @@ audioRustle = 5
 audioSawWood = 6
 audioBandage = 7
 audioWarning = 8
+audioDanger = 9
 
 
 musicCityofMagic = 11
