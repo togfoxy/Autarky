@@ -365,7 +365,6 @@ function ecsDraw.draw()
 
                 -- determine facing
                 -- determine row from spritesheet
-    print(e.position.previousx < e.position.x)
                 if e.position.previousx < e.position.x then
                     -- moving to the right
                     spriterow = 1
